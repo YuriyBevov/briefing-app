@@ -174,42 +174,36 @@ const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
 									class="checklist-card__item-text"
 									:class="{ 'checklist-card__item-text--required': item.required }"
 								>
-									{{ item.text }}{{ item.required ? "*" : "" }}
+									{{ item.text }}{{ item.required ? '*' : '' }}
 								</span>
 								<div class="checklist-card__item-controls">
-									<label class="checklist-status checklist-status--completed">
-										<input
-											class="checklist-status__control"
-											type="checkbox"
-											aria-label="Выполнено"
-											:checked="item.status === 'completed'"
-											@change="
-												toggleChecklistItemStatus(
-													checklist.id,
-													item.id,
-													item.status,
-													'completed',
-												)
-											"
-										/>
-									</label>
+									<ChecklistStatusCheckbox
+										:checked="item.status === 'completed'"
+										label="Выполнено"
+										tone="success"
+										@change="
+											toggleChecklistItemStatus(
+												checklist.id,
+												item.id,
+												item.status,
+												'completed',
+											)
+										"
+									/>
 
-									<label class="checklist-status checklist-status--skipped">
-										<input
-											class="checklist-status__control"
-											type="checkbox"
-											aria-label="Не используется"
-											:checked="item.status === 'skipped'"
-											@change="
-												toggleChecklistItemStatus(
-													checklist.id,
-													item.id,
-													item.status,
-													'skipped',
-												)
-											"
-										/>
-									</label>
+									<ChecklistStatusCheckbox
+										:checked="item.status === 'skipped'"
+										label="Не используется"
+										tone="danger"
+										@change="
+											toggleChecklistItemStatus(
+												checklist.id,
+												item.id,
+												item.status,
+												'skipped',
+											)
+										"
+									/>
 								</div>
 								<label class="field checklist-card__comment">
 									<span class="field__label">Комментарий</span>

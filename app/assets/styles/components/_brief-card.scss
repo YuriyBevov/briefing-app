@@ -32,8 +32,31 @@
     line-height: 1.2;
   }
 
+  &__ready {
+    width: fit-content;
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    color: var(--color-accent);
+    font-size: 12px;
+    line-height: 1.2;
+    background-color: var(--color-accent-soft);
+  }
+
   &__actions {
     padding: 0 var(--space-md) var(--space-md);
+  }
+
+  &__links {
+    display: grid;
+    gap: var(--space-xs);
+    padding: 0 var(--space-md) var(--space-md);
+  }
+
+  &__link {
+    overflow-wrap: anywhere;
+    color: var(--color-accent);
+    font-size: 12px;
+    line-height: 1.4;
   }
 
   &__list {

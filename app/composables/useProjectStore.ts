@@ -15,7 +15,8 @@ export const briefQuestionTypes = [
 export type ProjectStage = (typeof projectStages)[number]
 export type BriefQuestionType = (typeof briefQuestionTypes)[number]
 export type ChecklistItemStatus = 'pending' | 'completed' | 'skipped'
-export type BriefStatus = 'draft' | 'sent_to_manager'
+export type BriefStatus = 'draft' | 'link_created' | 'completed'
+export type BriefAnswerValue = string | string[]
 
 export interface ChecklistItem {
   id: string
@@ -50,6 +51,15 @@ export interface Brief {
   stage: ProjectStage
   status: BriefStatus
   questions: BriefQuestion[]
+  links: BriefLink[]
+  answers: Record<string, BriefAnswerValue>
+  createdAt: string
+  completedAt: string
+}
+
+export interface BriefLink {
+  id: string
+  token: string
   createdAt: string
 }
 
@@ -96,8 +106,26 @@ const createInitialData = (): ProjectData => ({
 
 const briefStatusLabels: Record<BriefStatus, string> = {
   draft: 'Черновик',
-  sent_to_manager: 'Отправлен менеджеру'
+  link_created: 'Ожидает заполнения',
+  completed: 'Заполнен'
 }
+
+const createToken = () => createId().replaceAll('-', '')
+
+const normalizeData = (projectData: ProjectData): ProjectData => ({
+  checklists: projectData.checklists ?? [],
+  briefs: (projectData.briefs ?? []).map((brief) => {
+    const status = brief.status === 'completed' || brief.status === 'link_created' ? brief.status : 'draft'
+
+    return {
+      ...brief,
+      status,
+      links: brief.links ?? [],
+      answers: brief.answers ?? {},
+      completedAt: brief.completedAt ?? ''
+    }
+  })
+})
 
 export const useProjectStore = () => {
   const data = useState<ProjectData>('project-data', createInitialData)
@@ -112,7 +140,7 @@ export const useProjectStore = () => {
     const savedData = window.localStorage.getItem(storageKey)
 
     if (savedData) {
-      data.value = JSON.parse(savedData) as ProjectData
+      data.value = normalizeData(JSON.parse(savedData) as ProjectData)
     }
 
     isLoaded.value = true
@@ -206,6 +234,9 @@ export const useProjectStore = () => {
       stage: payload.stage,
       status: 'draft',
       createdAt: new Date().toISOString(),
+      links: [],
+      answers: {},
+      completedAt: '',
       questions: payload.questions.map((question) => ({
         id: createId(),
         text: question.text,
@@ -252,6 +283,45 @@ export const useProjectStore = () => {
     brief.status = status
   }
 
+  const createBriefClientLink = (id: string) => {
+    const brief = data.value.briefs.find((item) => item.id === id)
+
+    if (!brief) {
+      return ''
+    }
+
+    const token = createToken()
+
+    brief.links = [
+      {
+        id: createId(),
+        token,
+        createdAt: new Date().toISOString()
+      },
+      ...brief.links
+    ]
+    brief.status = 'link_created'
+
+    return token
+  }
+
+  const getBriefByToken = (token: string) =>
+    computed(() => data.value.briefs.find((brief) => brief.links.some((link) => link.token === token)))
+
+  const completeBriefByToken = (token: string, answers: Record<string, BriefAnswerValue>) => {
+    const brief = data.value.briefs.find((item) => item.links.some((link) => link.token === token))
+
+    if (!brief) {
+      return false
+    }
+
+    brief.answers = answers
+    brief.status = 'completed'
+    brief.completedAt = new Date().toISOString()
+
+    return true
+  }
+
   const getChecklistsByStage = (stage: ProjectStage) =>
     computed(() => data.value.checklists.filter((checklist) => checklist.stage === stage))
 
@@ -271,6 +341,9 @@ export const useProjectStore = () => {
     updateBrief,
     deleteBrief,
     updateBriefStatus,
+    createBriefClientLink,
+    getBriefByToken,
+    completeBriefByToken,
     getChecklistsByStage,
     getBriefsByStage
   }

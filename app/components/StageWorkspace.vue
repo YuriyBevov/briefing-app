@@ -8,11 +8,11 @@ const props = defineProps<{
 const actions = ["Закрыть этап"];
 const {
 	briefStatusLabels,
+	createBriefClientLink,
 	deleteBrief,
 	deleteChecklist,
 	getBriefsByStage,
 	getChecklistsByStage,
-	updateBriefStatus,
 	updateChecklistItemStatus,
 } = useProjectStore();
 const { openEditModal } = useCreationModal();
@@ -68,11 +68,19 @@ const removeBrief = (id: string) => {
 	deleteBrief(id);
 };
 
-const sendBriefToManager = (id: string) => {
-	updateBriefStatus(id, "sent_to_manager");
+const createClientLink = (id: string) => {
+	createBriefClientLink(id);
 };
 
 const getBriefStatusLabel = (status: BriefStatus) => briefStatusLabels[status];
+
+const getBriefLink = (token: string) => {
+	if (import.meta.client) {
+		return `${window.location.origin}/brief/${token}`;
+	}
+
+	return `/brief/${token}`;
+};
 </script>
 
 <template>
@@ -166,6 +174,7 @@ const getBriefStatusLabel = (status: BriefStatus) => briefStatusLabels[status];
 								<span class="brief-card__meta">
 									{{ getBriefStatusLabel(brief.status) }} · {{ brief.questions.length }} вопросов
 								</span>
+								<span v-if="brief.status === 'completed'" class="brief-card__ready">Бриф заполнен</span>
 							</span>
 						</summary>
 
@@ -176,14 +185,26 @@ const getBriefStatusLabel = (status: BriefStatus) => briefStatusLabels[status];
 							<button
 								class="button button--secondary"
 								type="button"
-								:disabled="brief.status !== 'draft'"
-								@click="sendBriefToManager(brief.id)"
+								:disabled="brief.status === 'completed'"
+								@click="createClientLink(brief.id)"
 							>
-								Отправить менеджеру
+								Создать ссылку
 							</button>
 							<button class="button button--secondary" type="button" @click="removeBrief(brief.id)">
 								Удалить
 							</button>
+						</div>
+
+						<div v-if="brief.links.length" class="brief-card__links">
+							<a
+								v-for="link in brief.links"
+								:key="link.id"
+								class="brief-card__link"
+								:href="getBriefLink(link.token)"
+								target="_blank"
+							>
+								{{ getBriefLink(link.token) }}
+							</a>
 						</div>
 
 						<ul class="brief-card__list">

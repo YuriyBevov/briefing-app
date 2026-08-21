@@ -7,7 +7,21 @@ const mainMenu = [
   { title: 'Поддержка', to: '/support' }
 ]
 
-const bottomMenu = ['Настройки', 'Создать бриф', 'Создать чеклист']
+const { openCreationModal } = useCreationModal()
+
+const bottomMenu = [
+  { title: 'Настройки', action: null },
+  { title: 'Создать бриф', action: 'brief' as const },
+  { title: 'Создать чеклист', action: 'checklist' as const }
+]
+
+const handleBottomAction = (action: (typeof bottomMenu)[number]['action']) => {
+  if (!action) {
+    return
+  }
+
+  openCreationModal(action)
+}
 </script>
 
 <template>
@@ -27,8 +41,10 @@ const bottomMenu = ['Настройки', 'Создать бриф', 'Созда
 
     <nav class="sidebar__nav sidebar__nav--bottom" aria-label="Нижнее меню">
       <ul class="sidebar__list">
-        <li v-for="item in bottomMenu" :key="item" class="sidebar__item">
-          <button class="sidebar__link" type="button">{{ item }}</button>
+        <li v-for="item in bottomMenu" :key="item.title" class="sidebar__item">
+          <button class="sidebar__link" type="button" @click="handleBottomAction(item.action)">
+            {{ item.title }}
+          </button>
         </li>
       </ul>
     </nav>

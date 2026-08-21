@@ -23,5 +23,7 @@ const project = {
 
       <footer class="app-footer">Сделано&nbsp;в</footer>
     </div>
+
+    <CreationModal />
   </div>
 </template>

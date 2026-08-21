@@ -18,6 +18,9 @@
 @use "components/comments-panel";
 @use "components/workspace-panel";
 @use "components/field";
+@use "components/creation-modal";
+@use "components/checklist-card";
+@use "components/brief-card";
 
 @use "pages/stage-page";
 @use "pages/auth-page";

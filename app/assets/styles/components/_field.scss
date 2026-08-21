@@ -18,3 +18,7 @@
     background-color: var(--color-control);
   }
 }
+
+textarea.field__control {
+  min-height: 96px;
+}

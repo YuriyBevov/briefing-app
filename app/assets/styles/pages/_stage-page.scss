@@ -1,0 +1,21 @@
+.stage-page {
+  display: grid;
+  gap: var(--space-md);
+
+  &__actions {
+    justify-content: flex-start;
+  }
+
+  &__workspace {
+    display: grid;
+    gap: var(--space-md);
+  }
+}
+
+@media (min-width: 720px) {
+  .stage-page {
+    &__actions {
+      justify-content: flex-end;
+    }
+  }
+}

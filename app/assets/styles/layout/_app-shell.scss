@@ -1,0 +1,37 @@
+.app-shell {
+  min-height: 100vh;
+  background-color: var(--color-background);
+
+  &__main {
+    min-width: 0;
+  }
+
+  &__content {
+    display: grid;
+    gap: var(--space-md);
+    padding: var(--space-md);
+  }
+
+  &__workspace {
+    min-width: 0;
+  }
+}
+
+@media (min-width: 960px) {
+  .app-shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+
+    &__main {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: var(--topbar-height) 1fr auto;
+    }
+
+    &__content {
+      grid-template-columns: minmax(0, 1fr) 320px;
+      align-items: start;
+      padding: var(--space-lg);
+    }
+  }
+}

@@ -4,7 +4,8 @@ const mainMenu = [
   { title: 'Дизайн', to: '/design' },
   { title: 'Разработка', to: '/development' },
   { title: 'Деплой', to: '/deploy' },
-  { title: 'Поддержка', to: '/support' }
+  { title: 'Поддержка', to: '/support' },
+  { title: 'UI-компоненты', to: '/ui-components' }
 ]
 
 const { openCreationModal } = useCreationModal()

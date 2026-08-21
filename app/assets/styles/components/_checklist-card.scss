@@ -54,13 +54,26 @@
     background-color: var(--color-surface);
   }
 
+  &__item--completed {
+    border-color: #47b881;
+  }
+
+  &__item--skipped {
+    border-color: #f4a7b9;
+  }
+
   &__item-text {
     color: var(--color-text);
     font-size: 14px;
     line-height: 1.35;
   }
 
-  &__field {
+  &__item-controls {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  &__comment {
     margin-top: var(--space-xs);
   }
 }
@@ -68,11 +81,16 @@
 @media (min-width: 720px) {
   .checklist-card {
     &__item {
-      grid-template-columns: minmax(0, 1fr) 140px 180px;
+      grid-template-columns: minmax(0, 1fr) 140px;
       align-items: center;
     }
 
-    &__field {
+    &__item-controls,
+    &__comment {
+      grid-column: 1 / -1;
+    }
+
+    &__comment {
       margin-top: 0;
     }
   }

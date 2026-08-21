@@ -113,7 +113,13 @@ const briefStatusLabels: Record<BriefStatus, string> = {
 const createToken = () => createId().replaceAll('-', '')
 
 const normalizeData = (projectData: ProjectData): ProjectData => ({
-  checklists: projectData.checklists ?? [],
+  checklists: (projectData.checklists ?? []).map((checklist) => ({
+    ...checklist,
+    items: checklist.items.map((item) => ({
+      ...item,
+      comment: item.comment ?? ''
+    }))
+  })),
   briefs: (projectData.briefs ?? []).map((brief) => {
     const status = brief.status === 'completed' || brief.status === 'link_created' ? brief.status : 'draft'
 
@@ -227,6 +233,17 @@ export const useProjectStore = () => {
     checklistItem.completedAt = status === 'completed' ? new Date().toISOString() : ''
   }
 
+  const updateChecklistItemComment = (checklistId: string, itemId: string, comment: string) => {
+    const checklist = data.value.checklists.find((item) => item.id === checklistId)
+    const checklistItem = checklist?.items.find((item) => item.id === itemId)
+
+    if (!checklistItem || checklistItem.status !== 'pending') {
+      return
+    }
+
+    checklistItem.comment = comment
+  }
+
   const createBrief = (payload: BriefPayload) => {
     const brief: Brief = {
       id: createId(),
@@ -337,6 +354,7 @@ export const useProjectStore = () => {
     updateChecklist,
     deleteChecklist,
     updateChecklistItemStatus,
+    updateChecklistItemComment,
     createBrief,
     updateBrief,
     deleteBrief,

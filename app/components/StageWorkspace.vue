@@ -13,18 +13,13 @@ const {
 	deleteChecklist,
 	getBriefsByStage,
 	getChecklistsByStage,
+	updateChecklistItemComment,
 	updateChecklistItemStatus,
 } = useProjectStore();
 const { openEditModal } = useCreationModal();
 
 const checklists = getChecklistsByStage(props.title);
 const briefs = getBriefsByStage(props.title);
-const checklistItemStatuses: Array<{ title: string; value: ChecklistItemStatus }> = [
-	{ title: "Не начато", value: "pending" },
-	{ title: "Выполнено", value: "completed" },
-	{ title: "Не используется", value: "skipped" },
-];
-
 const getChecklistProgress = (checklist: Checklist) => {
 	if (checklist.items.length === 0) {
 		return 0;
@@ -54,10 +49,19 @@ const changeChecklistItemStatus = (
 	updateChecklistItemStatus(checklistId, itemId, status);
 };
 
-const changeChecklistItemStatusFromEvent = (checklistId: string, itemId: string, event: Event) => {
-	const target = event.target as HTMLSelectElement;
+const toggleChecklistItemStatus = (
+	checklistId: string,
+	itemId: string,
+	currentStatus: ChecklistItemStatus,
+	nextStatus: ChecklistItemStatus,
+) => {
+	changeChecklistItemStatus(checklistId, itemId, currentStatus === nextStatus ? "pending" : nextStatus);
+};
 
-	changeChecklistItemStatus(checklistId, itemId, target.value as ChecklistItemStatus);
+const updateChecklistCommentFromEvent = (checklistId: string, itemId: string, event: Event) => {
+	const target = event.target as HTMLTextAreaElement;
+
+	updateChecklistItemComment(checklistId, itemId, target.value);
 };
 
 const editBrief = (id: string) => {
@@ -132,26 +136,62 @@ const getBriefLink = (token: string) => {
 						</div>
 
 						<ul class="checklist-card__list">
-							<li v-for="item in checklist.items" :key="item.id" class="checklist-card__item">
+							<li
+								v-for="item in checklist.items"
+								:key="item.id"
+								class="checklist-card__item"
+								:class="{
+									'checklist-card__item--completed': item.status === 'completed',
+									'checklist-card__item--skipped': item.status === 'skipped',
+								}"
+							>
 								<span class="checklist-card__item-text">{{ item.text }}</span>
 								<span class="checklist-card__item-status">
 									{{ item.required ? "Обязательный" : "Необязательный" }}
 								</span>
-								<label class="field checklist-card__field">
-									<span class="field__label">Статус</span>
-									<select
+								<div class="checklist-card__item-controls">
+									<label class="switch-field">
+										<input
+											class="switch-field__control"
+											type="checkbox"
+											:checked="item.status === 'completed'"
+											@change="
+												toggleChecklistItemStatus(
+													checklist.id,
+													item.id,
+													item.status,
+													'completed',
+												)
+											"
+										/>
+										<span class="switch-field__label">Выполнено</span>
+									</label>
+
+									<label class="switch-field">
+										<input
+											class="switch-field__control"
+											type="checkbox"
+											:checked="item.status === 'skipped'"
+											@change="
+												toggleChecklistItemStatus(
+													checklist.id,
+													item.id,
+													item.status,
+													'skipped',
+												)
+											"
+										/>
+										<span class="switch-field__label">Не используется</span>
+									</label>
+								</div>
+								<label class="field checklist-card__comment">
+									<span class="field__label">Комментарий</span>
+									<textarea
 										class="field__control"
-										:value="item.status"
-										@change="changeChecklistItemStatusFromEvent(checklist.id, item.id, $event)"
-									>
-										<option
-											v-for="status in checklistItemStatuses"
-											:key="status.value"
-											:value="status.value"
-										>
-											{{ status.title }}
-										</option>
-									</select>
+										:value="item.comment"
+										:disabled="item.status !== 'pending'"
+										@input="updateChecklistCommentFromEvent(checklist.id, item.id, $event)"
+									/>
 								</label>
 							</li>
 						</ul>

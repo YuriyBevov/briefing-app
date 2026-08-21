@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type {
-	BriefAnswerValue,
 	BriefLinkStatus,
 	Checklist,
 	ChecklistItemStatus,
@@ -13,11 +12,14 @@ const props = defineProps<{
 
 const actions = ["Закрыть этап"];
 const {
+	approveBriefLink,
 	createBriefClientLink,
 	deleteBrief,
 	deleteChecklist,
+	briefLinkStatusLabels,
 	getBriefsByStage,
 	getChecklistsByStage,
+	reopenBriefLink,
 	updateChecklistItemComment,
 	updateChecklistItemStatus,
 } = useProjectStore();
@@ -82,7 +84,7 @@ const createClientLink = (id: string) => {
 };
 
 const getCompletedLinksCount = (links: Array<{ status: BriefLinkStatus }>) =>
-	links.filter((link) => link.status === "completed").length;
+	links.filter((link) => link.status === "completed" || link.status === "approved").length;
 
 const getBriefMeta = (links: Array<{ status: BriefLinkStatus }>, questionsCount: number) => {
 	if (!links.length) {
@@ -92,8 +94,15 @@ const getBriefMeta = (links: Array<{ status: BriefLinkStatus }>, questionsCount:
 	return `${questionsCount} вопросов · ${links.length} ссылок · ${getCompletedLinksCount(links)} заполнено`;
 };
 
-const getBriefLinkStatusLabel = (status: BriefLinkStatus) =>
-	status === "completed" ? "Заполнен" : "Ожидает заполнения";
+const getBriefLinkStatusLabel = (status: BriefLinkStatus) => briefLinkStatusLabels[status];
+
+const openBriefForFilling = (briefId: string, linkId: string) => {
+	reopenBriefLink(briefId, linkId);
+};
+
+const approveBrief = (briefId: string, linkId: string) => {
+	approveBriefLink(briefId, linkId);
+};
 
 const getBriefLink = (token: string) => {
 	if (import.meta.client) {
@@ -103,13 +112,6 @@ const getBriefLink = (token: string) => {
 	return `/brief/${token}`;
 };
 
-const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
-	if (Array.isArray(answer)) {
-		return answer.length ? answer.join(", ") : "Нет ответа";
-	}
-
-	return answer || "Нет ответа";
-};
 </script>
 
 <template>
@@ -269,23 +271,30 @@ const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
 								</a>
 								<span
 									class="brief-card__link-status"
-									:class="{ 'brief-card__link-status--completed': link.status === 'completed' }"
+									:class="{
+										'brief-card__link-status--completed': link.status === 'completed',
+										'brief-card__link-status--approved': link.status === 'approved',
+									}"
 								>
 									{{ getBriefLinkStatusLabel(link.status) }}
 								</span>
 
-								<ul v-if="link.status === 'completed'" class="brief-card__answer-list">
-									<li
-										v-for="question in brief.questions"
-										:key="question.id"
-										class="brief-card__answer-item"
+								<div v-if="link.status === 'completed'" class="button-row brief-card__link-actions">
+									<button
+										class="button button--secondary"
+										type="button"
+										@click="openBriefForFilling(brief.id, link.id)"
 									>
-										<span class="brief-card__question">{{ question.text }}</span>
-										<span class="brief-card__answer">
-											{{ formatBriefAnswer(link.answers[question.id]) }}
-										</span>
-									</li>
-								</ul>
+										Открыть бриф к заполнению
+									</button>
+									<button
+										class="button button--primary"
+										type="button"
+										@click="approveBrief(brief.id, link.id)"
+									>
+										Согласован
+									</button>
+								</div>
 							</div>
 						</div>
 

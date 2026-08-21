@@ -66,8 +66,12 @@ const canSubmit = computed(() =>
   brief.value ? brief.value.questions.every((question) => isQuestionCompleted(question)) : false
 )
 
+const isReadonly = computed(() =>
+  briefLink.value?.status === 'completed' || briefLink.value?.status === 'approved' || isSubmitted.value
+)
+
 const submitBrief = () => {
-  if (!canSubmit.value) {
+  if (!canSubmit.value || briefLink.value?.status === 'approved') {
     return
   }
 
@@ -87,6 +91,22 @@ const getReadonlyAnswer = (questionId: string) => {
 onMounted(() => {
   load()
 })
+
+watch(
+  briefLink,
+  (link) => {
+    if (!link) {
+      return
+    }
+
+    Object.keys(answers).forEach((key) => {
+      delete answers[key]
+    })
+    Object.assign(answers, link.answers)
+    isSubmitted.value = false
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -102,7 +122,7 @@ onMounted(() => {
         <h1 class="page-title">{{ brief.title }}</h1>
       </div>
 
-      <div v-if="briefLink?.status === 'completed' || isSubmitted" class="public-brief__form">
+      <div v-if="isReadonly" class="public-brief__form">
         <div
           v-for="question in brief.questions"
           :key="question.id"
@@ -160,7 +180,14 @@ onMounted(() => {
                 )
               "
             >
-              <option v-for="option in question.options" :key="option" :value="option">{{ option }}</option>
+              <option
+                v-for="option in question.options"
+                :key="option"
+                :value="option"
+                :selected="isOptionChecked(question.id, option)"
+              >
+                {{ option }}
+              </option>
             </select>
           </label>
 

@@ -16,7 +16,7 @@ export type ProjectStage = (typeof projectStages)[number]
 export type BriefQuestionType = (typeof briefQuestionTypes)[number]
 export type ChecklistItemStatus = 'pending' | 'completed' | 'skipped'
 export type BriefStatus = 'draft' | 'link_created' | 'completed'
-export type BriefLinkStatus = 'pending' | 'completed'
+export type BriefLinkStatus = 'pending' | 'completed' | 'approved'
 export type BriefAnswerValue = string | string[]
 
 export interface ChecklistItem {
@@ -112,6 +112,12 @@ const briefStatusLabels: Record<BriefStatus, string> = {
   draft: 'Черновик',
   link_created: 'Ожидает заполнения',
   completed: 'Заполнен'
+}
+
+const briefLinkStatusLabels: Record<BriefLinkStatus, string> = {
+  pending: 'Ожидает заполнения',
+  completed: 'Заполнен',
+  approved: 'Согласован'
 }
 
 const createToken = () => createId().replaceAll('-', '')
@@ -373,7 +379,7 @@ export const useProjectStore = () => {
     const brief = data.value.briefs.find((item) => item.links.some((link) => link.token === token))
     const link = brief?.links.find((item) => item.token === token)
 
-    if (!brief || !link) {
+    if (!brief || !link || link.status === 'approved') {
       return false
     }
 
@@ -384,6 +390,32 @@ export const useProjectStore = () => {
     save()
 
     return true
+  }
+
+  const reopenBriefLink = (briefId: string, linkId: string) => {
+    const brief = data.value.briefs.find((item) => item.id === briefId)
+    const link = brief?.links.find((item) => item.id === linkId)
+
+    if (!brief || !link || link.status === 'approved') {
+      return
+    }
+
+    link.status = 'pending'
+    link.completedAt = ''
+    brief.status = 'link_created'
+    save()
+  }
+
+  const approveBriefLink = (briefId: string, linkId: string) => {
+    const brief = data.value.briefs.find((item) => item.id === briefId)
+    const link = brief?.links.find((item) => item.id === linkId)
+
+    if (!brief || !link || link.status !== 'completed') {
+      return
+    }
+
+    link.status = 'approved'
+    save()
   }
 
   const getChecklistsByStage = (stage: ProjectStage) =>
@@ -397,6 +429,7 @@ export const useProjectStore = () => {
     projectStages,
     briefQuestionTypes,
     briefStatusLabels,
+    briefLinkStatusLabels,
     isLoaded,
     load,
     createChecklist,
@@ -412,6 +445,8 @@ export const useProjectStore = () => {
     getBriefByToken,
     getBriefLinkByToken,
     completeBriefByToken,
+    reopenBriefLink,
+    approveBriefLink,
     getChecklistsByStage,
     getBriefsByStage
   }

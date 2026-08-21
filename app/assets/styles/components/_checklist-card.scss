@@ -32,8 +32,7 @@
     font-weight: 700;
   }
 
-  &__meta,
-  &__item-status {
+  &__meta {
     color: var(--color-text-muted);
     font-size: 12px;
     line-height: 1.2;
@@ -68,9 +67,14 @@
     line-height: 1.35;
   }
 
+  &__item-text--required {
+    color: var(--color-accent);
+  }
+
   &__item-controls {
-    display: grid;
-    gap: var(--space-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
   }
 
   &__comment {
@@ -81,11 +85,10 @@
 @media (min-width: 720px) {
   .checklist-card {
     &__item {
-      grid-template-columns: minmax(0, 1fr) 140px;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
     }
 
-    &__item-controls,
     &__comment {
       grid-column: 1 / -1;
     }
@@ -93,5 +96,30 @@
     &__comment {
       margin-top: 0;
     }
+  }
+}
+
+.checklist-status {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background-color: var(--color-control);
+
+  &--completed {
+    border-color: #47b881;
+  }
+
+  &--skipped {
+    border-color: #f4a7b9;
+  }
+
+  &__control {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--color-accent);
   }
 }

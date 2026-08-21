@@ -170,15 +170,18 @@ const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
 									'checklist-card__item--skipped': item.status === 'skipped',
 								}"
 							>
-								<span class="checklist-card__item-text">{{ item.text }}</span>
-								<span class="checklist-card__item-status">
-									{{ item.required ? "Обязательный" : "Необязательный" }}
+								<span
+									class="checklist-card__item-text"
+									:class="{ 'checklist-card__item-text--required': item.required }"
+								>
+									{{ item.text }}{{ item.required ? "*" : "" }}
 								</span>
 								<div class="checklist-card__item-controls">
-									<label class="switch-field">
+									<label class="checklist-status checklist-status--completed">
 										<input
-											class="switch-field__control"
+											class="checklist-status__control"
 											type="checkbox"
+											aria-label="Выполнено"
 											:checked="item.status === 'completed'"
 											@change="
 												toggleChecklistItemStatus(
@@ -189,13 +192,13 @@ const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
 												)
 											"
 										/>
-										<span class="switch-field__label">Выполнено</span>
 									</label>
 
-									<label class="switch-field">
+									<label class="checklist-status checklist-status--skipped">
 										<input
-											class="switch-field__control"
+											class="checklist-status__control"
 											type="checkbox"
+											aria-label="Не используется"
 											:checked="item.status === 'skipped'"
 											@change="
 												toggleChecklistItemStatus(
@@ -206,7 +209,6 @@ const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
 												)
 											"
 										/>
-										<span class="switch-field__label">Не используется</span>
 									</label>
 								</div>
 								<label class="field checklist-card__comment">

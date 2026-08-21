@@ -15,6 +15,7 @@ const {
 	approveBriefLink,
 	createBriefClientLink,
 	deleteBrief,
+	deleteBriefLink,
 	deleteChecklist,
 	briefLinkStatusLabels,
 	getBriefsByStage,
@@ -102,6 +103,10 @@ const openBriefForFilling = (briefId: string, linkId: string) => {
 
 const approveBrief = (briefId: string, linkId: string) => {
 	approveBriefLink(briefId, linkId);
+};
+
+const removeBriefLink = (briefId: string, linkId: string) => {
+	deleteBriefLink(briefId, linkId);
 };
 
 const getBriefLink = (token: string) => {
@@ -293,6 +298,13 @@ const getBriefLink = (token: string) => {
 										@click="approveBrief(brief.id, link.id)"
 									>
 										Согласован
+									</button>
+									<button
+										class="button button--secondary"
+										type="button"
+										@click="removeBriefLink(brief.id, link.id)"
+									>
+										Удалить
 									</button>
 								</div>
 							</div>

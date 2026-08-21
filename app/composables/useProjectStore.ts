@@ -418,6 +418,18 @@ export const useProjectStore = () => {
     save()
   }
 
+  const deleteBriefLink = (briefId: string, linkId: string) => {
+    const brief = data.value.briefs.find((item) => item.id === briefId)
+
+    if (!brief) {
+      return
+    }
+
+    brief.links = brief.links.filter((link) => link.id !== linkId)
+    brief.status = brief.links.length ? 'link_created' : 'draft'
+    save()
+  }
+
   const getChecklistsByStage = (stage: ProjectStage) =>
     computed(() => data.value.checklists.filter((checklist) => checklist.stage === stage))
 
@@ -447,6 +459,7 @@ export const useProjectStore = () => {
     completeBriefByToken,
     reopenBriefLink,
     approveBriefLink,
+    deleteBriefLink,
     getChecklistsByStage,
     getBriefsByStage
   }

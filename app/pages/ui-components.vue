@@ -349,6 +349,7 @@ const tableRows = [
                   <div class="button-row brief-card__link-actions">
                     <button class="button button--secondary" type="button">Открыть бриф к заполнению</button>
                     <button class="button button--primary" type="button">Согласован</button>
+                    <button class="button button--secondary" type="button">Удалить</button>
                   </div>
                 </div>
                 <div class="brief-card__link-item">

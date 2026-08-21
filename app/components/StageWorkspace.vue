@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type {
 	BriefAnswerValue,
-	BriefStatus,
+	BriefLinkStatus,
 	Checklist,
 	ChecklistItemStatus,
 	ProjectStage,
@@ -13,7 +13,6 @@ const props = defineProps<{
 
 const actions = ["Закрыть этап"];
 const {
-	briefStatusLabels,
 	createBriefClientLink,
 	deleteBrief,
 	deleteChecklist,
@@ -82,7 +81,19 @@ const createClientLink = (id: string) => {
 	createBriefClientLink(id);
 };
 
-const getBriefStatusLabel = (status: BriefStatus) => briefStatusLabels[status];
+const getCompletedLinksCount = (links: Array<{ status: BriefLinkStatus }>) =>
+	links.filter((link) => link.status === "completed").length;
+
+const getBriefMeta = (links: Array<{ status: BriefLinkStatus }>, questionsCount: number) => {
+	if (!links.length) {
+		return `${questionsCount} вопросов`;
+	}
+
+	return `${questionsCount} вопросов · ${links.length} ссылок · ${getCompletedLinksCount(links)} заполнено`;
+};
+
+const getBriefLinkStatusLabel = (status: BriefLinkStatus) =>
+	status === "completed" ? "Заполнен" : "Ожидает заполнения";
 
 const getBriefLink = (token: string) => {
 	if (import.meta.client) {
@@ -226,9 +237,8 @@ const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
 							<span class="brief-card__body">
 								<span class="brief-card__title">{{ brief.title }}</span>
 								<span class="brief-card__meta">
-									{{ getBriefStatusLabel(brief.status) }} · {{ brief.questions.length }} вопросов
+									{{ getBriefMeta(brief.links, brief.questions.length) }}
 								</span>
-								<span v-if="brief.status === 'completed'" class="brief-card__ready">Бриф заполнен</span>
 							</span>
 						</summary>
 
@@ -239,7 +249,6 @@ const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
 							<button
 								class="button button--secondary"
 								type="button"
-								:disabled="brief.status === 'completed'"
 								@click="createClientLink(brief.id)"
 							>
 								Создать ссылку
@@ -250,15 +259,38 @@ const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
 						</div>
 
 						<div v-if="brief.links.length" class="brief-card__links">
-							<a
+							<div
 								v-for="link in brief.links"
 								:key="link.id"
-								class="brief-card__link"
-								:href="getBriefLink(link.token)"
-								target="_blank"
+								class="brief-card__link-item"
 							>
-								{{ getBriefLink(link.token) }}
-							</a>
+								<a
+									class="brief-card__link"
+									:href="getBriefLink(link.token)"
+									target="_blank"
+								>
+									{{ getBriefLink(link.token) }}
+								</a>
+								<span
+									class="brief-card__link-status"
+									:class="{ 'brief-card__link-status--completed': link.status === 'completed' }"
+								>
+									{{ getBriefLinkStatusLabel(link.status) }}
+								</span>
+
+								<ul v-if="link.status === 'completed'" class="brief-card__answer-list">
+									<li
+										v-for="question in brief.questions"
+										:key="question.id"
+										class="brief-card__answer-item"
+									>
+										<span class="brief-card__question">{{ question.text }}</span>
+										<span class="brief-card__answer">
+											{{ formatBriefAnswer(link.answers[question.id]) }}
+										</span>
+									</li>
+								</ul>
+							</div>
 						</div>
 
 						<ul class="brief-card__list">
@@ -272,9 +304,6 @@ const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
 								</span>
 								<span v-if="question.options.length" class="brief-card__description">
 									{{ question.options.join(", ") }}
-								</span>
-								<span v-if="brief.status === 'completed'" class="brief-card__answer">
-									{{ formatBriefAnswer(brief.answers[question.id]) }}
 								</span>
 							</li>
 						</ul>

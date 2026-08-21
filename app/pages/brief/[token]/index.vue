@@ -7,8 +7,10 @@ definePageMeta({
 
 const route = useRoute()
 const token = computed(() => String(route.params.token ?? ''))
-const { completeBriefByToken, getBriefByToken, isLoaded, load } = useProjectStore()
-const brief = getBriefByToken(token.value)
+const { completeBriefByToken, getBriefLinkByToken, isLoaded, load } = useProjectStore()
+const briefAccess = getBriefLinkByToken(token.value)
+const brief = computed(() => briefAccess.value?.brief ?? null)
+const briefLink = computed(() => briefAccess.value?.link ?? null)
 const answers = reactive<Record<string, BriefAnswerValue>>({})
 const isSubmitted = ref(false)
 
@@ -72,6 +74,16 @@ const submitBrief = () => {
   isSubmitted.value = completeBriefByToken(token.value, { ...answers })
 }
 
+const getReadonlyAnswer = (questionId: string) => {
+  const answer = briefLink.value?.answers[questionId]
+
+  if (Array.isArray(answer)) {
+    return answer.length ? answer.join(', ') : 'Нет ответа'
+  }
+
+  return answer || 'Нет ответа'
+}
+
 onMounted(() => {
   load()
 })
@@ -90,7 +102,18 @@ onMounted(() => {
         <h1 class="page-title">{{ brief.title }}</h1>
       </div>
 
-      <form v-if="!isSubmitted" class="public-brief__form" @submit.prevent="submitBrief">
+      <div v-if="briefLink?.status === 'completed' || isSubmitted" class="public-brief__form">
+        <div
+          v-for="question in brief.questions"
+          :key="question.id"
+          class="public-brief__question"
+        >
+          <span class="public-brief__question-title">{{ question.text }}</span>
+          <span class="public-brief__answer">{{ getReadonlyAnswer(question.id) }}</span>
+        </div>
+      </div>
+
+      <form v-else class="public-brief__form" @submit.prevent="submitBrief">
         <div
           v-for="question in brief.questions"
           :key="question.id"
@@ -182,7 +205,6 @@ onMounted(() => {
         <button class="button button--primary" type="submit" :disabled="!canSubmit">Согласовать</button>
       </form>
 
-      <p v-else class="card-description">Бриф заполнен</p>
     </section>
 
     <section v-else class="public-brief">

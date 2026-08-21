@@ -16,6 +16,7 @@ export type ProjectStage = (typeof projectStages)[number]
 export type BriefQuestionType = (typeof briefQuestionTypes)[number]
 export type ChecklistItemStatus = 'pending' | 'completed' | 'skipped'
 export type BriefStatus = 'draft' | 'link_created' | 'completed'
+export type BriefLinkStatus = 'pending' | 'completed'
 export type BriefAnswerValue = string | string[]
 
 export interface ChecklistItem {
@@ -60,7 +61,10 @@ export interface Brief {
 export interface BriefLink {
   id: string
   token: string
+  status: BriefLinkStatus
+  answers: Record<string, BriefAnswerValue>
   createdAt: string
+  completedAt: string
 }
 
 interface ProjectData {
@@ -121,13 +125,25 @@ const normalizeData = (projectData: ProjectData): ProjectData => ({
     }))
   })),
   briefs: (projectData.briefs ?? []).map((brief) => {
-    const status = brief.status === 'completed' || brief.status === 'link_created' ? brief.status : 'draft'
+    const legacyAnswers = brief.answers ?? {}
+    const hasLegacyAnswers = Object.keys(legacyAnswers).length > 0
+    const links = (brief.links ?? []).map((link, index) => {
+      const shouldUseLegacyAnswers = hasLegacyAnswers && index === 0 && !link.answers
+
+      return {
+        ...link,
+        status: link.status ?? (shouldUseLegacyAnswers || brief.status === 'completed' ? 'completed' : 'pending'),
+        answers: link.answers ?? (shouldUseLegacyAnswers ? legacyAnswers : {}),
+        completedAt: link.completedAt ?? (shouldUseLegacyAnswers ? brief.completedAt ?? '' : '')
+      }
+    })
+    const status = links.length ? 'link_created' : 'draft'
 
     return {
       ...brief,
       status,
-      links: brief.links ?? [],
-      answers: brief.answers ?? {},
+      links,
+      answers: legacyAnswers,
       completedAt: brief.completedAt ?? ''
     }
   })
@@ -322,7 +338,10 @@ export const useProjectStore = () => {
       {
         id: createId(),
         token,
-        createdAt: new Date().toISOString()
+        status: 'pending',
+        answers: {},
+        createdAt: new Date().toISOString(),
+        completedAt: ''
       },
       ...brief.links
     ]
@@ -335,16 +354,33 @@ export const useProjectStore = () => {
   const getBriefByToken = (token: string) =>
     computed(() => data.value.briefs.find((brief) => brief.links.some((link) => link.token === token)))
 
+  const getBriefLinkByToken = (token: string) =>
+    computed(() => {
+      const brief = data.value.briefs.find((item) => item.links.some((link) => link.token === token))
+      const link = brief?.links.find((item) => item.token === token)
+
+      if (!brief || !link) {
+        return null
+      }
+
+      return {
+        brief,
+        link
+      }
+    })
+
   const completeBriefByToken = (token: string, answers: Record<string, BriefAnswerValue>) => {
     const brief = data.value.briefs.find((item) => item.links.some((link) => link.token === token))
+    const link = brief?.links.find((item) => item.token === token)
 
-    if (!brief) {
+    if (!brief || !link) {
       return false
     }
 
-    brief.answers = answers
-    brief.status = 'completed'
-    brief.completedAt = new Date().toISOString()
+    link.answers = answers
+    link.status = 'completed'
+    link.completedAt = new Date().toISOString()
+    brief.status = 'link_created'
     save()
 
     return true
@@ -374,6 +410,7 @@ export const useProjectStore = () => {
     updateBriefStatus,
     createBriefClientLink,
     getBriefByToken,
+    getBriefLinkByToken,
     completeBriefByToken,
     getChecklistsByStage,
     getBriefsByStage

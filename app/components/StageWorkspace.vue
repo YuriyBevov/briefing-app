@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import type { BriefStatus, Checklist, ChecklistItemStatus, ProjectStage } from "~/composables/useProjectStore";
+import type {
+	BriefAnswerValue,
+	BriefStatus,
+	Checklist,
+	ChecklistItemStatus,
+	ProjectStage,
+} from "~/composables/useProjectStore";
 
 const props = defineProps<{
 	title: ProjectStage;
@@ -84,6 +90,14 @@ const getBriefLink = (token: string) => {
 	}
 
 	return `/brief/${token}`;
+};
+
+const formatBriefAnswer = (answer: BriefAnswerValue | undefined) => {
+	if (Array.isArray(answer)) {
+		return answer.length ? answer.join(", ") : "Нет ответа";
+	}
+
+	return answer || "Нет ответа";
 };
 </script>
 
@@ -258,6 +272,9 @@ const getBriefLink = (token: string) => {
 								</span>
 								<span v-if="question.options.length" class="brief-card__description">
 									{{ question.options.join(", ") }}
+								</span>
+								<span v-if="brief.status === 'completed'" class="brief-card__answer">
+									{{ formatBriefAnswer(brief.answers[question.id]) }}
 								</span>
 							</li>
 						</ul>

@@ -86,4 +86,16 @@
     font-size: 12px;
     line-height: 1.4;
   }
+
+  &__answer {
+    margin-top: var(--space-xs);
+    padding: var(--space-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    font-size: 14px;
+    line-height: 1.4;
+    background-color: var(--color-control);
+    white-space: pre-wrap;
+  }
 }

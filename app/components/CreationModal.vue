@@ -1,8 +1,16 @@
 <script setup lang="ts">
 import type { BriefQuestionType, ProjectStage } from '~/composables/useProjectStore'
 
-const { activeType, closeCreationModal } = useCreationModal()
-const { briefQuestionTypes, createBrief, createChecklist, projectStages } = useProjectStore()
+const { activeType, closeCreationModal, editingId } = useCreationModal()
+const {
+  briefQuestionTypes,
+  createBrief,
+  createChecklist,
+  data,
+  projectStages,
+  updateBrief,
+  updateChecklist
+} = useProjectStore()
 
 const optionTypes: BriefQuestionType[] = ['radio', 'checkbox', 'select', 'multiselect']
 
@@ -33,6 +41,15 @@ const createBriefForm = () => ({
 
 const checklistForm = reactive(createChecklistForm())
 const briefForm = reactive(createBriefForm())
+const isEditing = computed(() => Boolean(editingId.value))
+
+const modalTitle = computed(() => {
+  if (activeType.value === 'checklist') {
+    return isEditing.value ? 'Редактировать чеклист' : 'Создать чеклист'
+  }
+
+  return isEditing.value ? 'Редактировать бриф' : 'Создать бриф'
+})
 
 const resetChecklistForm = () => {
   Object.assign(checklistForm, createChecklistForm())
@@ -41,6 +58,65 @@ const resetChecklistForm = () => {
 const resetBriefForm = () => {
   Object.assign(briefForm, createBriefForm())
 }
+
+const fillChecklistForm = (id: string) => {
+  const checklist = data.value.checklists.find((item) => item.id === id)
+
+  if (!checklist) {
+    resetChecklistForm()
+    return
+  }
+
+  checklistForm.title = checklist.title
+  checklistForm.stage = checklist.stage
+  checklistForm.items = checklist.items.map((item) => ({
+    text: item.text,
+    required: item.required
+  }))
+}
+
+const fillBriefForm = (id: string) => {
+  const brief = data.value.briefs.find((item) => item.id === id)
+
+  if (!brief) {
+    resetBriefForm()
+    return
+  }
+
+  briefForm.title = brief.title
+  briefForm.stage = brief.stage
+  briefForm.questions = brief.questions.map((question) => ({
+    text: question.text,
+    type: question.type,
+    required: question.required,
+    description: question.description,
+    optionsText: question.options.join('\n')
+  }))
+}
+
+watch(
+  [activeType, editingId],
+  ([type, id]) => {
+    if (type === 'checklist' && id) {
+      fillChecklistForm(id)
+      return
+    }
+
+    if (type === 'brief' && id) {
+      fillBriefForm(id)
+      return
+    }
+
+    if (type === 'checklist') {
+      resetChecklistForm()
+    }
+
+    if (type === 'brief') {
+      resetBriefForm()
+    }
+  },
+  { immediate: true }
+)
 
 const addChecklistItem = () => {
   checklistForm.items.push({
@@ -91,11 +167,17 @@ const submitChecklist = () => {
     return
   }
 
-  createChecklist({
+  const payload = {
     title: checklistForm.title.trim(),
     stage: checklistForm.stage,
     items
-  })
+  }
+
+  if (editingId.value) {
+    updateChecklist(editingId.value, payload)
+  } else {
+    createChecklist(payload)
+  }
 
   resetChecklistForm()
   closeCreationModal()
@@ -119,11 +201,17 @@ const submitBrief = () => {
     return
   }
 
-  createBrief({
+  const payload = {
     title: briefForm.title.trim(),
     stage: briefForm.stage,
     questions
-  })
+  }
+
+  if (editingId.value) {
+    updateBrief(editingId.value, payload)
+  } else {
+    createBrief(payload)
+  }
 
   resetBriefForm()
   closeCreationModal()
@@ -139,7 +227,7 @@ const submitBrief = () => {
         @submit.prevent="submitChecklist"
       >
         <div class="section-header">
-          <h2 class="section-title">Создать чеклист</h2>
+          <h2 class="section-title">{{ modalTitle }}</h2>
           <button class="button button--secondary" type="button" @click="closeModal">Закрыть</button>
         </div>
 
@@ -188,12 +276,14 @@ const submitBrief = () => {
           </button>
         </div>
 
-        <button class="button button--primary" type="submit">Создать чеклист</button>
+        <button class="button button--primary" type="submit">
+          {{ isEditing ? 'Сохранить чеклист' : 'Создать чеклист' }}
+        </button>
       </form>
 
       <form v-else class="creation-form" @submit.prevent="submitBrief">
         <div class="section-header">
-          <h2 class="section-title">Создать бриф</h2>
+          <h2 class="section-title">{{ modalTitle }}</h2>
           <button class="button button--secondary" type="button" @click="closeModal">Закрыть</button>
         </div>
 
@@ -259,7 +349,9 @@ const submitBrief = () => {
           </button>
         </div>
 
-        <button class="button button--primary" type="submit">Создать бриф</button>
+        <button class="button button--primary" type="submit">
+          {{ isEditing ? 'Сохранить бриф' : 'Создать бриф' }}
+        </button>
       </form>
     </div>
   </div>

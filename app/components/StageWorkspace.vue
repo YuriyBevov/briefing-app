@@ -1,15 +1,29 @@
 <script setup lang="ts">
-import type { Checklist, ProjectStage } from "~/composables/useProjectStore";
+import type { BriefStatus, Checklist, ChecklistItemStatus, ProjectStage } from "~/composables/useProjectStore";
 
 const props = defineProps<{
 	title: ProjectStage;
 }>();
 
 const actions = ["Закрыть этап"];
-const { getBriefsByStage, getChecklistsByStage } = useProjectStore();
+const {
+	briefStatusLabels,
+	deleteBrief,
+	deleteChecklist,
+	getBriefsByStage,
+	getChecklistsByStage,
+	updateBriefStatus,
+	updateChecklistItemStatus,
+} = useProjectStore();
+const { openEditModal } = useCreationModal();
 
 const checklists = getChecklistsByStage(props.title);
 const briefs = getBriefsByStage(props.title);
+const checklistItemStatuses: Array<{ title: string; value: ChecklistItemStatus }> = [
+	{ title: "Не начато", value: "pending" },
+	{ title: "Выполнено", value: "completed" },
+	{ title: "Не используется", value: "skipped" },
+];
 
 const getChecklistProgress = (checklist: Checklist) => {
 	if (checklist.items.length === 0) {
@@ -23,6 +37,42 @@ const getChecklistProgress = (checklist: Checklist) => {
 
 const getRequiredOpenCount = (checklist: Checklist) =>
 	checklist.items.filter((item) => item.required && item.status === "pending").length;
+
+const editChecklist = (id: string) => {
+	openEditModal("checklist", id);
+};
+
+const removeChecklist = (id: string) => {
+	deleteChecklist(id);
+};
+
+const changeChecklistItemStatus = (
+	checklistId: string,
+	itemId: string,
+	status: ChecklistItemStatus,
+) => {
+	updateChecklistItemStatus(checklistId, itemId, status);
+};
+
+const changeChecklistItemStatusFromEvent = (checklistId: string, itemId: string, event: Event) => {
+	const target = event.target as HTMLSelectElement;
+
+	changeChecklistItemStatus(checklistId, itemId, target.value as ChecklistItemStatus);
+};
+
+const editBrief = (id: string) => {
+	openEditModal("brief", id);
+};
+
+const removeBrief = (id: string) => {
+	deleteBrief(id);
+};
+
+const sendBriefToManager = (id: string) => {
+	updateBriefStatus(id, "sent_to_manager");
+};
+
+const getBriefStatusLabel = (status: BriefStatus) => briefStatusLabels[status];
 </script>
 
 <template>
@@ -55,12 +105,23 @@ const getRequiredOpenCount = (checklist: Checklist) =>
 						open
 					>
 						<summary class="checklist-card__header">
-							<span class="checklist-card__title">{{ checklist.title }}</span>
-							<span class="checklist-card__meta">
-								{{ getChecklistProgress(checklist) }}% ·
-								{{ getRequiredOpenCount(checklist) }} обязательных пунктов
+							<span class="checklist-card__summary">
+								<span class="checklist-card__title">{{ checklist.title }}</span>
+								<span class="checklist-card__meta">
+									{{ getChecklistProgress(checklist) }}% ·
+									{{ getRequiredOpenCount(checklist) }} обязательных пунктов
+								</span>
 							</span>
 						</summary>
+
+						<div class="button-row checklist-card__actions">
+							<button class="button button--secondary" type="button" @click="editChecklist(checklist.id)">
+								Редактировать
+							</button>
+							<button class="button button--secondary" type="button" @click="removeChecklist(checklist.id)">
+								Удалить
+							</button>
+						</div>
 
 						<ul class="checklist-card__list">
 							<li v-for="item in checklist.items" :key="item.id" class="checklist-card__item">
@@ -68,6 +129,22 @@ const getRequiredOpenCount = (checklist: Checklist) =>
 								<span class="checklist-card__item-status">
 									{{ item.required ? "Обязательный" : "Необязательный" }}
 								</span>
+								<label class="field checklist-card__field">
+									<span class="field__label">Статус</span>
+									<select
+										class="field__control"
+										:value="item.status"
+										@change="changeChecklistItemStatusFromEvent(checklist.id, item.id, $event)"
+									>
+										<option
+											v-for="status in checklistItemStatuses"
+											:key="status.value"
+											:value="status.value"
+										>
+											{{ status.title }}
+										</option>
+									</select>
+								</label>
 							</li>
 						</ul>
 					</details>
@@ -82,12 +159,48 @@ const getRequiredOpenCount = (checklist: Checklist) =>
 				</div>
 
 				<div v-if="briefs.length" class="brief-list">
-					<article v-for="brief in briefs" :key="brief.id" class="brief-card">
-						<div class="brief-card__body">
-							<span class="brief-card__title">{{ brief.title }}</span>
-							<span class="brief-card__meta">Черновик · {{ brief.questions.length }} вопросов</span>
+					<details v-for="brief in briefs" :key="brief.id" class="brief-card" open>
+						<summary class="brief-card__header">
+							<span class="brief-card__body">
+								<span class="brief-card__title">{{ brief.title }}</span>
+								<span class="brief-card__meta">
+									{{ getBriefStatusLabel(brief.status) }} · {{ brief.questions.length }} вопросов
+								</span>
+							</span>
+						</summary>
+
+						<div class="button-row brief-card__actions">
+							<button class="button button--secondary" type="button" @click="editBrief(brief.id)">
+								Редактировать
+							</button>
+							<button
+								class="button button--secondary"
+								type="button"
+								:disabled="brief.status !== 'draft'"
+								@click="sendBriefToManager(brief.id)"
+							>
+								Отправить менеджеру
+							</button>
+							<button class="button button--secondary" type="button" @click="removeBrief(brief.id)">
+								Удалить
+							</button>
 						</div>
-					</article>
+
+						<ul class="brief-card__list">
+							<li v-for="question in brief.questions" :key="question.id" class="brief-card__item">
+								<span class="brief-card__question">{{ question.text }}</span>
+								<span class="brief-card__meta">
+									{{ question.type }} · {{ question.required ? "Обязательный" : "Необязательный" }}
+								</span>
+								<span v-if="question.description" class="brief-card__description">
+									{{ question.description }}
+								</span>
+								<span v-if="question.options.length" class="brief-card__description">
+									{{ question.options.join(", ") }}
+								</span>
+							</li>
+						</ul>
+					</details>
 				</div>
 
 				<p v-else class="card-description">Создать бриф</p>

@@ -16,6 +16,15 @@
     cursor: pointer;
   }
 
+  &__summary {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  &__actions {
+    padding: 0 var(--space-md) var(--space-md);
+  }
+
   &__title {
     color: var(--color-text);
     font-size: 14px;
@@ -49,5 +58,22 @@
     color: var(--color-text);
     font-size: 14px;
     line-height: 1.35;
+  }
+
+  &__field {
+    margin-top: var(--space-xs);
+  }
+}
+
+@media (min-width: 720px) {
+  .checklist-card {
+    &__item {
+      grid-template-columns: minmax(0, 1fr) 140px 180px;
+      align-items: center;
+    }
+
+    &__field {
+      margin-top: 0;
+    }
   }
 }

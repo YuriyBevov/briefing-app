@@ -7,7 +7,7 @@ definePageMeta({
 
 const route = useRoute()
 const token = computed(() => String(route.params.token ?? ''))
-const { completeBriefByToken, getBriefByToken } = useProjectStore()
+const { completeBriefByToken, getBriefByToken, isLoaded, load } = useProjectStore()
 const brief = getBriefByToken(token.value)
 const answers = reactive<Record<string, BriefAnswerValue>>({})
 const isSubmitted = ref(false)
@@ -71,11 +71,21 @@ const submitBrief = () => {
 
   isSubmitted.value = completeBriefByToken(token.value, { ...answers })
 }
+
+onMounted(() => {
+  load()
+})
 </script>
 
 <template>
   <main class="public-brief-page">
-    <section v-if="brief" class="public-brief">
+    <section v-if="!isLoaded" class="public-brief">
+      <div class="section-header">
+        <h1 class="page-title">Бриф загружается</h1>
+      </div>
+    </section>
+
+    <section v-else-if="brief" class="public-brief">
       <div class="section-header">
         <h1 class="page-title">{{ brief.title }}</h1>
       </div>

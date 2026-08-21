@@ -187,6 +187,7 @@ export const useProjectStore = () => {
     }
 
     data.value.checklists = [checklist, ...data.value.checklists]
+    save()
   }
 
   const updateChecklist = (id: string, payload: ChecklistPayload) => {
@@ -211,10 +212,12 @@ export const useProjectStore = () => {
         completedAt: currentItem?.completedAt ?? ''
       }
     })
+    save()
   }
 
   const deleteChecklist = (id: string) => {
     data.value.checklists = data.value.checklists.filter((checklist) => checklist.id !== id)
+    save()
   }
 
   const updateChecklistItemStatus = (
@@ -231,6 +234,7 @@ export const useProjectStore = () => {
 
     checklistItem.status = status
     checklistItem.completedAt = status === 'completed' ? new Date().toISOString() : ''
+    save()
   }
 
   const updateChecklistItemComment = (checklistId: string, itemId: string, comment: string) => {
@@ -242,6 +246,7 @@ export const useProjectStore = () => {
     }
 
     checklistItem.comment = comment
+    save()
   }
 
   const createBrief = (payload: BriefPayload) => {
@@ -265,6 +270,7 @@ export const useProjectStore = () => {
     }
 
     data.value.briefs = [brief, ...data.value.briefs]
+    save()
   }
 
   const updateBrief = (id: string, payload: BriefPayload) => {
@@ -284,10 +290,12 @@ export const useProjectStore = () => {
       description: question.description,
       options: question.options
     }))
+    save()
   }
 
   const deleteBrief = (id: string) => {
     data.value.briefs = data.value.briefs.filter((brief) => brief.id !== id)
+    save()
   }
 
   const updateBriefStatus = (id: string, status: BriefStatus) => {
@@ -298,6 +306,7 @@ export const useProjectStore = () => {
     }
 
     brief.status = status
+    save()
   }
 
   const createBriefClientLink = (id: string) => {
@@ -318,6 +327,7 @@ export const useProjectStore = () => {
       ...brief.links
     ]
     brief.status = 'link_created'
+    save()
 
     return token
   }
@@ -335,6 +345,7 @@ export const useProjectStore = () => {
     brief.answers = answers
     brief.status = 'completed'
     brief.completedAt = new Date().toISOString()
+    save()
 
     return true
   }
@@ -350,6 +361,8 @@ export const useProjectStore = () => {
     projectStages,
     briefQuestionTypes,
     briefStatusLabels,
+    isLoaded,
+    load,
     createChecklist,
     updateChecklist,
     deleteChecklist,

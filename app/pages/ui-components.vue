@@ -360,6 +360,11 @@ const tableRows = [
                     </a>
                     <span class="brief-card__link-status brief-card__link-status--pending">Ожидает заполнения</span>
                   </div>
+                  <div class="button-row brief-card__link-actions">
+                    <button class="button button--secondary button--small" type="button" disabled>Открыть бриф к заполнению</button>
+                    <button class="button button--primary button--small" type="button" disabled>Принять в работу</button>
+                    <button class="button button--secondary button--small" type="button">Удалить</button>
+                  </div>
                 </div>
                 <div class="brief-card__link-item">
                   <span class="ui-name">BriefLinkItemCompleted</span>

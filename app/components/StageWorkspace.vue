@@ -301,13 +301,11 @@ const getBriefLink = (token: string) => {
 									</span>
 								</div>
 
-								<div
-									v-if="link.status === 'completed' || link.status === 'in_work'"
-									class="button-row brief-card__link-actions"
-								>
+								<div class="button-row brief-card__link-actions">
 									<button
 										class="button button--secondary button--small"
 										type="button"
+										:disabled="link.status === 'pending'"
 										@click="openBriefForFilling(brief.id, link.id)"
 									>
 										Открыть бриф к заполнению
@@ -315,7 +313,7 @@ const getBriefLink = (token: string) => {
 									<button
 										class="button button--primary button--small"
 										type="button"
-										:disabled="link.status === 'in_work'"
+										:disabled="link.status !== 'completed'"
 										@click="acceptBriefToWork(brief.id, link.id)"
 									>
 										Принять в работу

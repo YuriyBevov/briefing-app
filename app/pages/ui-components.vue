@@ -24,7 +24,7 @@ const spacingTokens = [
 ]
 
 const tableRows = [
-  { component: 'BriefLinkItemCompleted', status: 'Согласован клиентом', owner: 'Менеджер' },
+  { component: 'BriefLinkItemCompleted', status: 'Согласован', owner: 'Менеджер' },
   { component: 'ChecklistItemRequired', status: 'Ожидает', owner: 'Дизайнер' },
   { component: 'ButtonPrimary', status: 'Готов', owner: 'Система' }
 ]
@@ -243,11 +243,27 @@ const tableRows = [
             </div>
             <div class="ui-sample">
               <span class="ui-name">BriefLinkStatusCompleted</span>
-              <span class="brief-card__link-status brief-card__link-status--completed">Согласован клиентом</span>
+              <span class="brief-card__link-status brief-card__link-status--completed">Согласован</span>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BriefLinkStatusRevisionPending</span>
+              <span class="brief-card__link-status brief-card__link-status--revision-pending">
+                Ожидает редакции
+              </span>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BriefLinkStatusRevisionCompleted</span>
+              <span class="brief-card__link-status brief-card__link-status--completed">
+                Отредактирован и согласован
+              </span>
             </div>
             <div class="ui-sample">
               <span class="ui-name">BriefLinkStatusInWork</span>
               <span class="brief-card__link-status brief-card__link-status--in-work">В работе</span>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BriefLinkStatusArchived</span>
+              <span class="brief-card__link-status brief-card__link-status--archived">Архив</span>
             </div>
             <div class="ui-sample">
               <span class="ui-name">TopbarStatus</span>
@@ -353,47 +369,52 @@ const tableRows = [
               </div>
               <div class="brief-card__links">
                 <div class="brief-card__link-item">
-                  <span class="ui-name">BriefLinkItemPending</span>
-                  <div class="brief-card__link-header">
-                    <a class="brief-card__link" href="/brief/example-pending" target="_blank">
-                      http://localhost:3000/brief/example-pending
-                    </a>
-                    <span class="brief-card__link-status brief-card__link-status--pending">Ожидает заполнения</span>
-                  </div>
-                  <div class="button-row brief-card__link-actions">
-                    <button class="button button--secondary button--small" type="button" disabled>Открыть бриф к заполнению</button>
-                    <button class="button button--primary button--small" type="button" disabled>Принять в работу</button>
-                    <button class="button button--secondary button--small" type="button">Удалить</button>
+                  <span class="ui-name">BriefLinkHistoryItemRevision</span>
+                  <div class="brief-card__link-tree">
+                    <div class="brief-card__link-node">
+                      <span class="ui-name">BriefLinkHistoryNodeRevisionPending</span>
+                      <div class="brief-card__link-header">
+                        <a class="brief-card__link" href="/brief/example-revision-pending" target="_blank">
+                          http://localhost:3000/brief/example-revision-pending
+                        </a>
+                        <span class="brief-card__link-status brief-card__link-status--revision-pending">
+                          Ожидает редакции
+                        </span>
+                      </div>
+                      <div class="button-row brief-card__link-actions">
+                        <button class="button button--secondary button--small" type="button" disabled>Открыть бриф к заполнению</button>
+                        <button class="button button--primary button--small" type="button" disabled>Принять в работу</button>
+                        <button class="button button--secondary button--small" type="button">Удалить</button>
+                      </div>
+                    </div>
+                    <div class="brief-card__link-node">
+                      <span class="ui-name">BriefLinkHistoryNodeArchived</span>
+                      <div class="brief-card__link-header">
+                        <a class="brief-card__link" href="/brief/example-archived" target="_blank">
+                          http://localhost:3000/brief/example-archived
+                        </a>
+                        <span class="brief-card__link-status brief-card__link-status--archived">Архив</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div class="brief-card__link-item">
-                  <span class="ui-name">BriefLinkItemCompleted</span>
-                  <div class="brief-card__link-header">
-                    <a class="brief-card__link" href="/brief/example-completed" target="_blank">
-                      http://localhost:3000/brief/example-completed
-                    </a>
-                    <span class="brief-card__link-status brief-card__link-status--completed">
-                      Согласован клиентом
-                    </span>
-                  </div>
-                  <div class="button-row brief-card__link-actions">
-                    <button class="button button--secondary button--small" type="button">Открыть бриф к заполнению</button>
-                    <button class="button button--primary button--small" type="button">Принять в работу</button>
-                    <button class="button button--secondary button--small" type="button">Удалить</button>
-                  </div>
-                </div>
-                <div class="brief-card__link-item">
-                  <span class="ui-name">BriefLinkItemInWork</span>
-                  <div class="brief-card__link-header">
-                    <a class="brief-card__link" href="/brief/example-in-work" target="_blank">
-                      http://localhost:3000/brief/example-in-work
-                    </a>
-                    <span class="brief-card__link-status brief-card__link-status--in-work">В работе</span>
-                  </div>
-                  <div class="button-row brief-card__link-actions">
-                    <button class="button button--secondary button--small" type="button">Открыть бриф к заполнению</button>
-                    <button class="button button--primary button--small" type="button" disabled>Принять в работу</button>
-                    <button class="button button--secondary button--small" type="button">Удалить</button>
+                  <span class="ui-name">BriefLinkHistoryItemSeparateClient</span>
+                  <div class="brief-card__link-tree">
+                    <div class="brief-card__link-node">
+                      <span class="ui-name">BriefLinkHistoryNodeCompleted</span>
+                      <div class="brief-card__link-header">
+                        <a class="brief-card__link" href="/brief/example-completed" target="_blank">
+                          http://localhost:3000/brief/example-completed
+                        </a>
+                        <span class="brief-card__link-status brief-card__link-status--completed">Согласован</span>
+                      </div>
+                      <div class="button-row brief-card__link-actions">
+                        <button class="button button--secondary button--small" type="button">Открыть бриф к заполнению</button>
+                        <button class="button button--primary button--small" type="button">Принять в работу</button>
+                        <button class="button button--secondary button--small" type="button">Удалить</button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

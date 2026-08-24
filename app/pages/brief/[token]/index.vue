@@ -67,11 +67,19 @@ const canSubmit = computed(() =>
 )
 
 const isReadonly = computed(() =>
-  briefLink.value?.status === 'completed' || briefLink.value?.status === 'in_work' || isSubmitted.value
+  briefLink.value?.status === 'completed' ||
+  briefLink.value?.status === 'revision_completed' ||
+  briefLink.value?.status === 'in_work' ||
+  briefLink.value?.status === 'archived' ||
+  isSubmitted.value
 )
 
 const submitBrief = () => {
-  if (!canSubmit.value || briefLink.value?.status === 'in_work') {
+  if (
+    !canSubmit.value ||
+    briefLink.value?.status === 'in_work' ||
+    briefLink.value?.status === 'archived'
+  ) {
     return
   }
 

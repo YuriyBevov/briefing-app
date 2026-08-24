@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type {
+	BriefLink,
 	BriefLinkStatus,
 	Checklist,
 	ChecklistItemStatus,
@@ -18,9 +19,9 @@ const {
 	deleteBriefLink,
 	deleteChecklist,
 	briefLinkStatusLabels,
+	createBriefRevisionLink,
 	getBriefsByStage,
 	getChecklistsByStage,
-	reopenBriefLink,
 	updateChecklistItemComment,
 	updateChecklistItemStatus,
 } = useProjectStore();
@@ -85,7 +86,11 @@ const createClientLink = (id: string) => {
 };
 
 const getCompletedLinksCount = (links: Array<{ status: BriefLinkStatus }>) =>
-	links.filter((link) => link.status === "completed" || link.status === "in_work").length;
+	links.filter((link) =>
+		link.status === "completed" ||
+		link.status === "revision_completed" ||
+		link.status === "in_work",
+	).length;
 
 const getBriefMeta = (links: Array<{ status: BriefLinkStatus }>, questionsCount: number) => {
 	if (!links.length) {
@@ -97,8 +102,29 @@ const getBriefMeta = (links: Array<{ status: BriefLinkStatus }>, questionsCount:
 
 const getBriefLinkStatusLabel = (status: BriefLinkStatus) => briefLinkStatusLabels[status];
 
+const getBriefLinkHistories = (links: BriefLink[]) => {
+	const histories: Array<{ id: string; links: BriefLink[] }> = [];
+
+	links.forEach((link) => {
+		const historyId = link.historyId ?? link.id;
+		const history = histories.find((item) => item.id === historyId);
+
+		if (history) {
+			history.links.push(link);
+			return;
+		}
+
+		histories.push({
+			id: historyId,
+			links: [link],
+		});
+	});
+
+	return histories;
+};
+
 const openBriefForFilling = (briefId: string, linkId: string) => {
-	reopenBriefLink(briefId, linkId);
+	createBriefRevisionLink(briefId, linkId);
 };
 
 const acceptBriefToWork = (briefId: string, linkId: string) => {
@@ -277,54 +303,72 @@ const getBriefLink = (token: string) => {
 
 						<div v-if="brief.links.length" class="brief-card__links">
 							<div
-								v-for="link in brief.links"
-								:key="link.id"
+								v-for="history in getBriefLinkHistories(brief.links)"
+								:key="history.id"
 								class="brief-card__link-item"
 							>
-								<div class="brief-card__link-header">
-									<a
-										class="brief-card__link"
-										:href="getBriefLink(link.token)"
-										target="_blank"
+								<div class="brief-card__link-tree">
+									<div
+										v-for="link in history.links"
+										:key="link.id"
+										class="brief-card__link-node"
 									>
-										{{ getBriefLink(link.token) }}
-									</a>
-									<span
-										class="brief-card__link-status"
-										:class="{
-											'brief-card__link-status--pending': link.status === 'pending',
-											'brief-card__link-status--completed': link.status === 'completed',
-											'brief-card__link-status--in-work': link.status === 'in_work',
-										}"
-									>
-										{{ getBriefLinkStatusLabel(link.status) }}
-									</span>
-								</div>
+										<div class="brief-card__link-header">
+											<a
+												class="brief-card__link"
+												:href="getBriefLink(link.token)"
+												target="_blank"
+											>
+												{{ getBriefLink(link.token) }}
+											</a>
+											<span
+												class="brief-card__link-status"
+												:class="{
+													'brief-card__link-status--pending': link.status === 'pending',
+													'brief-card__link-status--revision-pending': link.status === 'revision_pending',
+													'brief-card__link-status--completed':
+														link.status === 'completed' || link.status === 'revision_completed',
+													'brief-card__link-status--in-work': link.status === 'in_work',
+													'brief-card__link-status--archived': link.status === 'archived',
+												}"
+											>
+												{{ getBriefLinkStatusLabel(link.status) }}
+											</span>
+										</div>
 
-								<div class="button-row brief-card__link-actions">
-									<button
-										class="button button--secondary button--small"
-										type="button"
-										:disabled="link.status === 'pending'"
-										@click="openBriefForFilling(brief.id, link.id)"
-									>
-										Открыть бриф к заполнению
-									</button>
-									<button
-										class="button button--primary button--small"
-										type="button"
-										:disabled="link.status !== 'completed'"
-										@click="acceptBriefToWork(brief.id, link.id)"
-									>
-										Принять в работу
-									</button>
-									<button
-										class="button button--secondary button--small"
-										type="button"
-										@click="removeBriefLink(brief.id, link.id)"
-									>
-										Удалить
-									</button>
+										<div
+											v-if="link.status !== 'archived'"
+											class="button-row brief-card__link-actions"
+										>
+											<button
+												class="button button--secondary button--small"
+												type="button"
+												:disabled="
+													link.status === 'pending' ||
+													link.status === 'revision_pending' ||
+													link.status === 'archived'
+												"
+												@click="openBriefForFilling(brief.id, link.id)"
+											>
+												Открыть бриф к заполнению
+											</button>
+											<button
+												class="button button--primary button--small"
+												type="button"
+												:disabled="link.status !== 'completed' && link.status !== 'revision_completed'"
+												@click="acceptBriefToWork(brief.id, link.id)"
+											>
+												Принять в работу
+											</button>
+											<button
+												class="button button--secondary button--small"
+												type="button"
+												@click="removeBriefLink(brief.id, link.id)"
+											>
+												Удалить
+											</button>
+										</div>
+									</div>
 								</div>
 							</div>
 						</div>

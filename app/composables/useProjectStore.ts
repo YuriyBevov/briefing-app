@@ -16,7 +16,7 @@ export type ProjectStage = (typeof projectStages)[number]
 export type BriefQuestionType = (typeof briefQuestionTypes)[number]
 export type ChecklistItemStatus = 'pending' | 'completed' | 'skipped'
 export type BriefStatus = 'draft' | 'link_created' | 'completed'
-export type BriefLinkStatus = 'pending' | 'completed' | 'in_work'
+export type BriefLinkStatus = 'pending' | 'completed' | 'revision_pending' | 'revision_completed' | 'in_work' | 'archived'
 export type BriefAnswerValue = string | string[]
 
 export interface ChecklistItem {
@@ -60,6 +60,7 @@ export interface Brief {
 
 export interface BriefLink {
   id: string
+  historyId: string
   token: string
   status: BriefLinkStatus
   answers: Record<string, BriefAnswerValue>
@@ -116,8 +117,11 @@ const briefStatusLabels: Record<BriefStatus, string> = {
 
 const briefLinkStatusLabels: Record<BriefLinkStatus, string> = {
   pending: 'Ожидает заполнения',
-  completed: 'Согласован клиентом',
-  in_work: 'В работе'
+  completed: 'Согласован',
+  revision_pending: 'Ожидает редакции',
+  revision_completed: 'Отредактирован и согласован',
+  in_work: 'В работе',
+  archived: 'Архив'
 }
 
 const createToken = () => createId().replaceAll('-', '')
@@ -139,9 +143,11 @@ const normalizeData = (projectData: ProjectData): ProjectData => ({
       const status = legacyStatus === 'approved'
         ? 'in_work'
         : legacyStatus ?? (shouldUseLegacyAnswers || brief.status === 'completed' ? 'completed' : 'pending')
+      const historyId = link.historyId ?? link.id
 
       return {
         ...link,
+        historyId,
         status,
         answers: link.answers ?? (shouldUseLegacyAnswers ? legacyAnswers : {}),
         completedAt: link.completedAt ?? (shouldUseLegacyAnswers ? brief.completedAt ?? '' : '')
@@ -344,9 +350,12 @@ export const useProjectStore = () => {
 
     const token = createToken()
 
+    const linkId = createId()
+
     brief.links = [
       {
-        id: createId(),
+        id: linkId,
+        historyId: linkId,
         token,
         status: 'pending',
         answers: {},
@@ -383,12 +392,12 @@ export const useProjectStore = () => {
     const brief = data.value.briefs.find((item) => item.links.some((link) => link.token === token))
     const link = brief?.links.find((item) => item.token === token)
 
-    if (!brief || !link || link.status === 'in_work') {
+    if (!brief || !link || link.status === 'in_work' || link.status === 'archived') {
       return false
     }
 
     link.answers = answers
-    link.status = 'completed'
+    link.status = link.status === 'revision_pending' ? 'revision_completed' : 'completed'
     link.completedAt = new Date().toISOString()
     brief.status = 'link_created'
     save()
@@ -396,25 +405,47 @@ export const useProjectStore = () => {
     return true
   }
 
-  const reopenBriefLink = (briefId: string, linkId: string) => {
+  const createBriefRevisionLink = (briefId: string, linkId: string) => {
     const brief = data.value.briefs.find((item) => item.id === briefId)
     const link = brief?.links.find((item) => item.id === linkId)
 
-    if (!brief || !link || link.status === 'in_work') {
-      return
+    if (
+      !brief ||
+      !link ||
+      link.status === 'pending' ||
+      link.status === 'revision_pending' ||
+      link.status === 'archived'
+    ) {
+      return ''
     }
 
-    link.status = 'pending'
-    link.completedAt = ''
+    const token = createToken()
+    const historyId = link.historyId ?? link.id
+    link.status = 'archived'
+    link.historyId = historyId
+    brief.links = [
+      {
+        id: createId(),
+        historyId,
+        token,
+        status: 'revision_pending',
+        answers: { ...link.answers },
+        createdAt: new Date().toISOString(),
+        completedAt: ''
+      },
+      ...brief.links
+    ]
     brief.status = 'link_created'
     save()
+
+    return token
   }
 
   const acceptBriefLinkToWork = (briefId: string, linkId: string) => {
     const brief = data.value.briefs.find((item) => item.id === briefId)
     const link = brief?.links.find((item) => item.id === linkId)
 
-    if (!brief || !link || link.status !== 'completed') {
+    if (!brief || !link || (link.status !== 'completed' && link.status !== 'revision_completed')) {
       return
     }
 
@@ -461,7 +492,7 @@ export const useProjectStore = () => {
     getBriefByToken,
     getBriefLinkByToken,
     completeBriefByToken,
-    reopenBriefLink,
+    createBriefRevisionLink,
     acceptBriefLinkToWork,
     deleteBriefLink,
     getChecklistsByStage,

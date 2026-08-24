@@ -374,9 +374,40 @@ const tableRows = [
                     <div class="brief-card__link-node">
                       <span class="ui-name">BriefLinkHistoryNodeRevisionPending</span>
                       <div class="brief-card__link-header">
-                        <a class="brief-card__link" href="/brief/example-revision-pending" target="_blank">
-                          http://localhost:3000/brief/example-revision-pending
-                        </a>
+                        <span class="brief-card__link-main">
+                          <span class="brief-card__link-tools">
+                            <button
+                              class="button button--secondary button--small brief-card__icon-button"
+                              type="button"
+                              aria-label="Копировать ссылку"
+                              title="Копировать ссылку"
+                            >
+                              <svg
+                                class="brief-card__copy-icon"
+                                viewBox="0 0 20 20"
+                                fill="none"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M7 7V4.5C7 3.67 7.67 3 8.5 3H15.5C16.33 3 17 3.67 17 4.5V11.5C17 12.33 16.33 13 15.5 13H13M4.5 7H11.5C12.33 7 13 7.67 13 8.5V15.5C13 16.33 12.33 17 11.5 17H4.5C3.67 17 3 16.33 3 15.5V8.5C3 7.67 3.67 7 4.5 7Z"
+                                  stroke="currentColor"
+                                  stroke-width="1.7"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                              </svg>
+                            </button>
+                            <button class="button button--secondary button--small" type="button">
+                              Изменить название
+                            </button>
+                          </span>
+                          <span class="brief-card__link-content">
+                            <a class="brief-card__link" href="/brief/example-revision-pending" target="_blank">
+                              Главная страница, редакция клиента
+                            </a>
+                            <span class="brief-card__link-url">http://localhost:3000/brief/example-revision-pending</span>
+                          </span>
+                        </span>
                         <span class="brief-card__link-status brief-card__link-status--revision-pending">
                           Ожидает редакции
                         </span>
@@ -390,9 +421,12 @@ const tableRows = [
                     <div class="brief-card__link-node">
                       <span class="ui-name">BriefLinkHistoryNodeArchived</span>
                       <div class="brief-card__link-header">
-                        <a class="brief-card__link" href="/brief/example-archived" target="_blank">
-                          http://localhost:3000/brief/example-archived
-                        </a>
+                        <span class="brief-card__link-content">
+                          <a class="brief-card__link" href="/brief/example-archived" target="_blank">
+                            Главная страница, редакция клиента
+                          </a>
+                          <span class="brief-card__link-url">http://localhost:3000/brief/example-archived</span>
+                        </span>
                         <span class="brief-card__link-status brief-card__link-status--archived">Архив</span>
                       </div>
                     </div>
@@ -404,9 +438,39 @@ const tableRows = [
                     <div class="brief-card__link-node">
                       <span class="ui-name">BriefLinkHistoryNodeCompleted</span>
                       <div class="brief-card__link-header">
-                        <a class="brief-card__link" href="/brief/example-completed" target="_blank">
-                          http://localhost:3000/brief/example-completed
-                        </a>
+                        <span class="brief-card__link-main">
+                          <span class="brief-card__link-tools">
+                            <button
+                              class="button button--secondary button--small brief-card__icon-button"
+                              type="button"
+                              aria-label="Копировать ссылку"
+                              title="Копировать ссылку"
+                            >
+                              <svg
+                                class="brief-card__copy-icon"
+                                viewBox="0 0 20 20"
+                                fill="none"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M7 7V4.5C7 3.67 7.67 3 8.5 3H15.5C16.33 3 17 3.67 17 4.5V11.5C17 12.33 16.33 13 15.5 13H13M4.5 7H11.5C12.33 7 13 7.67 13 8.5V15.5C13 16.33 12.33 17 11.5 17H4.5C3.67 17 3 16.33 3 15.5V8.5C3 7.67 3.67 7 4.5 7Z"
+                                  stroke="currentColor"
+                                  stroke-width="1.7"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                              </svg>
+                            </button>
+                            <button class="button button--secondary button--small" type="button">
+                              Изменить название
+                            </button>
+                          </span>
+                          <span class="brief-card__link-content">
+                            <a class="brief-card__link" href="/brief/example-completed" target="_blank">
+                              http://localhost:3000/brief/example-completed
+                            </a>
+                          </span>
+                        </span>
                         <span class="brief-card__link-status brief-card__link-status--completed">Согласован</span>
                       </div>
                       <div class="button-row brief-card__link-actions">

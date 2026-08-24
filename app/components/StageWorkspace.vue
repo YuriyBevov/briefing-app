@@ -22,10 +22,12 @@ const {
 	createBriefRevisionLink,
 	getBriefsByStage,
 	getChecklistsByStage,
+	updateBriefLinkTitle,
 	updateChecklistItemComment,
 	updateChecklistItemStatus,
 } = useProjectStore();
 const { openEditModal } = useCreationModal();
+const copiedLinkId = ref("");
 
 const checklists = getChecklistsByStage(props.title);
 const briefs = getBriefsByStage(props.title);
@@ -102,6 +104,8 @@ const getBriefMeta = (links: Array<{ status: BriefLinkStatus }>, questionsCount:
 
 const getBriefLinkStatusLabel = (status: BriefLinkStatus) => briefLinkStatusLabels[status];
 
+const getBriefLinkTitle = (link: BriefLink) => link.title || getBriefLink(link.token);
+
 const getBriefLinkHistories = (links: BriefLink[]) => {
 	const histories: Array<{ id: string; links: BriefLink[] }> = [];
 
@@ -123,6 +127,9 @@ const getBriefLinkHistories = (links: BriefLink[]) => {
 	return histories;
 };
 
+const isActiveBriefHistoryLink = (history: { links: BriefLink[] }, link: BriefLink) =>
+	history.links[0]?.id === link.id && link.status !== "archived";
+
 const openBriefForFilling = (briefId: string, linkId: string) => {
 	createBriefRevisionLink(briefId, linkId);
 };
@@ -133,6 +140,34 @@ const acceptBriefToWork = (briefId: string, linkId: string) => {
 
 const removeBriefLink = (briefId: string, linkId: string) => {
 	deleteBriefLink(briefId, linkId);
+};
+
+const copyBriefLink = async (link: BriefLink) => {
+	const url = getBriefLink(link.token);
+
+	if (import.meta.client && navigator.clipboard) {
+		await navigator.clipboard.writeText(url);
+		copiedLinkId.value = link.id;
+		window.setTimeout(() => {
+			if (copiedLinkId.value === link.id) {
+				copiedLinkId.value = "";
+			}
+		}, 1600);
+	}
+};
+
+const renameBriefLink = (briefId: string, link: BriefLink) => {
+	if (!import.meta.client) {
+		return;
+	}
+
+	const title = window.prompt("Название экземпляра брифа", link.title || "");
+
+	if (title === null) {
+		return;
+	}
+
+	updateBriefLinkTitle(briefId, link.id, title);
 };
 
 const getBriefLink = (token: string) => {
@@ -314,13 +349,54 @@ const getBriefLink = (token: string) => {
 										class="brief-card__link-node"
 									>
 										<div class="brief-card__link-header">
-											<a
-												class="brief-card__link"
-												:href="getBriefLink(link.token)"
-												target="_blank"
-											>
-												{{ getBriefLink(link.token) }}
-											</a>
+											<span class="brief-card__link-main">
+												<span
+													v-if="isActiveBriefHistoryLink(history, link)"
+													class="brief-card__link-tools"
+												>
+													<button
+														class="button button--secondary button--small brief-card__icon-button"
+														type="button"
+														aria-label="Копировать ссылку"
+														:title="copiedLinkId === link.id ? 'Скопировано' : 'Копировать ссылку'"
+														@click="copyBriefLink(link)"
+													>
+														<svg
+															class="brief-card__copy-icon"
+															viewBox="0 0 20 20"
+															fill="none"
+															aria-hidden="true"
+														>
+															<path
+																d="M7 7V4.5C7 3.67 7.67 3 8.5 3H15.5C16.33 3 17 3.67 17 4.5V11.5C17 12.33 16.33 13 15.5 13H13M4.5 7H11.5C12.33 7 13 7.67 13 8.5V15.5C13 16.33 12.33 17 11.5 17H4.5C3.67 17 3 16.33 3 15.5V8.5C3 7.67 3.67 7 4.5 7Z"
+																stroke="currentColor"
+																stroke-width="1.7"
+																stroke-linecap="round"
+																stroke-linejoin="round"
+															/>
+														</svg>
+													</button>
+													<button
+														class="button button--secondary button--small"
+														type="button"
+														@click="renameBriefLink(brief.id, link)"
+													>
+														Изменить название
+													</button>
+												</span>
+												<span class="brief-card__link-content">
+													<a
+														class="brief-card__link"
+														:href="getBriefLink(link.token)"
+														target="_blank"
+													>
+														{{ getBriefLinkTitle(link) }}
+													</a>
+													<span v-if="link.title" class="brief-card__link-url">
+														{{ getBriefLink(link.token) }}
+													</span>
+												</span>
+											</span>
 											<span
 												class="brief-card__link-status"
 												:class="{

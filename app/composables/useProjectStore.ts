@@ -61,6 +61,7 @@ export interface Brief {
 export interface BriefLink {
   id: string
   historyId: string
+  title: string
   token: string
   status: BriefLinkStatus
   answers: Record<string, BriefAnswerValue>
@@ -148,6 +149,7 @@ const normalizeData = (projectData: ProjectData): ProjectData => ({
       return {
         ...link,
         historyId,
+        title: link.title ?? '',
         status,
         answers: link.answers ?? (shouldUseLegacyAnswers ? legacyAnswers : {}),
         completedAt: link.completedAt ?? (shouldUseLegacyAnswers ? brief.completedAt ?? '' : '')
@@ -356,6 +358,7 @@ export const useProjectStore = () => {
       {
         id: linkId,
         historyId: linkId,
+        title: '',
         token,
         status: 'pending',
         answers: {},
@@ -421,20 +424,19 @@ export const useProjectStore = () => {
 
     const token = createToken()
     const historyId = link.historyId ?? link.id
+    const linkIndex = brief.links.findIndex((item) => item.id === linkId)
     link.status = 'archived'
     link.historyId = historyId
-    brief.links = [
-      {
-        id: createId(),
-        historyId,
-        token,
-        status: 'revision_pending',
-        answers: { ...link.answers },
-        createdAt: new Date().toISOString(),
-        completedAt: ''
-      },
-      ...brief.links
-    ]
+    brief.links.splice(linkIndex, 0, {
+      id: createId(),
+      historyId,
+      title: link.title,
+      token,
+      status: 'revision_pending',
+      answers: { ...link.answers },
+      createdAt: new Date().toISOString(),
+      completedAt: ''
+    })
     brief.status = 'link_created'
     save()
 
@@ -450,6 +452,18 @@ export const useProjectStore = () => {
     }
 
     link.status = 'in_work'
+    save()
+  }
+
+  const updateBriefLinkTitle = (briefId: string, linkId: string, title: string) => {
+    const brief = data.value.briefs.find((item) => item.id === briefId)
+    const link = brief?.links.find((item) => item.id === linkId)
+
+    if (!link || link.status === 'archived') {
+      return
+    }
+
+    link.title = title.trim()
     save()
   }
 
@@ -494,6 +508,7 @@ export const useProjectStore = () => {
     completeBriefByToken,
     createBriefRevisionLink,
     acceptBriefLinkToWork,
+    updateBriefLinkTitle,
     deleteBriefLink,
     getChecklistsByStage,
     getBriefsByStage

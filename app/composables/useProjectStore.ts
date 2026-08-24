@@ -469,12 +469,15 @@ export const useProjectStore = () => {
 
   const deleteBriefLink = (briefId: string, linkId: string) => {
     const brief = data.value.briefs.find((item) => item.id === briefId)
+    const link = brief?.links.find((item) => item.id === linkId)
 
-    if (!brief) {
+    if (!brief || !link) {
       return
     }
 
-    brief.links = brief.links.filter((link) => link.id !== linkId)
+    const historyId = link.historyId ?? link.id
+
+    brief.links = brief.links.filter((item) => (item.historyId ?? item.id) !== historyId)
     brief.status = brief.links.length ? 'link_created' : 'draft'
     save()
   }

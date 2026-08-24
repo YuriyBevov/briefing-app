@@ -87,7 +87,16 @@
     background-color: var(--color-surface);
   }
 
+  &__link-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
   &__link {
+    min-width: 0;
     overflow-wrap: anywhere;
     color: var(--color-accent);
     font-size: 12px;
@@ -104,12 +113,17 @@
     background-color: var(--color-surface-muted);
   }
 
-  &__link-status--completed {
-    color: var(--color-accent);
-    background-color: var(--color-accent-soft);
+  &__link-status--pending {
+    color: var(--color-danger);
+    background-color: color-mix(in srgb, var(--color-danger) 16%, transparent);
   }
 
-  &__link-status--approved {
+  &__link-status--completed {
+    color: var(--color-warning);
+    background-color: color-mix(in srgb, var(--color-warning) 24%, transparent);
+  }
+
+  &__link-status--in-work {
     color: var(--color-success);
     background-color: color-mix(in srgb, var(--color-success) 16%, transparent);
   }

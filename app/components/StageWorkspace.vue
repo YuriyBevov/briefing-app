@@ -12,7 +12,7 @@ const props = defineProps<{
 
 const actions = ["Закрыть этап"];
 const {
-	approveBriefLink,
+	acceptBriefLinkToWork,
 	createBriefClientLink,
 	deleteBrief,
 	deleteBriefLink,
@@ -85,7 +85,7 @@ const createClientLink = (id: string) => {
 };
 
 const getCompletedLinksCount = (links: Array<{ status: BriefLinkStatus }>) =>
-	links.filter((link) => link.status === "completed" || link.status === "approved").length;
+	links.filter((link) => link.status === "completed" || link.status === "in_work").length;
 
 const getBriefMeta = (links: Array<{ status: BriefLinkStatus }>, questionsCount: number) => {
 	if (!links.length) {
@@ -101,8 +101,8 @@ const openBriefForFilling = (briefId: string, linkId: string) => {
 	reopenBriefLink(briefId, linkId);
 };
 
-const approveBrief = (briefId: string, linkId: string) => {
-	approveBriefLink(briefId, linkId);
+const acceptBriefToWork = (briefId: string, linkId: string) => {
+	acceptBriefLinkToWork(briefId, linkId);
 };
 
 const removeBriefLink = (briefId: string, linkId: string) => {
@@ -281,22 +281,25 @@ const getBriefLink = (token: string) => {
 								:key="link.id"
 								class="brief-card__link-item"
 							>
-								<a
-									class="brief-card__link"
-									:href="getBriefLink(link.token)"
-									target="_blank"
-								>
-									{{ getBriefLink(link.token) }}
-								</a>
-								<span
-									class="brief-card__link-status"
-									:class="{
-										'brief-card__link-status--completed': link.status === 'completed',
-										'brief-card__link-status--approved': link.status === 'approved',
-									}"
-								>
-									{{ getBriefLinkStatusLabel(link.status) }}
-								</span>
+								<div class="brief-card__link-header">
+									<a
+										class="brief-card__link"
+										:href="getBriefLink(link.token)"
+										target="_blank"
+									>
+										{{ getBriefLink(link.token) }}
+									</a>
+									<span
+										class="brief-card__link-status"
+										:class="{
+											'brief-card__link-status--pending': link.status === 'pending',
+											'brief-card__link-status--completed': link.status === 'completed',
+											'brief-card__link-status--in-work': link.status === 'in_work',
+										}"
+									>
+										{{ getBriefLinkStatusLabel(link.status) }}
+									</span>
+								</div>
 
 								<div v-if="link.status === 'completed'" class="button-row brief-card__link-actions">
 									<button
@@ -309,9 +312,9 @@ const getBriefLink = (token: string) => {
 									<button
 										class="button button--primary"
 										type="button"
-										@click="approveBrief(brief.id, link.id)"
+										@click="acceptBriefToWork(brief.id, link.id)"
 									>
-										Согласован
+										Принято в работу
 									</button>
 									<button
 										class="button button--secondary"

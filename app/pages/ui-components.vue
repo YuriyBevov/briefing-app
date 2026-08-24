@@ -11,6 +11,7 @@ const colorTokens = [
   { name: 'ColorAccentSoft', token: '--color-accent-soft' },
   { name: 'ColorDanger', token: '--color-danger' },
   { name: 'ColorSuccess', token: '--color-success' },
+  { name: 'ColorWarning', token: '--color-warning' },
   { name: 'ColorControl', token: '--color-control' }
 ]
 
@@ -23,7 +24,7 @@ const spacingTokens = [
 ]
 
 const tableRows = [
-  { component: 'BriefLinkItemCompleted', status: 'Заполнен', owner: 'Менеджер' },
+  { component: 'BriefLinkItemCompleted', status: 'Согласован клиентом', owner: 'Менеджер' },
   { component: 'ChecklistItemRequired', status: 'Ожидает', owner: 'Дизайнер' },
   { component: 'ButtonPrimary', status: 'Готов', owner: 'Система' }
 ]
@@ -234,15 +235,15 @@ const tableRows = [
           <div class="ui-sample-row">
             <div class="ui-sample">
               <span class="ui-name">BriefLinkStatusPending</span>
-              <span class="brief-card__link-status">Ожидает заполнения</span>
+              <span class="brief-card__link-status brief-card__link-status--pending">Ожидает заполнения</span>
             </div>
             <div class="ui-sample">
               <span class="ui-name">BriefLinkStatusCompleted</span>
-              <span class="brief-card__link-status brief-card__link-status--completed">Заполнен</span>
+              <span class="brief-card__link-status brief-card__link-status--completed">Согласован клиентом</span>
             </div>
             <div class="ui-sample">
-              <span class="ui-name">BriefLinkStatusApproved</span>
-              <span class="brief-card__link-status brief-card__link-status--approved">Согласован</span>
+              <span class="ui-name">BriefLinkStatusInWork</span>
+              <span class="brief-card__link-status brief-card__link-status--in-work">В работе</span>
             </div>
             <div class="ui-sample">
               <span class="ui-name">TopbarStatus</span>
@@ -349,29 +350,37 @@ const tableRows = [
               <div class="brief-card__links">
                 <div class="brief-card__link-item">
                   <span class="ui-name">BriefLinkItemPending</span>
-                  <a class="brief-card__link" href="/brief/example-pending" target="_blank">
-                    http://localhost:3000/brief/example-pending
-                  </a>
-                  <span class="brief-card__link-status">Ожидает заполнения</span>
+                  <div class="brief-card__link-header">
+                    <a class="brief-card__link" href="/brief/example-pending" target="_blank">
+                      http://localhost:3000/brief/example-pending
+                    </a>
+                    <span class="brief-card__link-status brief-card__link-status--pending">Ожидает заполнения</span>
+                  </div>
                 </div>
                 <div class="brief-card__link-item">
                   <span class="ui-name">BriefLinkItemCompleted</span>
-                  <a class="brief-card__link" href="/brief/example-completed" target="_blank">
-                    http://localhost:3000/brief/example-completed
-                  </a>
-                  <span class="brief-card__link-status brief-card__link-status--completed">Заполнен</span>
+                  <div class="brief-card__link-header">
+                    <a class="brief-card__link" href="/brief/example-completed" target="_blank">
+                      http://localhost:3000/brief/example-completed
+                    </a>
+                    <span class="brief-card__link-status brief-card__link-status--completed">
+                      Согласован клиентом
+                    </span>
+                  </div>
                   <div class="button-row brief-card__link-actions">
                     <button class="button button--secondary" type="button">Открыть бриф к заполнению</button>
-                    <button class="button button--primary" type="button">Согласован</button>
+                    <button class="button button--primary" type="button">Принято в работу</button>
                     <button class="button button--secondary" type="button">Удалить</button>
                   </div>
                 </div>
                 <div class="brief-card__link-item">
-                  <span class="ui-name">BriefLinkItemApproved</span>
-                  <a class="brief-card__link" href="/brief/example-approved" target="_blank">
-                    http://localhost:3000/brief/example-approved
-                  </a>
-                  <span class="brief-card__link-status brief-card__link-status--approved">Согласован</span>
+                  <span class="ui-name">BriefLinkItemInWork</span>
+                  <div class="brief-card__link-header">
+                    <a class="brief-card__link" href="/brief/example-in-work" target="_blank">
+                      http://localhost:3000/brief/example-in-work
+                    </a>
+                    <span class="brief-card__link-status brief-card__link-status--in-work">В работе</span>
+                  </div>
                 </div>
               </div>
             </details>

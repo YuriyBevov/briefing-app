@@ -16,7 +16,7 @@ export type ProjectStage = (typeof projectStages)[number]
 export type BriefQuestionType = (typeof briefQuestionTypes)[number]
 export type ChecklistItemStatus = 'pending' | 'completed' | 'skipped'
 export type BriefStatus = 'draft' | 'link_created' | 'completed'
-export type BriefLinkStatus = 'pending' | 'completed' | 'approved'
+export type BriefLinkStatus = 'pending' | 'completed' | 'in_work'
 export type BriefAnswerValue = string | string[]
 
 export interface ChecklistItem {
@@ -116,8 +116,8 @@ const briefStatusLabels: Record<BriefStatus, string> = {
 
 const briefLinkStatusLabels: Record<BriefLinkStatus, string> = {
   pending: 'Ожидает заполнения',
-  completed: 'Заполнен',
-  approved: 'Согласован'
+  completed: 'Согласован клиентом',
+  in_work: 'В работе'
 }
 
 const createToken = () => createId().replaceAll('-', '')
@@ -135,10 +135,14 @@ const normalizeData = (projectData: ProjectData): ProjectData => ({
     const hasLegacyAnswers = Object.keys(legacyAnswers).length > 0
     const links = (brief.links ?? []).map((link, index) => {
       const shouldUseLegacyAnswers = hasLegacyAnswers && index === 0 && !link.answers
+      const legacyStatus = link.status as BriefLinkStatus | 'approved' | undefined
+      const status = legacyStatus === 'approved'
+        ? 'in_work'
+        : legacyStatus ?? (shouldUseLegacyAnswers || brief.status === 'completed' ? 'completed' : 'pending')
 
       return {
         ...link,
-        status: link.status ?? (shouldUseLegacyAnswers || brief.status === 'completed' ? 'completed' : 'pending'),
+        status,
         answers: link.answers ?? (shouldUseLegacyAnswers ? legacyAnswers : {}),
         completedAt: link.completedAt ?? (shouldUseLegacyAnswers ? brief.completedAt ?? '' : '')
       }
@@ -379,7 +383,7 @@ export const useProjectStore = () => {
     const brief = data.value.briefs.find((item) => item.links.some((link) => link.token === token))
     const link = brief?.links.find((item) => item.token === token)
 
-    if (!brief || !link || link.status === 'approved') {
+    if (!brief || !link || link.status === 'in_work') {
       return false
     }
 
@@ -396,7 +400,7 @@ export const useProjectStore = () => {
     const brief = data.value.briefs.find((item) => item.id === briefId)
     const link = brief?.links.find((item) => item.id === linkId)
 
-    if (!brief || !link || link.status === 'approved') {
+    if (!brief || !link || link.status === 'in_work') {
       return
     }
 
@@ -406,7 +410,7 @@ export const useProjectStore = () => {
     save()
   }
 
-  const approveBriefLink = (briefId: string, linkId: string) => {
+  const acceptBriefLinkToWork = (briefId: string, linkId: string) => {
     const brief = data.value.briefs.find((item) => item.id === briefId)
     const link = brief?.links.find((item) => item.id === linkId)
 
@@ -414,7 +418,7 @@ export const useProjectStore = () => {
       return
     }
 
-    link.status = 'approved'
+    link.status = 'in_work'
     save()
   }
 
@@ -458,7 +462,7 @@ export const useProjectStore = () => {
     getBriefLinkByToken,
     completeBriefByToken,
     reopenBriefLink,
-    approveBriefLink,
+    acceptBriefLinkToWork,
     deleteBriefLink,
     getChecklistsByStage,
     getBriefsByStage

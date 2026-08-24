@@ -119,6 +119,10 @@ const tableRows = [
               <button class="button button--secondary" type="button">Редактировать</button>
             </div>
             <div class="ui-sample">
+              <span class="ui-name">ButtonSmall</span>
+              <button class="button button--secondary button--small" type="button">Удалить</button>
+            </div>
+            <div class="ui-sample">
               <span class="ui-name">ButtonSecondaryHover</span>
               <button class="button button--secondary ui-force-hover" type="button">Редактировать</button>
             </div>
@@ -368,9 +372,9 @@ const tableRows = [
                     </span>
                   </div>
                   <div class="button-row brief-card__link-actions">
-                    <button class="button button--secondary" type="button">Открыть бриф к заполнению</button>
-                    <button class="button button--primary" type="button">Принято в работу</button>
-                    <button class="button button--secondary" type="button">Удалить</button>
+                    <button class="button button--secondary button--small" type="button">Открыть бриф к заполнению</button>
+                    <button class="button button--primary button--small" type="button">Принять в работу</button>
+                    <button class="button button--secondary button--small" type="button">Удалить</button>
                   </div>
                 </div>
                 <div class="brief-card__link-item">
@@ -380,6 +384,11 @@ const tableRows = [
                       http://localhost:3000/brief/example-in-work
                     </a>
                     <span class="brief-card__link-status brief-card__link-status--in-work">В работе</span>
+                  </div>
+                  <div class="button-row brief-card__link-actions">
+                    <button class="button button--secondary button--small" type="button">Открыть бриф к заполнению</button>
+                    <button class="button button--primary button--small" type="button" disabled>Принять в работу</button>
+                    <button class="button button--secondary button--small" type="button">Удалить</button>
                   </div>
                 </div>
               </div>

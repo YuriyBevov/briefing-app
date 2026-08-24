@@ -31,6 +31,12 @@
     }
   }
 
+  &--small {
+    min-height: 32px;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
   &:disabled {
     cursor: not-allowed;
     opacity: 0.48;

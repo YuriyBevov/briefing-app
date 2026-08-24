@@ -326,6 +326,20 @@ const tableRows = [
                   <span class="brief-card__title">Бриф на дизайн главной страницы</span>
                   <span class="brief-card__meta">4 вопросов · 2 ссылок · 1 заполнено</span>
                 </span>
+                <svg
+                  class="brief-card__toggle-icon"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8L10 12L14 8"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
               </summary>
               <div class="button-row brief-card__actions">
                 <button class="button button--secondary" type="button">Редактировать</button>

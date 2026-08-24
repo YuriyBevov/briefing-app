@@ -472,9 +472,8 @@ const tableRows = [
                       <div class="brief-card__link-header">
                         <span class="brief-card__link-content">
                           <a class="brief-card__link" href="/brief/example-archived" target="_blank">
-                            Главная страница, редакция клиента
+                            http://localhost:3000/brief/example-archived
                           </a>
-                          <span class="brief-card__link-url">http://localhost:3000/brief/example-archived</span>
                         </span>
                         <span class="brief-card__link-status brief-card__link-status--archived">Архив</span>
                       </div>

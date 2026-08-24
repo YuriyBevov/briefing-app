@@ -554,11 +554,8 @@ const getBriefLink = (token: string) => {
 													:href="getBriefLink(link.token)"
 													target="_blank"
 												>
-													{{ getBriefLinkTitle(link, brief.title) }}
-												</a>
-												<span class="brief-card__link-url">
 													{{ getBriefLink(link.token) }}
-												</span>
+												</a>
 											</span>
 											<span
 												class="brief-card__link-status"

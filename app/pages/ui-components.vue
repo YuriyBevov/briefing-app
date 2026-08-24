@@ -360,20 +360,6 @@ const tableRows = [
                   <span class="brief-card__link-status brief-card__link-status--approved">Согласован</span>
                 </div>
               </div>
-              <ul class="brief-card__list">
-                <li class="brief-card__item">
-                  <span class="ui-name">BriefQuestionItemRequired</span>
-                  <span class="brief-card__question">Какая цель страницы?</span>
-                  <span class="brief-card__meta">textarea · Обязательный</span>
-                  <span class="brief-card__description">Короткое пояснение к вопросу.</span>
-                </li>
-                <li class="brief-card__item">
-                  <span class="ui-name">BriefQuestionItemOptions</span>
-                  <span class="brief-card__question">Какие блоки нужны?</span>
-                  <span class="brief-card__meta">checkbox · Необязательный</span>
-                  <span class="brief-card__description">Hero, преимущества, форма, FAQ</span>
-                </li>
-              </ul>
             </details>
           </div>
         </div>

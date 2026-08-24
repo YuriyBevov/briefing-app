@@ -309,21 +309,6 @@ const getBriefLink = (token: string) => {
 								</div>
 							</div>
 						</div>
-
-						<ul class="brief-card__list">
-							<li v-for="question in brief.questions" :key="question.id" class="brief-card__item">
-								<span class="brief-card__question">{{ question.text }}</span>
-								<span class="brief-card__meta">
-									{{ question.type }} · {{ question.required ? "Обязательный" : "Необязательный" }}
-								</span>
-								<span v-if="question.description" class="brief-card__description">
-									{{ question.description }}
-								</span>
-								<span v-if="question.options.length" class="brief-card__description">
-									{{ question.options.join(", ") }}
-								</span>
-							</li>
-						</ul>
 					</details>
 				</div>
 

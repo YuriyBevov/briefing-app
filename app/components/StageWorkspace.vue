@@ -104,7 +104,7 @@ const getBriefMeta = (links: Array<{ status: BriefLinkStatus }>, questionsCount:
 
 const getBriefLinkStatusLabel = (status: BriefLinkStatus) => briefLinkStatusLabels[status];
 
-const getBriefLinkTitle = (link: BriefLink) => link.title || getBriefLink(link.token);
+const getBriefLinkTitle = (link: BriefLink, briefTitle: string) => link.title || briefTitle;
 
 const getBriefLinkHistories = (links: BriefLink[]) => {
 	const histories: Array<{ id: string; links: BriefLink[] }> = [];
@@ -156,12 +156,12 @@ const copyBriefLink = async (link: BriefLink) => {
 	}
 };
 
-const renameBriefLink = (briefId: string, link: BriefLink) => {
+const renameBriefLink = (briefId: string, briefTitle: string, link: BriefLink) => {
 	if (!import.meta.client) {
 		return;
 	}
 
-	const title = window.prompt("Название экземпляра брифа", link.title || "");
+	const title = window.prompt("Название экземпляра брифа", link.title || briefTitle);
 
 	if (title === null) {
 		return;
@@ -381,7 +381,7 @@ const getBriefLink = (token: string) => {
 														type="button"
 														aria-label="Изменить название"
 														title="Изменить название"
-														@click="renameBriefLink(brief.id, link)"
+														@click="renameBriefLink(brief.id, brief.title, link)"
 													>
 														<svg
 															class="brief-card__edit-icon"
@@ -412,9 +412,9 @@ const getBriefLink = (token: string) => {
 														:href="getBriefLink(link.token)"
 														target="_blank"
 													>
-														{{ getBriefLinkTitle(link) }}
+														{{ getBriefLinkTitle(link, brief.title) }}
 													</a>
-													<span v-if="link.title" class="brief-card__link-url">
+													<span class="brief-card__link-url">
 														{{ getBriefLink(link.token) }}
 													</span>
 												</span>

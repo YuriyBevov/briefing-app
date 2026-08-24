@@ -397,8 +397,33 @@ const tableRows = [
                                 />
                               </svg>
                             </button>
-                            <button class="button button--secondary button--small" type="button">
-                              Изменить название
+                            <button
+                              class="button button--secondary button--small brief-card__icon-button"
+                              type="button"
+                              aria-label="Изменить название"
+                              title="Изменить название"
+                            >
+                              <svg
+                                class="brief-card__edit-icon"
+                                viewBox="0 0 20 20"
+                                fill="none"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M4 14.5V17H6.5L15.15 8.35L12.65 5.85L4 14.5Z"
+                                  stroke="currentColor"
+                                  stroke-width="1.7"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M11.75 6.75L13.25 5.25C13.94 4.56 15.06 4.56 15.75 5.25C16.44 5.94 16.44 7.06 15.75 7.75L14.25 9.25"
+                                  stroke="currentColor"
+                                  stroke-width="1.7"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                              </svg>
                             </button>
                           </span>
                           <span class="brief-card__link-content">
@@ -461,8 +486,33 @@ const tableRows = [
                                 />
                               </svg>
                             </button>
-                            <button class="button button--secondary button--small" type="button">
-                              Изменить название
+                            <button
+                              class="button button--secondary button--small brief-card__icon-button"
+                              type="button"
+                              aria-label="Изменить название"
+                              title="Изменить название"
+                            >
+                              <svg
+                                class="brief-card__edit-icon"
+                                viewBox="0 0 20 20"
+                                fill="none"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M4 14.5V17H6.5L15.15 8.35L12.65 5.85L4 14.5Z"
+                                  stroke="currentColor"
+                                  stroke-width="1.7"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="M11.75 6.75L13.25 5.25C13.94 4.56 15.06 4.56 15.75 5.25C16.44 5.94 16.44 7.06 15.75 7.75L14.25 9.25"
+                                  stroke="currentColor"
+                                  stroke-width="1.7"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                              </svg>
                             </button>
                           </span>
                           <span class="brief-card__link-content">

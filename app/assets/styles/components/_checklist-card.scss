@@ -10,15 +10,39 @@
   background-color: var(--color-surface-muted);
 
   &__header {
-    display: grid;
-    gap: var(--space-xs);
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    justify-content: space-between;
     padding: var(--space-md);
     cursor: pointer;
+
+    &::marker {
+      content: "";
+    }
+
+    &::-webkit-details-marker {
+      display: none;
+    }
   }
 
   &__summary {
     display: grid;
     gap: var(--space-xs);
+    min-width: 0;
+  }
+
+  &__toggle-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+    color: var(--color-text-muted);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  &[open] &__toggle-icon {
+    color: var(--color-text);
+    transform: rotate(180deg);
   }
 
   &__actions {

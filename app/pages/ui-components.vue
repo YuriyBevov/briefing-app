@@ -279,6 +279,29 @@ const tableRows = [
           <span class="ui-accordion__meta">ChecklistComponents</span>
         </summary>
         <div class="ui-accordion__body">
+          <details class="checklist-card">
+            <summary class="checklist-card__header">
+              <span class="checklist-card__summary">
+                <span class="ui-name">ChecklistCardCollapsed</span>
+                <span class="checklist-card__title">Чеклист предподготовки</span>
+                <span class="checklist-card__meta">0% · 2 обязательных пунктов</span>
+              </span>
+              <svg
+                class="checklist-card__toggle-icon"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M6 8L10 12L14 8"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </summary>
+          </details>
           <details class="checklist-card" open>
             <summary class="checklist-card__header">
               <span class="checklist-card__summary">
@@ -286,6 +309,20 @@ const tableRows = [
                 <span class="checklist-card__title">Чеклист запуска</span>
                 <span class="checklist-card__meta">66% · 1 обязательных пунктов</span>
               </span>
+              <svg
+                class="checklist-card__toggle-icon"
+                viewBox="0 0 20 20"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path
+                  d="M6 8L10 12L14 8"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
             </summary>
             <div class="button-row checklist-card__actions">
               <button class="button button--secondary" type="button">Редактировать</button>
@@ -340,6 +377,29 @@ const tableRows = [
         </summary>
         <div class="ui-accordion__body">
           <div class="brief-list">
+            <details class="brief-card">
+              <summary class="brief-card__header">
+                <span class="brief-card__body">
+                  <span class="ui-name">BriefCardCollapsed</span>
+                  <span class="brief-card__title">Бриф на аудит интерфейса</span>
+                  <span class="brief-card__meta">6 вопросов</span>
+                </span>
+                <svg
+                  class="brief-card__toggle-icon"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 8L10 12L14 8"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </summary>
+            </details>
             <details class="brief-card" open>
               <summary class="brief-card__header">
                 <span class="brief-card__body">

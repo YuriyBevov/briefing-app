@@ -220,7 +220,6 @@ const getBriefLink = (token: string) => {
 						v-for="checklist in checklists"
 						:key="checklist.id"
 						class="checklist-card"
-						open
 					>
 						<summary class="checklist-card__header">
 							<span class="checklist-card__summary">
@@ -230,6 +229,20 @@ const getBriefLink = (token: string) => {
 									{{ getRequiredOpenCount(checklist) }} обязательных пунктов
 								</span>
 							</span>
+							<svg
+								class="checklist-card__toggle-icon"
+								viewBox="0 0 20 20"
+								fill="none"
+								aria-hidden="true"
+							>
+								<path
+									d="M6 8L10 12L14 8"
+									stroke="currentColor"
+									stroke-width="2"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+								/>
+							</svg>
 						</summary>
 
 						<div class="button-row checklist-card__actions">
@@ -309,7 +322,7 @@ const getBriefLink = (token: string) => {
 				</div>
 
 				<div v-if="briefs.length" class="brief-list">
-					<details v-for="brief in briefs" :key="brief.id" class="brief-card" open>
+					<details v-for="brief in briefs" :key="brief.id" class="brief-card">
 						<summary class="brief-card__header">
 							<span class="brief-card__body">
 								<span class="brief-card__title">{{ brief.title }}</span>

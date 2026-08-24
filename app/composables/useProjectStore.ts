@@ -488,10 +488,22 @@ export const useProjectStore = () => {
   }
 
   const getChecklistsByStage = (stage: ProjectStage) =>
-    computed(() => data.value.checklists.filter((checklist) => checklist.stage === stage))
+    computed(() =>
+      data.value.checklists
+        .filter((checklist) => checklist.stage === stage)
+        .toSorted((firstChecklist, secondChecklist) =>
+          new Date(secondChecklist.createdAt).getTime() - new Date(firstChecklist.createdAt).getTime()
+        )
+    )
 
   const getBriefsByStage = (stage: ProjectStage) =>
-    computed(() => data.value.briefs.filter((brief) => brief.stage === stage))
+    computed(() =>
+      data.value.briefs
+        .filter((brief) => brief.stage === stage)
+        .toSorted((firstBrief, secondBrief) =>
+          new Date(secondBrief.createdAt).getTime() - new Date(firstBrief.createdAt).getTime()
+        )
+    )
 
   return {
     data,

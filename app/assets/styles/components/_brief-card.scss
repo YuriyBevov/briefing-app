@@ -86,8 +86,22 @@
     background-color: var(--color-surface);
   }
 
+  &__link-summary {
+    display: block;
+    cursor: pointer;
+
+    &::marker {
+      content: "";
+    }
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+  }
+
   &__link-tree {
     display: grid;
+    padding-top: var(--space-sm);
   }
 
   &__link-node {
@@ -115,6 +129,10 @@
     &:last-child {
       padding-bottom: 0;
     }
+  }
+
+  &__link-node--current {
+    padding-bottom: 0;
   }
 
   &__link-header {
@@ -175,9 +193,21 @@
   }
 
   &__copy-icon,
-  &__edit-icon {
+  &__edit-icon,
+  &__link-toggle-icon {
     width: 16px;
     height: 16px;
+  }
+
+  &__link-toggle-icon {
+    flex: 0 0 auto;
+    color: var(--color-text-muted);
+    transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  &__link-item[open] &__link-toggle-icon {
+    color: var(--color-text);
+    transform: rotate(180deg);
   }
 
   &__link-status {

@@ -127,8 +127,13 @@ const getBriefLinkHistories = (links: BriefLink[]) => {
 	return histories;
 };
 
-const isActiveBriefHistoryLink = (history: { links: BriefLink[] }, link: BriefLink) =>
-	history.links[0]?.id === link.id && link.status !== "archived";
+const getBriefLinkStatusClasses = (status: BriefLinkStatus) => ({
+	"brief-card__link-status--pending": status === "pending",
+	"brief-card__link-status--revision-pending": status === "revision_pending",
+	"brief-card__link-status--completed": status === "completed" || status === "revision_completed",
+	"brief-card__link-status--in-work": status === "in_work",
+	"brief-card__link-status--archived": status === "archived",
+});
 
 const openBriefForFilling = (briefId: string, linkId: string) => {
 	createBriefRevisionLink(briefId, linkId);
@@ -337,29 +342,25 @@ const getBriefLink = (token: string) => {
 						</div>
 
 						<div v-if="brief.links.length" class="brief-card__links">
-							<div
+							<details
 								v-for="history in getBriefLinkHistories(brief.links)"
 								:key="history.id"
 								class="brief-card__link-item"
 							>
-								<div class="brief-card__link-tree">
-									<div
-										v-for="link in history.links"
-										:key="link.id"
-										class="brief-card__link-node"
-									>
-										<div class="brief-card__link-header">
+								<summary class="brief-card__link-summary">
+									<div class="brief-card__link-node brief-card__link-node--current">
+										<div
+											v-if="history.links[0]"
+											class="brief-card__link-header"
+										>
 											<span class="brief-card__link-main">
-												<span
-													v-if="isActiveBriefHistoryLink(history, link)"
-													class="brief-card__link-tools"
-												>
+												<span class="brief-card__link-tools">
 													<button
 														class="button button--secondary button--small brief-card__icon-button"
 														type="button"
 														aria-label="Копировать ссылку"
-														:title="copiedLinkId === link.id ? 'Скопировано' : 'Копировать ссылку'"
-														@click="copyBriefLink(link)"
+														:title="copiedLinkId === history.links[0].id ? 'Скопировано' : 'Копировать ссылку'"
+														@click.stop="copyBriefLink(history.links[0])"
 													>
 														<svg
 															class="brief-card__copy-icon"
@@ -381,7 +382,7 @@ const getBriefLink = (token: string) => {
 														type="button"
 														aria-label="Изменить название"
 														title="Изменить название"
-														@click="renameBriefLink(brief.id, brief.title, link)"
+														@click.stop="renameBriefLink(brief.id, brief.title, history.links[0])"
 													>
 														<svg
 															class="brief-card__edit-icon"
@@ -409,66 +410,110 @@ const getBriefLink = (token: string) => {
 												<span class="brief-card__link-content">
 													<a
 														class="brief-card__link"
-														:href="getBriefLink(link.token)"
+														:href="getBriefLink(history.links[0].token)"
 														target="_blank"
+														@click.stop
 													>
-														{{ getBriefLinkTitle(link, brief.title) }}
+														{{ getBriefLinkTitle(history.links[0], brief.title) }}
 													</a>
 													<span class="brief-card__link-url">
-														{{ getBriefLink(link.token) }}
+														{{ getBriefLink(history.links[0].token) }}
 													</span>
 												</span>
 											</span>
 											<span
 												class="brief-card__link-status"
-												:class="{
-													'brief-card__link-status--pending': link.status === 'pending',
-													'brief-card__link-status--revision-pending': link.status === 'revision_pending',
-													'brief-card__link-status--completed':
-														link.status === 'completed' || link.status === 'revision_completed',
-													'brief-card__link-status--in-work': link.status === 'in_work',
-													'brief-card__link-status--archived': link.status === 'archived',
-												}"
+												:class="getBriefLinkStatusClasses(history.links[0].status)"
 											>
-												{{ getBriefLinkStatusLabel(link.status) }}
+												{{ getBriefLinkStatusLabel(history.links[0].status) }}
 											</span>
+											<svg
+												v-if="history.links.length > 1"
+												class="brief-card__link-toggle-icon"
+												viewBox="0 0 20 20"
+												fill="none"
+												aria-hidden="true"
+											>
+												<path
+													d="M6 8L10 12L14 8"
+													stroke="currentColor"
+													stroke-width="2"
+													stroke-linecap="round"
+													stroke-linejoin="round"
+												/>
+											</svg>
 										</div>
 
 										<div
-											v-if="link.status !== 'archived'"
+											v-if="history.links[0] && history.links[0].status !== 'archived'"
 											class="button-row brief-card__link-actions"
 										>
 											<button
 												class="button button--secondary button--small"
 												type="button"
 												:disabled="
-													link.status === 'pending' ||
-													link.status === 'revision_pending' ||
-													link.status === 'archived'
+													history.links[0].status === 'pending' ||
+													history.links[0].status === 'revision_pending' ||
+													history.links[0].status === 'archived'
 												"
-												@click="openBriefForFilling(brief.id, link.id)"
+												@click.stop="openBriefForFilling(brief.id, history.links[0].id)"
 											>
 												Открыть бриф к заполнению
 											</button>
 											<button
 												class="button button--primary button--small"
 												type="button"
-												:disabled="link.status !== 'completed' && link.status !== 'revision_completed'"
-												@click="acceptBriefToWork(brief.id, link.id)"
+												:disabled="
+													history.links[0].status !== 'completed' &&
+													history.links[0].status !== 'revision_completed'
+												"
+												@click.stop="acceptBriefToWork(brief.id, history.links[0].id)"
 											>
 												Принять в работу
 											</button>
 											<button
 												class="button button--secondary button--small"
 												type="button"
-												@click="removeBriefLink(brief.id, link.id)"
+												@click.stop="removeBriefLink(brief.id, history.links[0].id)"
 											>
 												Удалить
 											</button>
 										</div>
 									</div>
+								</summary>
+
+								<div
+									v-if="history.links.length > 1"
+									class="brief-card__link-tree"
+								>
+									<div
+										v-for="link in history.links.slice(1)"
+										:key="link.id"
+										class="brief-card__link-node"
+									>
+										<div class="brief-card__link-header">
+											<span class="brief-card__link-content">
+												<a
+													class="brief-card__link"
+													:href="getBriefLink(link.token)"
+													target="_blank"
+												>
+													{{ getBriefLinkTitle(link, brief.title) }}
+												</a>
+												<span class="brief-card__link-url">
+													{{ getBriefLink(link.token) }}
+												</span>
+											</span>
+											<span
+												class="brief-card__link-status"
+												:class="getBriefLinkStatusClasses(link.status)"
+											>
+												{{ getBriefLinkStatusLabel(link.status) }}
+											</span>
+										</div>
+									</div>
 								</div>
-							</div>
+							</details>
 						</div>
 					</details>
 				</div>

@@ -368,74 +368,34 @@ const tableRows = [
                 <button class="button button--secondary" type="button">Удалить</button>
               </div>
               <div class="brief-card__links">
-                <div class="brief-card__link-item">
-                  <span class="ui-name">BriefLinkHistoryItemRevision</span>
-                  <div class="brief-card__link-tree">
-                    <div class="brief-card__link-node">
-                      <span class="ui-name">BriefLinkHistoryNodeRevisionPending</span>
+                <details class="brief-card__link-item" open>
+                  <summary class="brief-card__link-summary">
+                    <div class="brief-card__link-node brief-card__link-node--current">
+                      <span class="ui-name">BriefLinkHistoryItemRevisionOpen</span>
                       <div class="brief-card__link-header">
                         <span class="brief-card__link-main">
                           <span class="brief-card__link-tools">
-                            <button
-                              class="button button--secondary button--small brief-card__icon-button"
-                              type="button"
-                              aria-label="Копировать ссылку"
-                              title="Копировать ссылку"
-                            >
-                              <svg
-                                class="brief-card__copy-icon"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                aria-hidden="true"
-                              >
-                                <path
-                                  d="M7 7V4.5C7 3.67 7.67 3 8.5 3H15.5C16.33 3 17 3.67 17 4.5V11.5C17 12.33 16.33 13 15.5 13H13M4.5 7H11.5C12.33 7 13 7.67 13 8.5V15.5C13 16.33 12.33 17 11.5 17H4.5C3.67 17 3 16.33 3 15.5V8.5C3 7.67 3.67 7 4.5 7Z"
-                                  stroke="currentColor"
-                                  stroke-width="1.7"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                />
+                            <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Копировать ссылку" title="Копировать ссылку">
+                              <svg class="brief-card__copy-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M7 7V4.5C7 3.67 7.67 3 8.5 3H15.5C16.33 3 17 3.67 17 4.5V11.5C17 12.33 16.33 13 15.5 13H13M4.5 7H11.5C12.33 7 13 7.67 13 8.5V15.5C13 16.33 12.33 17 11.5 17H4.5C3.67 17 3 16.33 3 15.5V8.5C3 7.67 3.67 7 4.5 7Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
                               </svg>
                             </button>
-                            <button
-                              class="button button--secondary button--small brief-card__icon-button"
-                              type="button"
-                              aria-label="Изменить название"
-                              title="Изменить название"
-                            >
-                              <svg
-                                class="brief-card__edit-icon"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                aria-hidden="true"
-                              >
-                                <path
-                                  d="M4 14.5V17H6.5L15.15 8.35L12.65 5.85L4 14.5Z"
-                                  stroke="currentColor"
-                                  stroke-width="1.7"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                />
-                                <path
-                                  d="M11.75 6.75L13.25 5.25C13.94 4.56 15.06 4.56 15.75 5.25C16.44 5.94 16.44 7.06 15.75 7.75L14.25 9.25"
-                                  stroke="currentColor"
-                                  stroke-width="1.7"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                />
+                            <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Изменить название" title="Изменить название">
+                              <svg class="brief-card__edit-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M4 14.5V17H6.5L15.15 8.35L12.65 5.85L4 14.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M11.75 6.75L13.25 5.25C13.94 4.56 15.06 4.56 15.75 5.25C16.44 5.94 16.44 7.06 15.75 7.75L14.25 9.25" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
                               </svg>
                             </button>
                           </span>
                           <span class="brief-card__link-content">
-                            <a class="brief-card__link" href="/brief/example-revision-pending" target="_blank">
-                              Главная страница, редакция клиента
-                            </a>
+                            <a class="brief-card__link" href="/brief/example-revision-pending" target="_blank">Главная страница, редакция клиента</a>
                             <span class="brief-card__link-url">http://localhost:3000/brief/example-revision-pending</span>
                           </span>
                         </span>
-                        <span class="brief-card__link-status brief-card__link-status--revision-pending">
-                          Ожидает редакции
-                        </span>
+                        <span class="brief-card__link-status brief-card__link-status--revision-pending">Ожидает редакции</span>
+                        <svg class="brief-card__link-toggle-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                          <path d="M6 8L10 12L14 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
                       </div>
                       <div class="button-row brief-card__link-actions">
                         <button class="button button--secondary button--small" type="button" disabled>Открыть бриф к заполнению</button>
@@ -443,6 +403,8 @@ const tableRows = [
                         <button class="button button--secondary button--small" type="button">Удалить</button>
                       </div>
                     </div>
+                  </summary>
+                  <div class="brief-card__link-tree">
                     <div class="brief-card__link-node">
                       <span class="ui-name">BriefLinkHistoryNodeArchived</span>
                       <div class="brief-card__link-header">
@@ -456,69 +418,28 @@ const tableRows = [
                       </div>
                     </div>
                   </div>
-                </div>
-                <div class="brief-card__link-item">
-                  <span class="ui-name">BriefLinkHistoryItemSeparateClient</span>
-                  <div class="brief-card__link-tree">
-                    <div class="brief-card__link-node">
-                      <span class="ui-name">BriefLinkHistoryNodeCompleted</span>
+                </details>
+                <details class="brief-card__link-item">
+                  <summary class="brief-card__link-summary">
+                    <div class="brief-card__link-node brief-card__link-node--current">
+                      <span class="ui-name">BriefLinkHistoryItemCollapsed</span>
                       <div class="brief-card__link-header">
                         <span class="brief-card__link-main">
                           <span class="brief-card__link-tools">
-                            <button
-                              class="button button--secondary button--small brief-card__icon-button"
-                              type="button"
-                              aria-label="Копировать ссылку"
-                              title="Копировать ссылку"
-                            >
-                              <svg
-                                class="brief-card__copy-icon"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                aria-hidden="true"
-                              >
-                                <path
-                                  d="M7 7V4.5C7 3.67 7.67 3 8.5 3H15.5C16.33 3 17 3.67 17 4.5V11.5C17 12.33 16.33 13 15.5 13H13M4.5 7H11.5C12.33 7 13 7.67 13 8.5V15.5C13 16.33 12.33 17 11.5 17H4.5C3.67 17 3 16.33 3 15.5V8.5C3 7.67 3.67 7 4.5 7Z"
-                                  stroke="currentColor"
-                                  stroke-width="1.7"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                />
+                            <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Копировать ссылку" title="Копировать ссылку">
+                              <svg class="brief-card__copy-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M7 7V4.5C7 3.67 7.67 3 8.5 3H15.5C16.33 3 17 3.67 17 4.5V11.5C17 12.33 16.33 13 15.5 13H13M4.5 7H11.5C12.33 7 13 7.67 13 8.5V15.5C13 16.33 12.33 17 11.5 17H4.5C3.67 17 3 16.33 3 15.5V8.5C3 7.67 3.67 7 4.5 7Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
                               </svg>
                             </button>
-                            <button
-                              class="button button--secondary button--small brief-card__icon-button"
-                              type="button"
-                              aria-label="Изменить название"
-                              title="Изменить название"
-                            >
-                              <svg
-                                class="brief-card__edit-icon"
-                                viewBox="0 0 20 20"
-                                fill="none"
-                                aria-hidden="true"
-                              >
-                                <path
-                                  d="M4 14.5V17H6.5L15.15 8.35L12.65 5.85L4 14.5Z"
-                                  stroke="currentColor"
-                                  stroke-width="1.7"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                />
-                                <path
-                                  d="M11.75 6.75L13.25 5.25C13.94 4.56 15.06 4.56 15.75 5.25C16.44 5.94 16.44 7.06 15.75 7.75L14.25 9.25"
-                                  stroke="currentColor"
-                                  stroke-width="1.7"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                />
+                            <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Изменить название" title="Изменить название">
+                              <svg class="brief-card__edit-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                <path d="M4 14.5V17H6.5L15.15 8.35L12.65 5.85L4 14.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M11.75 6.75L13.25 5.25C13.94 4.56 15.06 4.56 15.75 5.25C16.44 5.94 16.44 7.06 15.75 7.75L14.25 9.25" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
                               </svg>
                             </button>
                           </span>
                           <span class="brief-card__link-content">
-                            <a class="brief-card__link" href="/brief/example-completed" target="_blank">
-                              http://localhost:3000/brief/example-completed
-                            </a>
+                            <a class="brief-card__link" href="/brief/example-completed" target="_blank">http://localhost:3000/brief/example-completed</a>
                           </span>
                         </span>
                         <span class="brief-card__link-status brief-card__link-status--completed">Согласован</span>
@@ -529,8 +450,8 @@ const tableRows = [
                         <button class="button button--secondary button--small" type="button">Удалить</button>
                       </div>
                     </div>
-                  </div>
-                </div>
+                  </summary>
+                </details>
               </div>
             </details>
           </div>

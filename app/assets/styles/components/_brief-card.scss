@@ -200,9 +200,12 @@
   }
 
   &__link-toggle-icon {
-    flex: 0 0 auto;
     color: var(--color-text-muted);
     transition: transform 0.2s ease, color 0.2s ease;
+  }
+
+  &__history-toggle {
+    flex: 0 0 auto;
   }
 
   &__link-item[open] &__link-toggle-icon {

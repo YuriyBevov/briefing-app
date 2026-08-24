@@ -135,6 +135,14 @@ const getBriefLinkStatusClasses = (status: BriefLinkStatus) => ({
 	"brief-card__link-status--archived": status === "archived",
 });
 
+const toggleBriefHistory = (event: MouseEvent) => {
+	const details = (event.currentTarget as HTMLElement).closest("details");
+
+	if (details) {
+		details.open = !details.open;
+	}
+};
+
 const openBriefForFilling = (briefId: string, linkId: string) => {
 	createBriefRevisionLink(briefId, linkId);
 };
@@ -427,21 +435,29 @@ const getBriefLink = (token: string) => {
 											>
 												{{ getBriefLinkStatusLabel(history.links[0].status) }}
 											</span>
-											<svg
-												v-if="history.links.length > 1"
-												class="brief-card__link-toggle-icon"
-												viewBox="0 0 20 20"
-												fill="none"
-												aria-hidden="true"
+											<button
+												class="button button--secondary button--small brief-card__icon-button brief-card__history-toggle"
+												type="button"
+												:disabled="history.links.length <= 1"
+												aria-label="Свернуть историю"
+												title="История экземпляра"
+												@click.stop.prevent="toggleBriefHistory"
 											>
-												<path
-													d="M6 8L10 12L14 8"
-													stroke="currentColor"
-													stroke-width="2"
-													stroke-linecap="round"
-													stroke-linejoin="round"
-												/>
-											</svg>
+												<svg
+													class="brief-card__link-toggle-icon"
+													viewBox="0 0 20 20"
+													fill="none"
+													aria-hidden="true"
+												>
+													<path
+														d="M6 8L10 12L14 8"
+														stroke="currentColor"
+														stroke-width="2"
+														stroke-linecap="round"
+														stroke-linejoin="round"
+													/>
+												</svg>
+											</button>
 										</div>
 
 										<div

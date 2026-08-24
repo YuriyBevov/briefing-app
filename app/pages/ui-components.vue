@@ -393,9 +393,11 @@ const tableRows = [
                           </span>
                         </span>
                         <span class="brief-card__link-status brief-card__link-status--revision-pending">Ожидает редакции</span>
-                        <svg class="brief-card__link-toggle-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                          <path d="M6 8L10 12L14 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
+                        <button class="button button--secondary button--small brief-card__icon-button brief-card__history-toggle" type="button" aria-label="Свернуть историю" title="История экземпляра">
+                          <svg class="brief-card__link-toggle-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M6 8L10 12L14 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </button>
                       </div>
                       <div class="button-row brief-card__link-actions">
                         <button class="button button--secondary button--small" type="button" disabled>Открыть бриф к заполнению</button>
@@ -443,6 +445,11 @@ const tableRows = [
                           </span>
                         </span>
                         <span class="brief-card__link-status brief-card__link-status--completed">Согласован</span>
+                        <button class="button button--secondary button--small brief-card__icon-button brief-card__history-toggle" type="button" disabled aria-label="История недоступна" title="История экземпляра">
+                          <svg class="brief-card__link-toggle-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                            <path d="M6 8L10 12L14 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </button>
                       </div>
                       <div class="button-row brief-card__link-actions">
                         <button class="button button--secondary button--small" type="button">Открыть бриф к заполнению</button>

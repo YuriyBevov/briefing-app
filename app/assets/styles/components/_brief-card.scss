@@ -216,7 +216,10 @@
   &__link-status {
     flex: 0 0 auto;
     width: fit-content;
-    padding: 4px 8px;
+    min-height: 32px;
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 10px;
     border-radius: var(--radius-sm);
     color: var(--color-text-muted);
     font-size: 12px;

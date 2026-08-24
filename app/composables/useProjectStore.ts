@@ -96,6 +96,9 @@ interface BriefPayload {
 }
 
 const storageKey = 'brief-os-project-data'
+const forceDeletedBriefTokens = new Set([
+  '1d3edbaf2a864c3abf58a05761001e0f'
+])
 
 const createId = () => {
   if (import.meta.client && window.crypto?.randomUUID) {
@@ -135,36 +138,38 @@ const normalizeData = (projectData: ProjectData): ProjectData => ({
       comment: item.comment ?? ''
     }))
   })),
-  briefs: (projectData.briefs ?? []).map((brief) => {
-    const legacyAnswers = brief.answers ?? {}
-    const hasLegacyAnswers = Object.keys(legacyAnswers).length > 0
-    const links = (brief.links ?? []).map((link, index) => {
-      const shouldUseLegacyAnswers = hasLegacyAnswers && index === 0 && !link.answers
-      const legacyStatus = link.status as BriefLinkStatus | 'approved' | undefined
-      const status = legacyStatus === 'approved'
-        ? 'in_work'
-        : legacyStatus ?? (shouldUseLegacyAnswers || brief.status === 'completed' ? 'completed' : 'pending')
-      const historyId = link.historyId ?? link.id
+  briefs: (projectData.briefs ?? [])
+    .filter((brief) => !brief.links?.some((link) => forceDeletedBriefTokens.has(link.token)))
+    .map((brief) => {
+      const legacyAnswers = brief.answers ?? {}
+      const hasLegacyAnswers = Object.keys(legacyAnswers).length > 0
+      const links = (brief.links ?? []).map((link, index) => {
+        const shouldUseLegacyAnswers = hasLegacyAnswers && index === 0 && !link.answers
+        const legacyStatus = link.status as BriefLinkStatus | 'approved' | undefined
+        const status = legacyStatus === 'approved'
+          ? 'in_work'
+          : legacyStatus ?? (shouldUseLegacyAnswers || brief.status === 'completed' ? 'completed' : 'pending')
+        const historyId = link.historyId ?? link.id
+
+        return {
+          ...link,
+          historyId,
+          title: link.title ?? '',
+          status,
+          answers: link.answers ?? (shouldUseLegacyAnswers ? legacyAnswers : {}),
+          completedAt: link.completedAt ?? (shouldUseLegacyAnswers ? brief.completedAt ?? '' : '')
+        }
+      })
+      const status = links.length ? 'link_created' : 'draft'
 
       return {
-        ...link,
-        historyId,
-        title: link.title ?? '',
+        ...brief,
         status,
-        answers: link.answers ?? (shouldUseLegacyAnswers ? legacyAnswers : {}),
-        completedAt: link.completedAt ?? (shouldUseLegacyAnswers ? brief.completedAt ?? '' : '')
+        links,
+        answers: legacyAnswers,
+        completedAt: brief.completedAt ?? ''
       }
     })
-    const status = links.length ? 'link_created' : 'draft'
-
-    return {
-      ...brief,
-      status,
-      links,
-      answers: legacyAnswers,
-      completedAt: brief.completedAt ?? ''
-    }
-  })
 })
 
 export const useProjectStore = () => {

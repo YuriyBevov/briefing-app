@@ -405,7 +405,7 @@ const tableRows = [
                 <span class="brief-card__body">
                   <span class="ui-name">BriefCardOpen</span>
                   <span class="brief-card__title">Бриф на дизайн главной страницы</span>
-                  <span class="brief-card__meta">4 вопросов · 2 ссылок · 1 заполнено</span>
+                  <span class="brief-card__meta">4 вопроса · 2 ссылки · 1 заполнена</span>
                 </span>
                 <svg
                   class="brief-card__toggle-icon"

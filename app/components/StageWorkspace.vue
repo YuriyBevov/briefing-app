@@ -94,12 +94,39 @@ const getCompletedLinksCount = (links: Array<{ status: BriefLinkStatus }>) =>
 		link.status === "in_work",
 	).length;
 
-const getBriefMeta = (links: Array<{ status: BriefLinkStatus }>, questionsCount: number) => {
-	if (!links.length) {
-		return `${questionsCount} вопросов`;
+const getPluralLabel = (count: number, forms: [string, string, string]) => {
+	const absoluteCount = Math.abs(count);
+	const lastTwoDigits = absoluteCount % 100;
+	const lastDigit = absoluteCount % 10;
+
+	if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+		return forms[2];
 	}
 
-	return `${questionsCount} вопросов · ${links.length} ссылок · ${getCompletedLinksCount(links)} заполнено`;
+	if (lastDigit === 1) {
+		return forms[0];
+	}
+
+	if (lastDigit >= 2 && lastDigit <= 4) {
+		return forms[1];
+	}
+
+	return forms[2];
+};
+
+const getBriefMeta = (links: Array<{ status: BriefLinkStatus }>, questionsCount: number) => {
+	const questionLabel = getPluralLabel(questionsCount, ["вопрос", "вопроса", "вопросов"]);
+
+	if (!links.length) {
+		return `${questionsCount} ${questionLabel}`;
+	}
+
+	const linksCount = links.length;
+	const completedLinksCount = getCompletedLinksCount(links);
+	const linkLabel = getPluralLabel(linksCount, ["ссылка", "ссылки", "ссылок"]);
+	const completedLabel = getPluralLabel(completedLinksCount, ["заполнена", "заполнены", "заполнено"]);
+
+	return `${questionsCount} ${questionLabel} · ${linksCount} ${linkLabel} · ${completedLinksCount} ${completedLabel}`;
 };
 
 const getBriefLinkStatusLabel = (status: BriefLinkStatus) => briefLinkStatusLabels[status];

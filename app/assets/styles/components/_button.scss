@@ -15,9 +15,11 @@
   transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 
   &--primary {
+    color: var(--color-accent-contrast);
     background-color: var(--color-accent);
 
     &:hover {
+      color: var(--color-accent-contrast);
       background-color: var(--color-accent-strong);
     }
   }

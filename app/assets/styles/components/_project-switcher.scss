@@ -1,6 +1,7 @@
 .project-switcher {
   position: relative;
   display: grid;
+  align-self: start;
   gap: var(--space-xs);
 
   &__label {

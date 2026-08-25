@@ -32,7 +32,9 @@ const handleBottomAction = (action: (typeof bottomMenu)[number]['action']) => {
     </div>
 
     <div class="sidebar__content">
-      <ProjectSwitcher />
+      <div class="sidebar__project">
+        <ProjectSwitcher />
+      </div>
 
       <nav class="sidebar__nav" aria-label="Основное меню">
         <ul class="sidebar__list">

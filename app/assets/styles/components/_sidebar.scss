@@ -13,17 +13,21 @@
 
   &__content {
     display: grid;
-    gap: var(--space-md);
     align-content: start;
+  }
+
+  &__project {
     padding: var(--space-md);
+    border-bottom: 1px solid var(--color-border);
   }
 
   &__nav {
     min-width: 0;
+    padding: var(--space-md);
   }
 
   &__nav--bottom {
-    padding-top: var(--space-sm);
+    padding-top: var(--space-md);
     border-top: 1px solid var(--color-border);
   }
 

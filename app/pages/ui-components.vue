@@ -550,12 +550,14 @@ const tableRows = [
                 <a class="logo" href="/">Логотип</a>
               </div>
               <div class="sidebar__content">
-                <label class="project-switcher">
-                  <span class="project-switcher__label">ProjectSwitcher</span>
-                  <select class="project-switcher__control">
-                    <option>Проект Alpha</option>
-                  </select>
-                </label>
+                <div class="sidebar__project">
+                  <label class="project-switcher">
+                    <span class="project-switcher__label">ProjectSwitcher</span>
+                    <select class="project-switcher__control">
+                      <option>Проект Alpha</option>
+                    </select>
+                  </label>
+                </div>
                 <nav class="sidebar__nav" aria-label="Демо меню">
                   <ul class="sidebar__list">
                     <li class="sidebar__item">

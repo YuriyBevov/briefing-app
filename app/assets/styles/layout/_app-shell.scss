@@ -33,5 +33,9 @@
       align-items: start;
       padding: var(--space-lg);
     }
+
+    &__content--wide {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 }

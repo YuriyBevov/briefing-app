@@ -1,3 +1,3 @@
 <template>
-  <StageWorkspace title="Дизайн" />
+  <StageWorkspace section-id="section-design" />
 </template>

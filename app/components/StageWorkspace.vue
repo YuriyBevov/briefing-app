@@ -4,24 +4,24 @@ import type {
 	BriefLinkStatus,
 	Checklist,
 	ChecklistItemStatus,
-	ProjectStage,
 } from "~/composables/useProjectStore";
 
 const props = defineProps<{
-	title: ProjectStage;
+	sectionId: string;
 }>();
 
-const actions = ["Закрыть этап"];
 const {
 	acceptBriefLinkToWork,
+	canUsePermission,
 	createBriefClientLink,
+	data,
 	deleteBrief,
 	deleteBriefLink,
 	deleteChecklist,
 	briefLinkStatusLabels,
 	createBriefRevisionLink,
-	getBriefsByStage,
-	getChecklistsByStage,
+	getBriefsBySection,
+	getChecklistsBySection,
 	updateBriefLinkTitle,
 	updateChecklistItemComment,
 	updateChecklistItemStatus,
@@ -29,8 +29,12 @@ const {
 const { openEditModal } = useCreationModal();
 const copiedLinkId = ref("");
 
-const checklists = getChecklistsByStage(props.title);
-const briefs = getBriefsByStage(props.title);
+const section = computed(() => data.value.sections.find((item) => item.id === props.sectionId));
+const canViewSection = computed(() =>
+	Boolean(section.value?.isActive) && canUsePermission(`view_section_${props.sectionId}`).value
+);
+const checklists = getChecklistsBySection(props.sectionId);
+const briefs = getBriefsBySection(props.sectionId);
 const getChecklistProgress = (checklist: Checklist) => {
 	if (checklist.items.length === 0) {
 		return 0;
@@ -221,19 +225,9 @@ const getBriefLink = (token: string) => {
 </script>
 
 <template>
-	<section class="stage-page">
+	<section v-if="canViewSection" class="stage-page">
 		<div class="section-header stage-page__header">
-			<h1 class="page-title">{{ title }}</h1>
-			<div class="button-row stage-page__actions">
-				<button
-					v-for="action in actions"
-					:key="action"
-					class="button button--primary"
-					type="button"
-				>
-					{{ action }}
-				</button>
-			</div>
+			<h1 class="page-title">{{ section?.title }}</h1>
 		</div>
 
 		<div class="stage-page__workspace">
@@ -256,27 +250,14 @@ const getBriefLink = (token: string) => {
 									{{ getRequiredOpenCount(checklist) }} обязательных пунктов
 								</span>
 							</span>
-							<svg
-								class="checklist-card__toggle-icon"
-								viewBox="0 0 20 20"
-								fill="none"
-								aria-hidden="true"
-							>
-								<path
-									d="M6 8L10 12L14 8"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-								/>
-							</svg>
+							<BaseIcon class="checklist-card__toggle-icon" name="chevron-down" />
 						</summary>
 
 						<div class="button-row checklist-card__actions">
 							<button class="button button--secondary" type="button" @click="editChecklist(checklist.id)">
 								Редактировать
 							</button>
-							<button class="button button--secondary" type="button" @click="removeChecklist(checklist.id)">
+							<button class="button button--danger" type="button" @click="removeChecklist(checklist.id)">
 								Удалить
 							</button>
 						</div>
@@ -357,20 +338,7 @@ const getBriefLink = (token: string) => {
 									{{ getBriefMeta(brief.links, brief.questions.length) }}
 								</span>
 							</span>
-							<svg
-								class="brief-card__toggle-icon"
-								viewBox="0 0 20 20"
-								fill="none"
-								aria-hidden="true"
-							>
-								<path
-									d="M6 8L10 12L14 8"
-									stroke="currentColor"
-									stroke-width="2"
-									stroke-linecap="round"
-									stroke-linejoin="round"
-								/>
-							</svg>
+							<BaseIcon class="brief-card__toggle-icon" name="chevron-down" />
 						</summary>
 
 						<div class="button-row brief-card__actions">
@@ -384,7 +352,7 @@ const getBriefLink = (token: string) => {
 							>
 								Создать ссылку
 							</button>
-							<button class="button button--secondary" type="button" @click="removeBrief(brief.id)">
+							<button class="button button--danger" type="button" @click="removeBrief(brief.id)">
 								Удалить
 							</button>
 						</div>
@@ -410,20 +378,7 @@ const getBriefLink = (token: string) => {
 														:title="copiedLinkId === history.links[0].id ? 'Скопировано' : 'Копировать ссылку'"
 														@click.stop="copyBriefLink(history.links[0])"
 													>
-														<svg
-															class="brief-card__copy-icon"
-															viewBox="0 0 20 20"
-															fill="none"
-															aria-hidden="true"
-														>
-															<path
-																d="M7 7V4.5C7 3.67 7.67 3 8.5 3H15.5C16.33 3 17 3.67 17 4.5V11.5C17 12.33 16.33 13 15.5 13H13M4.5 7H11.5C12.33 7 13 7.67 13 8.5V15.5C13 16.33 12.33 17 11.5 17H4.5C3.67 17 3 16.33 3 15.5V8.5C3 7.67 3.67 7 4.5 7Z"
-																stroke="currentColor"
-																stroke-width="1.7"
-																stroke-linecap="round"
-																stroke-linejoin="round"
-															/>
-														</svg>
+														<BaseIcon class="brief-card__copy-icon" name="copy" />
 													</button>
 													<button
 														class="button button--secondary button--small brief-card__icon-button"
@@ -432,27 +387,7 @@ const getBriefLink = (token: string) => {
 														title="Изменить название"
 														@click.stop="renameBriefLink(brief.id, brief.title, history.links[0])"
 													>
-														<svg
-															class="brief-card__edit-icon"
-															viewBox="0 0 20 20"
-															fill="none"
-															aria-hidden="true"
-														>
-															<path
-																d="M4 14.5V17H6.5L15.15 8.35L12.65 5.85L4 14.5Z"
-																stroke="currentColor"
-																stroke-width="1.7"
-																stroke-linecap="round"
-																stroke-linejoin="round"
-															/>
-															<path
-																d="M11.75 6.75L13.25 5.25C13.94 4.56 15.06 4.56 15.75 5.25C16.44 5.94 16.44 7.06 15.75 7.75L14.25 9.25"
-																stroke="currentColor"
-																stroke-width="1.7"
-																stroke-linecap="round"
-																stroke-linejoin="round"
-															/>
-														</svg>
+														<BaseIcon class="brief-card__edit-icon" name="edit" />
 													</button>
 												</span>
 												<span class="brief-card__link-content">
@@ -483,20 +418,7 @@ const getBriefLink = (token: string) => {
 												title="История экземпляра"
 												@click.stop.prevent="toggleBriefHistory"
 											>
-												<svg
-													class="brief-card__link-toggle-icon"
-													viewBox="0 0 20 20"
-													fill="none"
-													aria-hidden="true"
-												>
-													<path
-														d="M6 8L10 12L14 8"
-														stroke="currentColor"
-														stroke-width="2"
-														stroke-linecap="round"
-														stroke-linejoin="round"
-													/>
-												</svg>
+												<BaseIcon class="brief-card__link-toggle-icon" name="chevron-down" />
 											</button>
 										</div>
 
@@ -505,7 +427,7 @@ const getBriefLink = (token: string) => {
 											class="button-row brief-card__link-actions"
 										>
 											<button
-												class="button button--secondary button--small"
+												class="button button--danger button--small"
 												type="button"
 												:disabled="
 													history.links[0].status === 'pending' ||
@@ -574,5 +496,15 @@ const getBriefLink = (token: string) => {
 				<p v-else class="card-description">Создать бриф</p>
 			</section>
 		</div>
+	</section>
+
+	<section v-else class="stage-page">
+		<div class="section-header stage-page__header">
+			<h1 class="page-title">{{ section?.title ?? "Раздел" }}</h1>
+		</div>
+
+		<section class="workspace-panel">
+			<p class="card-description">Раздел отключён или у вас нет прав на его просмотр.</p>
+		</section>
 	</section>
 </template>

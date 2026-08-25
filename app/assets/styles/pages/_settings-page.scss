@@ -1,0 +1,314 @@
+.settings-page {
+  display: grid;
+  gap: var(--space-md);
+
+  &__header {
+    align-items: flex-start;
+  }
+
+  &__lead {
+    margin-top: var(--space-xs);
+    color: var(--color-text-muted);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+}
+
+.settings-section {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.settings-block-list {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.settings-section.sortable-ghost {
+  border-color: var(--color-accent);
+  opacity: 0.54;
+}
+
+.settings-section__header {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.settings-section__drag {
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  background-color: var(--color-control);
+  cursor: grab;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.settings-section__drag:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.settings-section__drag:active {
+  cursor: grabbing;
+}
+
+.settings-section__drag-icon,
+.settings-section__toggle-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.settings-section__actions {
+  flex-wrap: nowrap;
+}
+
+.settings-section__toggle-icon {
+  transition: transform 0.2s ease;
+}
+
+.settings-section--collapsed .settings-section__toggle-icon {
+  transform: rotate(-90deg);
+}
+
+.settings-form {
+  display: grid;
+  gap: var(--space-md);
+  max-width: 760px;
+}
+
+.settings-form__group {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.settings-form__choice-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm) var(--space-md);
+}
+
+.settings-form__choice-list .switch-field {
+  flex: 0 0 auto;
+}
+
+.settings-permission-groups {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.settings-permission-group {
+  display: grid;
+  gap: var(--space-sm);
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-muted);
+}
+
+.settings-permission-group__title {
+  padding-inline: var(--space-xs);
+  color: var(--color-text);
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.settings-list {
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.settings-card {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-muted);
+}
+
+.settings-card__drag {
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  background-color: var(--color-control);
+  cursor: grab;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.settings-card__drag:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.settings-card__drag:active {
+  cursor: grabbing;
+}
+
+.settings-card__drag-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.settings-card.sortable-ghost {
+  border-color: var(--color-accent);
+  opacity: 0.54;
+}
+
+.settings-card__body {
+  display: grid;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.settings-card__body--wide {
+  flex: 1 1 auto;
+}
+
+.settings-card__headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.settings-card__content {
+  display: grid;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.settings-card__headline-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 0 0 auto;
+}
+
+.settings-card__body strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.settings-card__actions {
+  flex-wrap: nowrap;
+}
+
+.settings-card__status {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.settings-card__status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  display: block;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.settings-card__status--active {
+  color: var(--color-success);
+  background-color: color-mix(in srgb, var(--color-success) 14%, transparent);
+}
+
+.settings-card__status--blocked {
+  color: var(--color-danger);
+  background-color: color-mix(in srgb, var(--color-danger) 18%, transparent);
+}
+
+.settings-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.settings-card__badge {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.2;
+  background-color: var(--color-control);
+}
+
+.settings-card__badge--success {
+  color: var(--color-success);
+  background-color: color-mix(in srgb, var(--color-success) 14%, transparent);
+}
+
+.settings-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: var(--space-md);
+  background-color: rgba(0, 0, 0, 0.48);
+}
+
+.settings-modal__panel {
+  width: min(100%, 680px);
+  max-height: min(720px, calc(100vh - 32px));
+  display: grid;
+  gap: var(--space-md);
+  overflow-y: auto;
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-shell);
+}
+
+.settings-confirm {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.settings-confirm__text {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}

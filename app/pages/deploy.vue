@@ -1,3 +1,3 @@
 <template>
-  <StageWorkspace title="Деплой" />
+  <StageWorkspace section-id="section-deploy" />
 </template>

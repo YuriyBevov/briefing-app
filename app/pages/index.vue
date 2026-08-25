@@ -1,3 +1,3 @@
 <template>
-  <StageWorkspace title="Согласование" />
+  <StageWorkspace section-id="section-approval" />
 </template>

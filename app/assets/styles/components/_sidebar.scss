@@ -15,6 +15,7 @@
     display: grid;
     align-content: start;
     grid-template-rows: auto auto auto 1fr;
+    min-height: 0;
   }
 
   &__project {
@@ -33,9 +34,13 @@
   }
 
   &__nav--utility {
+    position: sticky;
+    bottom: var(--topbar-height);
+    z-index: 1;
     align-self: end;
     padding-top: var(--space-md);
     border-top: 1px solid var(--color-border);
+    background-color: var(--color-surface);
   }
 
   &__list {
@@ -67,12 +72,18 @@
   }
 
   &__footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    height: var(--topbar-height);
+    min-height: var(--topbar-height);
     display: flex;
     align-items: center;
     gap: var(--space-sm);
     min-width: 0;
     padding: var(--space-md);
     border-top: 1px solid var(--color-border);
+    background-color: var(--color-surface);
   }
 }
 

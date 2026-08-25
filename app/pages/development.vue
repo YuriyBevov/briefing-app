@@ -1,3 +1,3 @@
 <template>
-  <StageWorkspace title="Разработка" />
+  <StageWorkspace section-id="section-development" />
 </template>

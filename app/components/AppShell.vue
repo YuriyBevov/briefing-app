@@ -1,7 +1,9 @@
 <script setup lang="ts">
+const route = useRoute()
 const project = {
   title: 'Brief OS'
 }
+const shouldShowComments = computed(() => route.path !== '/settings')
 </script>
 
 <template>
@@ -13,12 +15,12 @@ const project = {
         :project-title="project.title"
       />
 
-      <main class="app-shell__content">
+      <main class="app-shell__content" :class="{ 'app-shell__content--wide': !shouldShowComments }">
         <div class="app-shell__workspace">
           <slot />
         </div>
 
-        <CommentsPanel />
+        <CommentsPanel v-if="shouldShowComments" />
       </main>
 
       <footer class="app-footer">Сделано&nbsp;в</footer>

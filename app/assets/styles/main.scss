@@ -8,6 +8,8 @@
 @use "layout/app-footer";
 
 @use "components/button";
+@use "components/base-icon-button";
+@use "components/modal-close-button";
 @use "components/section-header";
 @use "components/sidebar";
 @use "components/logo";
@@ -26,5 +28,6 @@
 @use "pages/auth-page";
 @use "pages/public-brief-page";
 @use "pages/ui-page";
+@use "pages/settings-page";
 
 @use "utilities/visually-hidden";

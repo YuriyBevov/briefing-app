@@ -18,14 +18,16 @@ type ProjectOption = {
   title: string
 }
 
-const projects: ProjectOption[] = [
-  { id: 'brief-os', title: 'Brief OS' },
-  { id: 'landing-pack', title: 'Landing Pack' },
-  { id: 'support-flow', title: 'Support Flow' },
-  { id: 'design-kit', title: 'Design Kit' }
-]
+const { currentProject, setCurrentProject, visibleProjects } = useProjectStore()
 
-const selectedProject = ref<ProjectOption>(projects[0])
+const selectedProject = computed<ProjectOption>({
+  get: () => currentProject.value,
+  set: (project) => {
+    if (project) {
+      setCurrentProject(project.id)
+    }
+  }
+})
 
 const displayProject = (project?: ProjectOption) => project?.title ?? ''
 </script>
@@ -47,9 +49,7 @@ const displayProject = (project?: ProjectOption) => project?.title ?? ''
         :display-value="displayProject"
       />
       <ComboboxTrigger class="project-switcher__trigger" aria-label="Открыть список проектов">
-        <svg class="project-switcher__icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="m7 10 5 5 5-5" />
-        </svg>
+        <BaseIcon class="project-switcher__icon" name="chevron-down" />
       </ComboboxTrigger>
     </ComboboxAnchor>
 
@@ -63,16 +63,14 @@ const displayProject = (project?: ProjectOption) => project?.title ?? ''
         <ComboboxViewport class="project-switcher__viewport">
           <ComboboxEmpty class="project-switcher__empty">Проекты не найдены</ComboboxEmpty>
           <ComboboxItem
-            v-for="project in projects"
+            v-for="project in visibleProjects"
             :key="project.id"
             class="project-switcher__item"
             :value="project"
           >
             <span class="project-switcher__item-text">{{ project.title }}</span>
             <ComboboxItemIndicator class="project-switcher__indicator">
-              <svg class="project-switcher__check" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m5 12 4 4 10-10" />
-              </svg>
+              <BaseIcon class="project-switcher__check" name="check" />
             </ComboboxItemIndicator>
           </ComboboxItem>
         </ComboboxViewport>

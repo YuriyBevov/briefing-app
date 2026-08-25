@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BriefQuestionType, ProjectStage } from '~/composables/useProjectStore'
+import type { BriefQuestionType, EntityScope } from '~/composables/useProjectStore'
 
 const { activeType, closeCreationModal, editingId } = useCreationModal()
 const {
@@ -7,16 +7,18 @@ const {
   createBrief,
   createChecklist,
   data,
-  projectStages,
   updateBrief,
   updateChecklist
 } = useProjectStore()
 
 const optionTypes: BriefQuestionType[] = ['radio', 'checkbox', 'select', 'multiselect']
+const activeSections = computed(() => data.value.sections.filter((section) => section.isActive))
+const getDefaultSectionId = () => activeSections.value[0]?.id ?? data.value.sections[0]?.id ?? ''
 
 const createChecklistForm = () => ({
   title: '',
-  stage: 'Согласование' as ProjectStage,
+  sectionId: getDefaultSectionId(),
+  scope: 'common' as EntityScope,
   items: [
     {
       text: '',
@@ -27,7 +29,8 @@ const createChecklistForm = () => ({
 
 const createBriefForm = () => ({
   title: '',
-  stage: 'Согласование' as ProjectStage,
+  sectionId: getDefaultSectionId(),
+  scope: 'common' as EntityScope,
   questions: [
     {
       text: '',
@@ -68,7 +71,8 @@ const fillChecklistForm = (id: string) => {
   }
 
   checklistForm.title = checklist.title
-  checklistForm.stage = checklist.stage
+  checklistForm.sectionId = checklist.sectionId
+  checklistForm.scope = checklist.scope
   checklistForm.items = checklist.items.map((item) => ({
     text: item.text,
     required: item.required
@@ -84,7 +88,8 @@ const fillBriefForm = (id: string) => {
   }
 
   briefForm.title = brief.title
-  briefForm.stage = brief.stage
+  briefForm.sectionId = brief.sectionId
+  briefForm.scope = brief.scope
   briefForm.questions = brief.questions.map((question) => ({
     text: question.text,
     type: question.type,
@@ -169,7 +174,8 @@ const submitChecklist = () => {
 
   const payload = {
     title: checklistForm.title.trim(),
-    stage: checklistForm.stage,
+    sectionId: checklistForm.sectionId || getDefaultSectionId(),
+    scope: checklistForm.scope,
     items
   }
 
@@ -203,7 +209,8 @@ const submitBrief = () => {
 
   const payload = {
     title: briefForm.title.trim(),
-    stage: briefForm.stage,
+    sectionId: briefForm.sectionId || getDefaultSectionId(),
+    scope: briefForm.scope,
     questions
   }
 
@@ -228,7 +235,7 @@ const submitBrief = () => {
       >
         <div class="section-header">
           <h2 class="section-title">{{ modalTitle }}</h2>
-          <button class="button button--secondary" type="button" @click="closeModal">Закрыть</button>
+          <BaseModalCloseButton @click="closeModal" />
         </div>
 
         <label class="field">
@@ -237,9 +244,19 @@ const submitBrief = () => {
         </label>
 
         <label class="field">
-          <span class="field__label">Этап</span>
-          <select v-model="checklistForm.stage" class="field__control">
-            <option v-for="stage in projectStages" :key="stage" :value="stage">{{ stage }}</option>
+          <span class="field__label">Раздел</span>
+          <select v-model="checklistForm.sectionId" class="field__control">
+            <option v-for="section in activeSections" :key="section.id" :value="section.id">
+              {{ section.title }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Тип</span>
+          <select v-model="checklistForm.scope" class="field__control">
+            <option value="common">Общий</option>
+            <option value="project">Проектный</option>
           </select>
         </label>
 
@@ -262,7 +279,7 @@ const submitBrief = () => {
             </label>
 
             <button
-              class="button button--secondary"
+              class="button button--danger"
               type="button"
               :disabled="checklistForm.items.length === 1"
               @click="removeChecklistItem(index)"
@@ -284,7 +301,7 @@ const submitBrief = () => {
       <form v-else class="creation-form" @submit.prevent="submitBrief">
         <div class="section-header">
           <h2 class="section-title">{{ modalTitle }}</h2>
-          <button class="button button--secondary" type="button" @click="closeModal">Закрыть</button>
+          <BaseModalCloseButton @click="closeModal" />
         </div>
 
         <label class="field">
@@ -293,9 +310,19 @@ const submitBrief = () => {
         </label>
 
         <label class="field">
-          <span class="field__label">Этап</span>
-          <select v-model="briefForm.stage" class="field__control">
-            <option v-for="stage in projectStages" :key="stage" :value="stage">{{ stage }}</option>
+          <span class="field__label">Раздел</span>
+          <select v-model="briefForm.sectionId" class="field__control">
+            <option v-for="section in activeSections" :key="section.id" :value="section.id">
+              {{ section.title }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Тип</span>
+          <select v-model="briefForm.scope" class="field__control">
+            <option value="common">Общий</option>
+            <option value="project">Проектный</option>
           </select>
         </label>
 
@@ -335,7 +362,7 @@ const submitBrief = () => {
             </label>
 
             <button
-              class="button button--secondary"
+              class="button button--danger"
               type="button"
               :disabled="briefForm.questions.length === 1"
               @click="removeBriefQuestion(index)"

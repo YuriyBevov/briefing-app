@@ -1,4 +1,7 @@
 <script setup lang="ts">
+const { canUsePermission } = useProjectStore()
+const canViewUiComponents = canUsePermission('view_ui_components')
+
 const colorTokens = [
   { name: 'ColorBackground', token: '--color-background' },
   { name: 'ColorSurface', token: '--color-surface' },
@@ -23,6 +26,20 @@ const spacingTokens = [
   { name: 'SpaceXl', token: '--space-xl' }
 ]
 
+const iconNames = [
+  'check',
+  'copy',
+  'edit',
+  'chevron-down',
+  'close',
+  'drag-handle',
+  'lock',
+  'moon',
+  'sun',
+  'unlock',
+  'trash'
+] as const
+
 const tableRows = [
   { component: 'BriefLinkItemCompleted', status: 'Согласован', owner: 'Менеджер' },
   { component: 'ChecklistItemRequired', status: 'Ожидает', owner: 'Дизайнер' },
@@ -31,7 +48,7 @@ const tableRows = [
 </script>
 
 <template>
-  <section class="ui-page">
+  <section v-if="canViewUiComponents" class="ui-page">
     <div class="section-header ui-page__header">
       <div>
         <h1 class="page-title">UI-компоненты</h1>
@@ -63,6 +80,22 @@ const tableRows = [
               <span class="ui-name">{{ space.name }}</span>
               <span class="ui-spacing__bar" :style="{ width: `var(${space.token})` }" aria-hidden="true" />
               <code class="ui-code">{{ space.token }}</code>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="ui-accordion">
+        <summary class="ui-accordion__summary">
+          <span class="section-title">Иконки</span>
+          <span class="ui-accordion__meta">BaseIcon</span>
+        </summary>
+        <div class="ui-accordion__body">
+          <div class="ui-grid ui-grid--icons">
+            <div v-for="iconName in iconNames" :key="iconName" class="ui-icon-sample">
+              <BaseIcon class="ui-icon-sample__icon" :name="iconName" />
+              <span class="ui-name">Icon{{ iconName }}</span>
+              <code class="ui-code">name="{{ iconName }}"</code>
             </div>
           </div>
         </div>
@@ -119,8 +152,8 @@ const tableRows = [
               <button class="button button--secondary" type="button">Редактировать</button>
             </div>
             <div class="ui-sample">
-              <span class="ui-name">ButtonSmall</span>
-              <button class="button button--secondary button--small" type="button">Удалить</button>
+              <span class="ui-name">ButtonDangerSmall</span>
+              <button class="button button--danger button--small" type="button">Удалить</button>
             </div>
             <div class="ui-sample">
               <span class="ui-name">ButtonSecondaryHover</span>
@@ -161,9 +194,7 @@ const tableRows = [
             <div class="ui-sample">
               <span class="ui-name">ThemeToggle</span>
               <button class="theme-toggle" type="button" aria-label="ThemeToggle">
-                <svg class="theme-toggle__icon" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M20.4 14.4A7.2 7.2 0 0 1 9.6 3.6 8.4 8.4 0 1 0 20.4 14.4Z" />
-                </svg>
+                <BaseIcon class="theme-toggle__icon" name="moon" />
               </button>
             </div>
           </div>
@@ -287,20 +318,7 @@ const tableRows = [
                 <span class="checklist-card__title">Чеклист предподготовки</span>
                 <span class="checklist-card__meta">0% · 2 обязательных пунктов</span>
               </span>
-              <svg
-                class="checklist-card__toggle-icon"
-                viewBox="0 0 20 20"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M6 8L10 12L14 8"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+              <BaseIcon class="checklist-card__toggle-icon" name="chevron-down" />
             </summary>
           </details>
           <details class="checklist-card" open>
@@ -310,24 +328,11 @@ const tableRows = [
                 <span class="checklist-card__title">Чеклист запуска</span>
                 <span class="checklist-card__meta">66% · 1 обязательных пунктов</span>
               </span>
-              <svg
-                class="checklist-card__toggle-icon"
-                viewBox="0 0 20 20"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M6 8L10 12L14 8"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
+              <BaseIcon class="checklist-card__toggle-icon" name="chevron-down" />
             </summary>
             <div class="button-row checklist-card__actions">
               <button class="button button--secondary" type="button">Редактировать</button>
-              <button class="button button--secondary" type="button">Удалить</button>
+              <button class="button button--danger" type="button">Удалить</button>
             </div>
             <ul class="checklist-card__list">
               <li class="checklist-card__item">
@@ -385,20 +390,7 @@ const tableRows = [
                   <span class="brief-card__title">Бриф на аудит интерфейса</span>
                   <span class="brief-card__meta">6 вопросов</span>
                 </span>
-                <svg
-                  class="brief-card__toggle-icon"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M6 8L10 12L14 8"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
+                <BaseIcon class="brief-card__toggle-icon" name="chevron-down" />
               </summary>
             </details>
             <details class="brief-card" open>
@@ -408,25 +400,12 @@ const tableRows = [
                   <span class="brief-card__title">Бриф на дизайн главной страницы</span>
                   <span class="brief-card__meta">4 вопроса · 2 ссылки · 1 заполнена</span>
                 </span>
-                <svg
-                  class="brief-card__toggle-icon"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M6 8L10 12L14 8"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
+                <BaseIcon class="brief-card__toggle-icon" name="chevron-down" />
               </summary>
               <div class="button-row brief-card__actions">
                 <button class="button button--secondary" type="button">Редактировать</button>
                 <button class="button button--secondary" type="button">Создать ссылку</button>
-                <button class="button button--secondary" type="button">Удалить</button>
+                <button class="button button--danger" type="button">Удалить</button>
               </div>
               <div class="brief-card__links">
                 <details class="brief-card__link-item" open>
@@ -437,15 +416,10 @@ const tableRows = [
                         <span class="brief-card__link-main">
                           <span class="brief-card__link-tools">
                             <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Копировать ссылку" title="Копировать ссылку">
-                              <svg class="brief-card__copy-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                <path d="M7 7V4.5C7 3.67 7.67 3 8.5 3H15.5C16.33 3 17 3.67 17 4.5V11.5C17 12.33 16.33 13 15.5 13H13M4.5 7H11.5C12.33 7 13 7.67 13 8.5V15.5C13 16.33 12.33 17 11.5 17H4.5C3.67 17 3 16.33 3 15.5V8.5C3 7.67 3.67 7 4.5 7Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-                              </svg>
+                              <BaseIcon class="brief-card__copy-icon" name="copy" />
                             </button>
                             <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Изменить название" title="Изменить название">
-                              <svg class="brief-card__edit-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                <path d="M4 14.5V17H6.5L15.15 8.35L12.65 5.85L4 14.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M11.75 6.75L13.25 5.25C13.94 4.56 15.06 4.56 15.75 5.25C16.44 5.94 16.44 7.06 15.75 7.75L14.25 9.25" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-                              </svg>
+                              <BaseIcon class="brief-card__edit-icon" name="edit" />
                             </button>
                           </span>
                           <span class="brief-card__link-content">
@@ -455,15 +429,13 @@ const tableRows = [
                         </span>
                         <span class="brief-card__link-status brief-card__link-status--revision-pending">Ожидает редакции</span>
                         <button class="button button--secondary button--small brief-card__icon-button brief-card__history-toggle" type="button" aria-label="Свернуть историю" title="История экземпляра">
-                          <svg class="brief-card__link-toggle-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                            <path d="M6 8L10 12L14 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
+                          <BaseIcon class="brief-card__link-toggle-icon" name="chevron-down" />
                         </button>
                       </div>
                       <div class="button-row brief-card__link-actions">
                         <button class="button button--secondary button--small" type="button" disabled>Открыть бриф к заполнению</button>
                         <button class="button button--primary button--small" type="button" disabled>Принять в работу</button>
-                        <button class="button button--secondary button--small" type="button">Удалить</button>
+                        <button class="button button--danger button--small" type="button">Удалить</button>
                       </div>
                     </div>
                   </summary>
@@ -489,15 +461,10 @@ const tableRows = [
                         <span class="brief-card__link-main">
                           <span class="brief-card__link-tools">
                             <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Копировать ссылку" title="Копировать ссылку">
-                              <svg class="brief-card__copy-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                <path d="M7 7V4.5C7 3.67 7.67 3 8.5 3H15.5C16.33 3 17 3.67 17 4.5V11.5C17 12.33 16.33 13 15.5 13H13M4.5 7H11.5C12.33 7 13 7.67 13 8.5V15.5C13 16.33 12.33 17 11.5 17H4.5C3.67 17 3 16.33 3 15.5V8.5C3 7.67 3.67 7 4.5 7Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-                              </svg>
+                              <BaseIcon class="brief-card__copy-icon" name="copy" />
                             </button>
                             <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Изменить название" title="Изменить название">
-                              <svg class="brief-card__edit-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                                <path d="M4 14.5V17H6.5L15.15 8.35L12.65 5.85L4 14.5Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M11.75 6.75L13.25 5.25C13.94 4.56 15.06 4.56 15.75 5.25C16.44 5.94 16.44 7.06 15.75 7.75L14.25 9.25" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
-                              </svg>
+                              <BaseIcon class="brief-card__edit-icon" name="edit" />
                             </button>
                           </span>
                           <span class="brief-card__link-content">
@@ -506,15 +473,13 @@ const tableRows = [
                         </span>
                         <span class="brief-card__link-status brief-card__link-status--completed">Согласован</span>
                         <button class="button button--secondary button--small brief-card__icon-button brief-card__history-toggle" type="button" disabled aria-label="История недоступна" title="История экземпляра">
-                          <svg class="brief-card__link-toggle-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                            <path d="M6 8L10 12L14 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
+                          <BaseIcon class="brief-card__link-toggle-icon" name="chevron-down" />
                         </button>
                       </div>
                       <div class="button-row brief-card__link-actions">
                         <button class="button button--secondary button--small" type="button">Открыть бриф к заполнению</button>
                         <button class="button button--primary button--small" type="button">Принять в работу</button>
-                        <button class="button button--secondary button--small" type="button">Удалить</button>
+                        <button class="button button--danger button--small" type="button">Удалить</button>
                       </div>
                     </div>
                   </summary>
@@ -590,9 +555,7 @@ const tableRows = [
                   </span>
                 </div>
                 <button class="theme-toggle" type="button" aria-label="ThemeToggle">
-                  <svg class="theme-toggle__icon" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M20.4 14.4A7.2 7.2 0 0 1 9.6 3.6 8.4 8.4 0 1 0 20.4 14.4Z" />
-                  </svg>
+                  <BaseIcon class="theme-toggle__icon" name="moon" />
                 </button>
               </div>
             </aside>
@@ -623,7 +586,7 @@ const tableRows = [
             <form class="creation-form">
               <div class="section-header">
                 <h2 class="section-title">CreationModalPanel</h2>
-                <button class="button button--secondary" type="button">Закрыть</button>
+                <BaseModalCloseButton />
               </div>
               <label class="field">
                 <span class="field__label">CreationModalTitleField</span>
@@ -636,7 +599,7 @@ const tableRows = [
                     <span class="field__label">CreationFormRowField</span>
                     <input class="field__control" type="text" value="Вопрос" />
                   </label>
-                  <button class="button button--secondary" type="button">Удалить</button>
+                  <button class="button button--danger" type="button">Удалить</button>
                 </div>
               </div>
               <button class="button button--primary" type="button">Создать</button>
@@ -702,5 +665,15 @@ const tableRows = [
         </div>
       </details>
     </div>
+  </section>
+
+  <section v-else class="stage-page">
+    <div class="section-header stage-page__header">
+      <h1 class="page-title">UI-компоненты</h1>
+    </div>
+
+    <section class="workspace-panel">
+      <p class="card-description">У вас нет прав на просмотр этого раздела.</p>
+    </section>
   </section>
 </template>

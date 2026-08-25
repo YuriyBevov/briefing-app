@@ -1,8 +1,8 @@
 .project-switcher {
-  position: relative;
   display: grid;
   align-self: start;
   gap: var(--space-xs);
+  width: 100%;
 
   &__label {
     color: var(--color-text-muted);
@@ -10,29 +10,128 @@
     line-height: 1.2;
   }
 
-  &__control {
-    appearance: none;
+  &__anchor {
     width: 100%;
-    min-height: 32px;
-    padding: 5px 34px 5px 10px;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 32px;
+    align-items: center;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
+    background-color: var(--color-control);
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+
+    &:focus-within {
+      border-color: var(--color-accent);
+    }
+  }
+
+  &__control {
+    width: 100%;
+    min-height: 32px;
+    min-width: 0;
+    padding: 5px 0 5px 10px;
+    border: 0;
     color: var(--color-text);
     font-size: 13px;
     line-height: 1.2;
-    background-color: var(--color-control);
+    background-color: transparent;
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+
+    &:focus {
+      outline: 0;
+    }
   }
 
-  &::after {
-    content: "";
-    position: absolute;
-    right: 10px;
-    bottom: 8px;
+  &__trigger {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    color: var(--color-text-muted);
+    background-color: transparent;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: var(--color-text);
+    }
+  }
+
+  &__icon,
+  &__check {
     width: 14px;
     height: 14px;
-    pointer-events: none;
-    background-color: var(--color-text-muted);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m7 10 5 5 5-5' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='m7 10 5 5 5-5' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  &__content {
+    z-index: 20;
+    width: var(--reka-combobox-trigger-width);
+    max-height: min(var(--reka-combobox-content-available-height), 240px);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-shell);
+  }
+
+  &__viewport {
+    display: grid;
+    gap: 2px;
+    max-height: 240px;
+    padding: var(--space-xs);
+    overflow-y: auto;
+  }
+
+  &__item {
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+    padding: 7px 8px;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: 13px;
+    line-height: 1.2;
+    cursor: pointer;
+    outline: 0;
+
+    &[data-highlighted] {
+      color: var(--color-text);
+      background-color: var(--color-surface-muted);
+    }
+
+    &[data-state="checked"] {
+      color: var(--color-text);
+    }
+  }
+
+  &__item-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__indicator {
+    display: inline-flex;
+    flex: 0 0 auto;
+    color: var(--color-accent);
+  }
+
+  &__empty {
+    padding: 8px;
+    color: var(--color-text-muted);
+    font-size: 13px;
+    line-height: 1.2;
   }
 }

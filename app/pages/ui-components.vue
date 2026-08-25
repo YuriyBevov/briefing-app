@@ -197,13 +197,10 @@ const tableRows = [
               <span class="field__label">FieldDisabled</span>
               <input class="field__control" type="text" value="Поле закрыто" disabled />
             </label>
-            <label class="project-switcher">
-              <span class="project-switcher__label">ProjectSwitcher</span>
-              <select class="project-switcher__control">
-                <option>Проект Alpha</option>
-                <option>Проект Beta</option>
-              </select>
-            </label>
+            <div class="ui-sample">
+              <span class="ui-name">ProjectSwitcherCombobox</span>
+              <ProjectSwitcher />
+            </div>
             <div class="ui-sample">
               <span class="ui-name">ChoiceRadioList</span>
               <div class="choice-list">
@@ -551,12 +548,7 @@ const tableRows = [
               </div>
               <div class="sidebar__content">
                 <div class="sidebar__project">
-                  <label class="project-switcher">
-                    <span class="project-switcher__label">ProjectSwitcher</span>
-                    <select class="project-switcher__control">
-                      <option>Проект Alpha</option>
-                    </select>
-                  </label>
+                  <ProjectSwitcher />
                 </div>
                 <nav class="sidebar__nav" aria-label="Демо меню">
                   <ul class="sidebar__list">

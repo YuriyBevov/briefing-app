@@ -28,6 +28,14 @@ const {
 } = useProjectStore();
 const { openEditModal } = useCreationModal();
 const copiedLinkId = ref("");
+const renamingBriefLink = ref<{
+	briefId: string;
+	briefTitle: string;
+	link: BriefLink;
+} | null>(null);
+const briefLinkTitleForm = reactive({
+	title: "",
+});
 
 const section = computed(() => data.value.sections.find((item) => item.id === props.sectionId));
 const canViewSection = computed(() =>
@@ -200,18 +208,31 @@ const copyBriefLink = async (link: BriefLink) => {
 	}
 };
 
-const renameBriefLink = (briefId: string, briefTitle: string, link: BriefLink) => {
-	if (!import.meta.client) {
+const openRenameBriefLinkModal = (briefId: string, briefTitle: string, link: BriefLink) => {
+	renamingBriefLink.value = {
+		briefId,
+		briefTitle,
+		link,
+	};
+	briefLinkTitleForm.title = link.title || briefTitle;
+};
+
+const closeRenameBriefLinkModal = () => {
+	renamingBriefLink.value = null;
+	briefLinkTitleForm.title = "";
+};
+
+const submitBriefLinkTitle = () => {
+	if (!renamingBriefLink.value) {
 		return;
 	}
 
-	const title = window.prompt("Название экземпляра брифа", link.title || briefTitle);
-
-	if (title === null) {
-		return;
-	}
-
-	updateBriefLinkTitle(briefId, link.id, title);
+	updateBriefLinkTitle(
+		renamingBriefLink.value.briefId,
+		renamingBriefLink.value.link.id,
+		briefLinkTitleForm.title,
+	);
+	closeRenameBriefLinkModal();
 };
 
 const getBriefLink = (token: string) => {
@@ -385,7 +406,7 @@ const getBriefLink = (token: string) => {
 														type="button"
 														aria-label="Изменить название"
 														title="Изменить название"
-														@click.stop="renameBriefLink(brief.id, brief.title, history.links[0])"
+														@click.stop="openRenameBriefLinkModal(brief.id, brief.title, history.links[0])"
 													>
 														<BaseIcon class="brief-card__edit-icon" name="edit" />
 													</button>
@@ -507,4 +528,32 @@ const getBriefLink = (token: string) => {
 			<p class="card-description">Раздел отключён или у вас нет прав на его просмотр.</p>
 		</section>
 	</section>
+
+	<SettingsModal
+		v-if="renamingBriefLink"
+		title="Изменить название ссылки"
+		@close="closeRenameBriefLinkModal"
+	>
+		<form class="settings-form" @submit.prevent="submitBriefLinkTitle">
+			<label class="field">
+				<span class="field__label">Название</span>
+				<input
+					v-model="briefLinkTitleForm.title"
+					class="field__control"
+					type="text"
+					:placeholder="renamingBriefLink.briefTitle"
+					autofocus
+				/>
+			</label>
+
+			<div class="button-row">
+				<button class="button button--primary" type="submit">
+					Сохранить
+				</button>
+				<button class="button button--secondary" type="button" @click="closeRenameBriefLinkModal">
+					Отменить
+				</button>
+			</div>
+		</form>
+	</SettingsModal>
 </template>

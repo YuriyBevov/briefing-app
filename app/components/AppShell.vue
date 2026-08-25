@@ -1,9 +1,10 @@
 <script setup lang="ts">
 const route = useRoute()
-const project = {
-  title: 'Brief OS'
-}
-const shouldShowComments = computed(() => route.path !== '/settings')
+const { currentProject } = useProjectStore()
+const legacySectionPaths = ['/', '/design', '/development', '/deploy', '/support']
+const shouldShowComments = computed(() =>
+  legacySectionPaths.includes(route.path) || route.path.startsWith('/sections/')
+)
 </script>
 
 <template>
@@ -12,7 +13,7 @@ const shouldShowComments = computed(() => route.path !== '/settings')
 
     <div class="app-shell__main">
       <Topbar
-        :project-title="project.title"
+        :project-title="currentProject.title"
       />
 
       <main class="app-shell__content" :class="{ 'app-shell__content--wide': !shouldShowComments }">

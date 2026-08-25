@@ -1,0 +1,114 @@
+.base-select {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  font-size: 14px;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    border-color: var(--color-accent);
+  }
+
+  &:focus-visible,
+  &[data-state="open"] {
+    outline: 0;
+    border-color: var(--color-accent);
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.64;
+  }
+}
+
+.base-select__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+  transform-origin: center;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.base-select__icon .base-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.base-select[data-state="open"] .base-select__icon {
+  color: var(--color-text);
+  transform: rotate(180deg);
+}
+
+.base-select__value {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.base-select__value--placeholder {
+  color: var(--color-text-muted);
+}
+
+.base-select__content {
+  z-index: 50;
+  width: var(--reka-select-trigger-width);
+  max-height: min(var(--reka-select-content-available-height), 280px);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-shell);
+}
+
+.base-select__viewport {
+  display: grid;
+  gap: 2px;
+  max-height: 280px;
+  padding: var(--space-xs);
+  overflow-y: auto;
+}
+
+.base-select__item {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 7px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.2;
+  cursor: pointer;
+  outline: 0;
+}
+
+.base-select__item[data-highlighted] {
+  color: var(--color-text);
+  background-color: var(--color-surface-muted);
+}
+
+.base-select__item[data-state="checked"] {
+  color: var(--color-text);
+}
+
+.base-select__indicator {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--color-accent);
+}
+
+.base-select__check {
+  width: 14px;
+  height: 14px;
+}

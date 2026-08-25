@@ -1,6 +1,12 @@
 html {
   color-scheme: dark;
   background-color: var(--color-background);
+  scrollbar-gutter: stable;
+}
+
+* {
+  scrollbar-color: var(--color-border-strong) var(--color-background);
+  scrollbar-width: thin;
 }
 
 html[data-theme="light"] {
@@ -23,4 +29,19 @@ a {
 
 textarea {
   resize: none;
+}
+
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background-color: var(--color-background);
+}
+
+*::-webkit-scrollbar-thumb {
+  border: 2px solid var(--color-background);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-border-strong);
 }

@@ -10,8 +10,9 @@
   &__panel {
     width: min(100%, 720px);
     max-height: calc(100vh - 32px);
+    display: grid;
     margin-inline: auto;
-    overflow: auto;
+    overflow: hidden;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     background-color: var(--color-surface);
@@ -21,8 +22,50 @@
 
 .creation-form {
   display: grid;
-  gap: var(--space-md);
-  padding: var(--space-md);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  max-height: calc(100vh - 32px);
+
+  &__header,
+  &__footer {
+    position: sticky;
+    z-index: 2;
+    background-color: var(--color-surface);
+  }
+
+  &__header {
+    top: 0;
+    padding: var(--space-md);
+  }
+
+  &__body {
+    display: grid;
+    gap: var(--space-md);
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-md);
+  }
+
+  &__footer {
+    bottom: 0;
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--space-md);
+  }
+
+  &__field-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-md);
+  }
+
+  &__choice-list {
+    min-height: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm) var(--space-md);
+    padding: 8px 0;
+  }
 
   &__group {
     display: grid;
@@ -138,6 +181,22 @@
   }
 
   .creation-form {
-    padding: var(--space-lg);
+    &__header {
+      padding: var(--space-lg);
+    }
+
+    &__body {
+      padding: var(--space-lg);
+    }
+
+    &__footer {
+      padding: var(--space-lg);
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .creation-form__field-row {
+    grid-template-columns: 1fr;
   }
 }

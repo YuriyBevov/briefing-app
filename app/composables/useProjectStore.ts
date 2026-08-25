@@ -32,10 +32,18 @@ export const briefQuestionTypes = [
   'checkbox',
   'select',
   'multiselect',
-  'number',
-  'date',
-  'file'
+  'date'
 ] as const
+
+export const briefQuestionTypeLabels: Record<(typeof briefQuestionTypes)[number], string> = {
+  text: 'текст',
+  textarea: 'поле для комментария',
+  radio: 'радиокнопки',
+  checkbox: 'чекбокс',
+  select: 'выпадающий список',
+  multiselect: 'выпадающий список с множественным выбором',
+  date: 'выбор даты'
+}
 
 export type EntityScope = (typeof entityScopes)[number]
 export type BriefQuestionType = (typeof briefQuestionTypes)[number]
@@ -103,7 +111,8 @@ export interface ChecklistItem {
 export interface Checklist {
   id: string
   title: string
-  sectionId: string
+  sectionId?: string
+  sectionIds: string[]
   stage?: string
   scope: EntityScope
   projectId: string
@@ -123,7 +132,8 @@ export interface BriefQuestion {
 export interface Brief {
   id: string
   title: string
-  sectionId: string
+  sectionId?: string
+  sectionIds: string[]
   stage?: string
   scope: EntityScope
   projectId: string
@@ -160,7 +170,7 @@ interface ProjectData {
 
 interface ChecklistPayload {
   title: string
-  sectionId: string
+  sectionIds: string[]
   scope: EntityScope
   items: Array<{
     text: string
@@ -170,7 +180,7 @@ interface ChecklistPayload {
 
 interface BriefPayload {
   title: string
-  sectionId: string
+  sectionIds: string[]
   scope: EntityScope
   questions: Array<{
     text: string
@@ -512,16 +522,24 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
   const projectIds = new Set(projects.map((project) => project.id))
   const sectionIds = new Set(sections.map((section) => section.id))
   const sectionByTitle = new Map(sections.map((section) => [section.title, section]))
-  const getNormalizedSectionId = (item: { sectionId?: string; stage?: string }) => {
+  const getNormalizedSectionIds = (item: { sectionId?: string; sectionIds?: string[]; stage?: string }) => {
+    const normalizedSectionIds = [...new Set(item.sectionIds ?? [])].filter((sectionId) =>
+      sectionIds.has(sectionId)
+    )
+
+    if (normalizedSectionIds.length) {
+      return normalizedSectionIds
+    }
+
     if (item.sectionId && sectionIds.has(item.sectionId)) {
-      return item.sectionId
+      return [item.sectionId]
     }
 
     if (item.stage && sectionByTitle.has(item.stage)) {
-      return sectionByTitle.get(item.stage)?.id ?? sections[0].id
+      return [sectionByTitle.get(item.stage)?.id ?? sections[0].id]
     }
 
-    return sections[0].id
+    return [sections[0].id]
   }
   const currentProjectId = projectIds.has(projectData.currentProjectId ?? '')
     ? projectData.currentProjectId as string
@@ -542,7 +560,7 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
     currentUserId,
     checklists: (projectData.checklists ?? []).map((checklist) => ({
       ...checklist,
-      sectionId: getNormalizedSectionId(checklist),
+      sectionIds: getNormalizedSectionIds(checklist),
       scope: checklist.scope ?? 'common',
       projectId: checklist.projectId ?? currentProjectId,
       items: checklist.items.map((item) => ({
@@ -576,7 +594,7 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
 
         return {
           ...brief,
-          sectionId: getNormalizedSectionId(brief),
+          sectionIds: getNormalizedSectionIds(brief),
           scope: brief.scope ?? 'common',
           projectId: brief.projectId ?? currentProjectId,
           status,
@@ -1130,8 +1148,8 @@ export const useProjectStore = () => {
   }
 
   const getSectionDocumentCount = (sectionId: string) =>
-    data.value.checklists.filter((checklist) => checklist.sectionId === sectionId).length +
-    data.value.briefs.filter((brief) => brief.sectionId === sectionId).length
+    data.value.checklists.filter((checklist) => checklist.sectionIds.includes(sectionId)).length +
+    data.value.briefs.filter((brief) => brief.sectionIds.includes(sectionId)).length
 
   const deleteSection = (sectionId: string) => {
     if (data.value.sections.length <= 1) {
@@ -1166,7 +1184,7 @@ export const useProjectStore = () => {
     const checklist: Checklist = {
       id: createId(),
       title: payload.title,
-      sectionId: payload.sectionId,
+      sectionIds: payload.sectionIds,
       scope: payload.scope,
       projectId: data.value.currentProjectId,
       createdAt: new Date().toISOString(),
@@ -1193,7 +1211,7 @@ export const useProjectStore = () => {
     }
 
     checklist.title = payload.title
-    checklist.sectionId = payload.sectionId
+    checklist.sectionIds = payload.sectionIds
     checklist.scope = payload.scope
     checklist.projectId = payload.scope === 'project' ? data.value.currentProjectId : checklist.projectId
     checklist.items = payload.items.map((item, index) => {
@@ -1250,7 +1268,7 @@ export const useProjectStore = () => {
     const brief: Brief = {
       id: createId(),
       title: payload.title,
-      sectionId: payload.sectionId,
+      sectionIds: payload.sectionIds,
       scope: payload.scope,
       projectId: data.value.currentProjectId,
       status: 'draft',
@@ -1280,7 +1298,7 @@ export const useProjectStore = () => {
     }
 
     brief.title = payload.title
-    brief.sectionId = payload.sectionId
+    brief.sectionIds = payload.sectionIds
     brief.scope = payload.scope
     brief.projectId = payload.scope === 'project' ? data.value.currentProjectId : brief.projectId
     brief.questions = payload.questions.map((question, index) => ({
@@ -1452,7 +1470,7 @@ export const useProjectStore = () => {
   const getChecklistsBySection = (sectionId: string) =>
     computed(() =>
       data.value.checklists
-        .filter((checklist) => checklist.sectionId === sectionId && isVisibleInCurrentProject(checklist))
+        .filter((checklist) => checklist.sectionIds.includes(sectionId) && isVisibleInCurrentProject(checklist))
         .toSorted((firstChecklist, secondChecklist) =>
           new Date(secondChecklist.createdAt).getTime() - new Date(firstChecklist.createdAt).getTime()
         )
@@ -1461,7 +1479,7 @@ export const useProjectStore = () => {
   const getBriefsBySection = (sectionId: string) =>
     computed(() =>
       data.value.briefs
-        .filter((brief) => brief.sectionId === sectionId && isVisibleInCurrentProject(brief))
+        .filter((brief) => brief.sectionIds.includes(sectionId) && isVisibleInCurrentProject(brief))
         .toSorted((firstBrief, secondBrief) =>
           new Date(secondBrief.createdAt).getTime() - new Date(firstBrief.createdAt).getTime()
         )
@@ -1471,6 +1489,7 @@ export const useProjectStore = () => {
     data,
     getSectionPermissionId,
     briefQuestionTypes,
+    briefQuestionTypeLabels,
     briefStatusLabels,
     briefLinkStatusLabels,
     currentProject,

@@ -3,6 +3,7 @@ import type { BriefQuestionType, EntityScope } from '~/composables/useProjectSto
 
 const { activeType, closeCreationModal, editingId } = useCreationModal()
 const {
+  briefQuestionTypeLabels,
   briefQuestionTypes,
   createBrief,
   createChecklist,
@@ -14,10 +15,31 @@ const {
 const optionTypes: BriefQuestionType[] = ['radio', 'checkbox', 'select', 'multiselect']
 const activeSections = computed(() => data.value.sections.filter((section) => section.isActive))
 const getDefaultSectionId = () => activeSections.value[0]?.id ?? data.value.sections[0]?.id ?? ''
+const getDefaultSectionIds = () => {
+  const sectionId = getDefaultSectionId()
+
+  return sectionId ? [sectionId] : []
+}
+const sectionOptions = computed(() =>
+  activeSections.value.map((section) => ({
+    value: section.id,
+    label: section.title
+  }))
+)
+const scopeOptions = [
+  { value: 'common', label: 'Общий' },
+  { value: 'project', label: 'Проектный' }
+]
+const questionTypeOptions = computed(() =>
+  briefQuestionTypes.map((type) => ({
+    value: type,
+    label: briefQuestionTypeLabels[type]
+  }))
+)
 
 const createChecklistForm = () => ({
   title: '',
-  sectionId: getDefaultSectionId(),
+  sectionIds: getDefaultSectionIds(),
   scope: 'common' as EntityScope,
   items: [
     {
@@ -29,7 +51,7 @@ const createChecklistForm = () => ({
 
 const createBriefForm = () => ({
   title: '',
-  sectionId: getDefaultSectionId(),
+  sectionIds: getDefaultSectionIds(),
   scope: 'common' as EntityScope,
   questions: [
     {
@@ -62,6 +84,23 @@ const resetBriefForm = () => {
   Object.assign(briefForm, createBriefForm())
 }
 
+const getEntitySectionIds = (entity: { sectionId?: string; sectionIds?: string[] }) => {
+  if (entity.sectionIds?.length) {
+    return [...entity.sectionIds]
+  }
+
+  return entity.sectionId ? [entity.sectionId] : getDefaultSectionIds()
+}
+
+const normalizeFormSectionIds = (sectionIds: string[]) => {
+  const activeSectionIds = new Set(activeSections.value.map((section) => section.id))
+  const normalizedSectionIds = [...new Set(sectionIds)].filter((sectionId) =>
+    activeSectionIds.has(sectionId)
+  )
+
+  return normalizedSectionIds.length ? normalizedSectionIds : getDefaultSectionIds()
+}
+
 const fillChecklistForm = (id: string) => {
   const checklist = data.value.checklists.find((item) => item.id === id)
 
@@ -71,7 +110,7 @@ const fillChecklistForm = (id: string) => {
   }
 
   checklistForm.title = checklist.title
-  checklistForm.sectionId = checklist.sectionId
+  checklistForm.sectionIds = getEntitySectionIds(checklist)
   checklistForm.scope = checklist.scope
   checklistForm.items = checklist.items.map((item) => ({
     text: item.text,
@@ -88,7 +127,7 @@ const fillBriefForm = (id: string) => {
   }
 
   briefForm.title = brief.title
-  briefForm.sectionId = brief.sectionId
+  briefForm.sectionIds = getEntitySectionIds(brief)
   briefForm.scope = brief.scope
   briefForm.questions = brief.questions.map((question) => ({
     text: question.text,
@@ -174,7 +213,7 @@ const submitChecklist = () => {
 
   const payload = {
     title: checklistForm.title.trim(),
-    sectionId: checklistForm.sectionId || getDefaultSectionId(),
+    sectionIds: normalizeFormSectionIds(checklistForm.sectionIds),
     scope: checklistForm.scope,
     items
   }
@@ -209,7 +248,7 @@ const submitBrief = () => {
 
   const payload = {
     title: briefForm.title.trim(),
-    sectionId: briefForm.sectionId || getDefaultSectionId(),
+    sectionIds: normalizeFormSectionIds(briefForm.sectionIds),
     scope: briefForm.scope,
     questions
   }
@@ -233,152 +272,156 @@ const submitBrief = () => {
         class="creation-form"
         @submit.prevent="submitChecklist"
       >
-        <div class="section-header">
+        <div class="section-header creation-form__header">
           <h2 class="section-title">{{ modalTitle }}</h2>
           <BaseModalCloseButton @click="closeModal" />
         </div>
 
-        <label class="field">
-          <span class="field__label">Название</span>
-          <input v-model="checklistForm.title" class="field__control" type="text" required />
-        </label>
+        <div class="creation-form__body">
+          <label class="field">
+            <span class="field__label">Название</span>
+            <input v-model="checklistForm.title" class="field__control" type="text" required />
+          </label>
 
-        <label class="field">
-          <span class="field__label">Раздел</span>
-          <select v-model="checklistForm.sectionId" class="field__control">
-            <option v-for="section in activeSections" :key="section.id" :value="section.id">
-              {{ section.title }}
-            </option>
-          </select>
-        </label>
+          <div class="creation-form__field-row">
+            <div class="field">
+              <span class="field__label">Раздел</span>
+              <BaseMultiSelect
+                v-model="checklistForm.sectionIds"
+                :options="sectionOptions"
+                placeholder="Выберите разделы"
+              />
+            </div>
 
-        <label class="field">
-          <span class="field__label">Тип</span>
-          <select v-model="checklistForm.scope" class="field__control">
-            <option value="common">Общий</option>
-            <option value="project">Проектный</option>
-          </select>
-        </label>
-
-        <div class="creation-form__group">
-          <span class="creation-form__group-title">Пункты</span>
-
-          <div
-            v-for="(item, index) in checklistForm.items"
-            :key="index"
-            class="creation-form__row"
-          >
-            <label class="field">
-              <span class="field__label">Текст</span>
-              <input v-model="item.text" class="field__control" type="text" required />
-            </label>
-
-            <label class="switch-field">
-              <input v-model="item.required" class="switch-field__control" type="checkbox" />
-              <span class="switch-field__label">Обязательный пункт</span>
-            </label>
-
-            <button
-              class="button button--danger"
-              type="button"
-              :disabled="checklistForm.items.length === 1"
-              @click="removeChecklistItem(index)"
-            >
-              Удалить
-            </button>
+            <div class="field">
+              <span class="field__label">Тип</span>
+              <BaseSelect v-model="checklistForm.scope" :options="scopeOptions" />
+            </div>
           </div>
 
-          <button class="button button--secondary" type="button" @click="addChecklistItem">
-            Добавить пункт
-          </button>
+          <div class="creation-form__group">
+            <span class="creation-form__group-title">Пункты</span>
+
+            <div
+              v-for="(item, index) in checklistForm.items"
+              :key="index"
+              class="creation-form__row"
+            >
+              <label class="field">
+                <span class="field__label">Текст</span>
+                <input v-model="item.text" class="field__control" type="text" required />
+              </label>
+
+              <label class="switch-field">
+                <input v-model="item.required" class="switch-field__control" type="checkbox" />
+                <span class="switch-field__label">Обязательный пункт</span>
+              </label>
+
+              <button
+                class="button button--danger"
+                type="button"
+                :disabled="checklistForm.items.length === 1"
+                @click="removeChecklistItem(index)"
+              >
+                Удалить
+              </button>
+            </div>
+
+            <button class="button button--secondary" type="button" @click="addChecklistItem">
+              Добавить пункт
+            </button>
+          </div>
         </div>
 
-        <button class="button button--primary" type="submit">
-          {{ isEditing ? 'Сохранить чеклист' : 'Создать чеклист' }}
-        </button>
+        <div class="creation-form__footer">
+          <button class="button button--primary" type="submit">
+            {{ isEditing ? 'Сохранить чеклист' : 'Создать чеклист' }}
+          </button>
+        </div>
       </form>
 
       <form v-else class="creation-form" @submit.prevent="submitBrief">
-        <div class="section-header">
+        <div class="section-header creation-form__header">
           <h2 class="section-title">{{ modalTitle }}</h2>
           <BaseModalCloseButton @click="closeModal" />
         </div>
 
-        <label class="field">
-          <span class="field__label">Название</span>
-          <input v-model="briefForm.title" class="field__control" type="text" required />
-        </label>
+        <div class="creation-form__body">
+          <label class="field">
+            <span class="field__label">Название</span>
+            <input v-model="briefForm.title" class="field__control" type="text" required />
+          </label>
 
-        <label class="field">
-          <span class="field__label">Раздел</span>
-          <select v-model="briefForm.sectionId" class="field__control">
-            <option v-for="section in activeSections" :key="section.id" :value="section.id">
-              {{ section.title }}
-            </option>
-          </select>
-        </label>
+          <div class="creation-form__field-row">
+            <div class="field">
+              <span class="field__label">Раздел</span>
+              <BaseMultiSelect
+                v-model="briefForm.sectionIds"
+                :options="sectionOptions"
+                placeholder="Выберите разделы"
+              />
+            </div>
 
-        <label class="field">
-          <span class="field__label">Тип</span>
-          <select v-model="briefForm.scope" class="field__control">
-            <option value="common">Общий</option>
-            <option value="project">Проектный</option>
-          </select>
-        </label>
-
-        <div class="creation-form__group">
-          <span class="creation-form__group-title">Вопросы</span>
-
-          <div
-            v-for="(question, index) in briefForm.questions"
-            :key="index"
-            class="creation-form__row"
-          >
-            <label class="field">
-              <span class="field__label">Текст вопроса</span>
-              <input v-model="question.text" class="field__control" type="text" required />
-            </label>
-
-            <label class="field">
-              <span class="field__label">Тип поля</span>
-              <select v-model="question.type" class="field__control">
-                <option v-for="type in briefQuestionTypes" :key="type" :value="type">{{ type }}</option>
-              </select>
-            </label>
-
-            <label class="field">
-              <span class="field__label">Пояснение</span>
-              <input v-model="question.description" class="field__control" type="text" />
-            </label>
-
-            <label v-if="optionTypes.includes(question.type)" class="field">
-              <span class="field__label">Варианты ответа</span>
-              <textarea v-model="question.optionsText" class="field__control" rows="4" />
-            </label>
-
-            <label class="switch-field">
-              <input v-model="question.required" class="switch-field__control" type="checkbox" />
-              <span class="switch-field__label">Обязательный вопрос</span>
-            </label>
-
-            <button
-              class="button button--danger"
-              type="button"
-              :disabled="briefForm.questions.length === 1"
-              @click="removeBriefQuestion(index)"
-            >
-              Удалить
-            </button>
+            <div class="field">
+              <span class="field__label">Тип</span>
+              <BaseSelect v-model="briefForm.scope" :options="scopeOptions" />
+            </div>
           </div>
 
-          <button class="button button--secondary" type="button" @click="addBriefQuestion">
-            Добавить вопрос
-          </button>
+          <div class="creation-form__group">
+            <span class="creation-form__group-title">Вопросы</span>
+
+            <div
+              v-for="(question, index) in briefForm.questions"
+              :key="index"
+              class="creation-form__row"
+            >
+              <label class="field">
+                <span class="field__label">Текст вопроса</span>
+                <input v-model="question.text" class="field__control" type="text" required />
+              </label>
+
+              <div class="field">
+                <span class="field__label">Тип поля</span>
+                <BaseSelect v-model="question.type" :options="questionTypeOptions" />
+              </div>
+
+              <label class="field">
+                <span class="field__label">Описание</span>
+                <textarea v-model="question.description" class="field__control" rows="3" />
+              </label>
+
+              <label v-if="optionTypes.includes(question.type)" class="field">
+                <span class="field__label">Варианты ответа</span>
+                <textarea v-model="question.optionsText" class="field__control" rows="4" />
+              </label>
+
+              <label class="switch-field">
+                <input v-model="question.required" class="switch-field__control" type="checkbox" />
+                <span class="switch-field__label">Обязательный вопрос</span>
+              </label>
+
+              <button
+                class="button button--danger"
+                type="button"
+                :disabled="briefForm.questions.length === 1"
+                @click="removeBriefQuestion(index)"
+              >
+                Удалить
+              </button>
+            </div>
+
+            <button class="button button--secondary" type="button" @click="addBriefQuestion">
+              Добавить вопрос
+            </button>
+          </div>
         </div>
 
-        <button class="button button--primary" type="submit">
-          {{ isEditing ? 'Сохранить бриф' : 'Создать бриф' }}
-        </button>
+        <div class="creation-form__footer">
+          <button class="button button--primary" type="submit">
+            {{ isEditing ? 'Сохранить бриф' : 'Создать бриф' }}
+          </button>
+        </div>
       </form>
     </div>
   </div>

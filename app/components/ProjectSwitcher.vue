@@ -6,7 +6,6 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxItemIndicator,
-  ComboboxLabel,
   ComboboxPortal,
   ComboboxRoot,
   ComboboxTrigger,
@@ -40,8 +39,6 @@ const displayProject = (project?: ProjectOption) => project?.title ?? ''
     :open-on-click="true"
     :open-on-focus="true"
   >
-    <ComboboxLabel class="project-switcher__label">Проект</ComboboxLabel>
-
     <ComboboxAnchor class="project-switcher__anchor">
       <ComboboxInput
         class="project-switcher__control"
@@ -57,6 +54,7 @@ const displayProject = (project?: ProjectOption) => project?.title ?? ''
       <ComboboxContent
         class="project-switcher__content"
         position="popper"
+        :body-lock="false"
         :side-offset="4"
         :collision-padding="16"
       >

@@ -40,6 +40,18 @@ const iconNames = [
   'trash'
 ] as const
 
+const fieldSelectOptions = [
+  { value: 'approval', label: 'Согласование' },
+  { value: 'design', label: 'Дизайн' },
+  { value: 'development', label: 'Разработка' }
+]
+
+const baseSelectValue = ref('design')
+const placeholderSelectValue = ref('')
+const disabledSelectValue = ref('approval')
+const baseMultiSelectValue = ref(['approval', 'design'])
+const emptyMultiSelectValue = ref<string[]>([])
+
 const tableRows = [
   { component: 'BriefLinkItemCompleted', status: 'Согласован', owner: 'Менеджер' },
   { component: 'ChecklistItemRequired', status: 'Ожидает', owner: 'Дизайнер' },
@@ -203,6 +215,55 @@ const tableRows = [
 
       <details class="ui-accordion">
         <summary class="ui-accordion__summary">
+          <span class="section-title">Выпадающие списки</span>
+          <span class="ui-accordion__meta">SelectControls</span>
+        </summary>
+        <div class="ui-accordion__body">
+          <div class="ui-grid">
+            <div class="ui-sample">
+              <span class="ui-name">BaseSelectDefault</span>
+              <BaseSelect v-model="baseSelectValue" :options="fieldSelectOptions" />
+              <code class="ui-code">BaseSelect v-model options</code>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BaseSelectPlaceholder</span>
+              <BaseSelect
+                v-model="placeholderSelectValue"
+                :options="fieldSelectOptions"
+                placeholder="Выберите раздел"
+              />
+              <code class="ui-code">placeholder="Выберите раздел"</code>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BaseSelectDisabled</span>
+              <BaseSelect v-model="disabledSelectValue" :options="fieldSelectOptions" disabled />
+              <code class="ui-code">disabled</code>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BaseMultiSelectDefault</span>
+              <BaseMultiSelect v-model="baseMultiSelectValue" :options="fieldSelectOptions" />
+              <code class="ui-code">BaseMultiSelect v-model options</code>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BaseMultiSelectPlaceholder</span>
+              <BaseMultiSelect
+                v-model="emptyMultiSelectValue"
+                :options="fieldSelectOptions"
+                placeholder="Выберите разделы"
+              />
+              <code class="ui-code">placeholder="Выберите разделы"</code>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">ProjectSwitcherCombobox</span>
+              <ProjectSwitcher />
+              <code class="ui-code">Combobox с поиском</code>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <details class="ui-accordion">
+        <summary class="ui-accordion__summary">
           <span class="section-title">Поля форм</span>
           <span class="ui-accordion__meta">FormControls</span>
         </summary>
@@ -212,14 +273,10 @@ const tableRows = [
               <span class="field__label">FieldText</span>
               <input class="field__control" type="text" value="Название брифа" />
             </label>
-            <label class="field">
+            <div class="field">
               <span class="field__label">FieldSelect</span>
-              <select class="field__control">
-                <option>Согласование</option>
-                <option selected>Дизайн</option>
-                <option>Разработка</option>
-              </select>
-            </label>
+              <BaseSelect model-value="design" :options="fieldSelectOptions" />
+            </div>
             <label class="field">
               <span class="field__label">FieldTextarea</span>
               <textarea class="field__control">Комментарий к пункту чеклиста</textarea>
@@ -228,10 +285,6 @@ const tableRows = [
               <span class="field__label">FieldDisabled</span>
               <input class="field__control" type="text" value="Поле закрыто" disabled />
             </label>
-            <div class="ui-sample">
-              <span class="ui-name">ProjectSwitcherCombobox</span>
-              <ProjectSwitcher />
-            </div>
             <div class="ui-sample">
               <span class="ui-name">ChoiceRadioList</span>
               <div class="choice-list">
@@ -622,7 +675,7 @@ const tableRows = [
               <div class="public-brief__question">
                 <span class="ui-name">PublicBriefQuestionText</span>
                 <span class="public-brief__question-title">Какая цель страницы?</span>
-                <span class="public-brief__description">Пояснение для клиента.</span>
+                <span class="public-brief__description">Описание для клиента.</span>
                 <label class="field">
                   <span class="field__label">Ответ</span>
                   <input class="field__control" type="text" value="Получить заявки" />

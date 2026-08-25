@@ -1,7 +1,9 @@
 .user-menu {
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: var(--space-sm);
+  min-width: 0;
 
   &__avatar {
     width: 40px;

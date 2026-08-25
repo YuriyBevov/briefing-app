@@ -1,13 +1,20 @@
 .sidebar {
   display: grid;
-  gap: var(--space-md);
-  padding: var(--space-md);
   border-bottom: 1px solid var(--color-border);
   background-color: var(--color-surface);
 
   &__top {
+    min-height: var(--topbar-height);
+    display: flex;
+    align-items: center;
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  &__content {
     display: grid;
     gap: var(--space-md);
+    padding: var(--space-md);
   }
 
   &__nav {
@@ -48,8 +55,12 @@
   }
 
   &__footer {
-    display: grid;
-    gap: var(--space-md);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    min-width: 0;
+    padding: var(--space-md);
+    border-top: 1px solid var(--color-border);
   }
 }
 
@@ -59,7 +70,7 @@
     top: 0;
     min-height: 100vh;
     align-content: start;
-    grid-template-rows: auto auto 1fr auto;
+    grid-template-rows: var(--topbar-height) 1fr auto;
     border-right: 1px solid var(--color-border);
     border-bottom: 0;
   }

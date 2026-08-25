@@ -160,7 +160,11 @@ const tableRows = [
             </div>
             <div class="ui-sample">
               <span class="ui-name">ThemeToggle</span>
-              <button class="theme-toggle" type="button">Светлая тема</button>
+              <button class="theme-toggle" type="button" aria-label="ThemeToggle">
+                <svg class="theme-toggle__icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M20.4 14.4A7.2 7.2 0 0 1 9.6 3.6 8.4 8.4 0 1 0 20.4 14.4Z" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
@@ -544,25 +548,26 @@ const tableRows = [
             <aside class="sidebar ui-sidebar-preview">
               <div class="sidebar__top">
                 <a class="logo" href="/">Логотип</a>
+              </div>
+              <div class="sidebar__content">
                 <label class="project-switcher">
                   <span class="project-switcher__label">ProjectSwitcher</span>
                   <select class="project-switcher__control">
                     <option>Проект Alpha</option>
                   </select>
                 </label>
+                <nav class="sidebar__nav" aria-label="Демо меню">
+                  <ul class="sidebar__list">
+                    <li class="sidebar__item">
+                      <a class="sidebar__link router-link-active" href="/">Согласование</a>
+                    </li>
+                    <li class="sidebar__item">
+                      <a class="sidebar__link" href="/design">Дизайн</a>
+                    </li>
+                  </ul>
+                </nav>
               </div>
-              <nav class="sidebar__nav" aria-label="Демо меню">
-                <ul class="sidebar__list">
-                  <li class="sidebar__item">
-                    <a class="sidebar__link router-link-active" href="/">Согласование</a>
-                  </li>
-                  <li class="sidebar__item">
-                    <a class="sidebar__link" href="/design">Дизайн</a>
-                  </li>
-                </ul>
-              </nav>
               <div class="sidebar__footer">
-                <button class="theme-toggle" type="button">Светлая тема</button>
                 <div class="user-menu">
                   <span class="user-menu__avatar">ЮБ</span>
                   <span class="user-menu__body">
@@ -570,6 +575,11 @@ const tableRows = [
                     <span class="user-menu__role">Менеджер</span>
                   </span>
                 </div>
+                <button class="theme-toggle" type="button" aria-label="ThemeToggle">
+                  <svg class="theme-toggle__icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20.4 14.4A7.2 7.2 0 0 1 9.6 3.6 8.4 8.4 0 1 0 20.4 14.4Z" />
+                  </svg>
+                </button>
               </div>
             </aside>
             <div class="workspace-panel">

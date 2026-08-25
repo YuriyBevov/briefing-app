@@ -560,6 +560,26 @@ const tableRows = [
                     </li>
                   </ul>
                 </nav>
+                <nav class="sidebar__nav sidebar__nav--create" aria-label="Демо создание">
+                  <ul class="sidebar__list">
+                    <li class="sidebar__item">
+                      <button class="sidebar__link" type="button">Создать бриф</button>
+                    </li>
+                    <li class="sidebar__item">
+                      <button class="sidebar__link" type="button">Создать чеклист</button>
+                    </li>
+                  </ul>
+                </nav>
+                <nav class="sidebar__nav sidebar__nav--utility" aria-label="Демо настройки">
+                  <ul class="sidebar__list">
+                    <li class="sidebar__item">
+                      <button class="sidebar__link" type="button">Настройки</button>
+                    </li>
+                    <li class="sidebar__item">
+                      <a class="sidebar__link" href="/ui-components">UI-компоненты</a>
+                    </li>
+                  </ul>
+                </nav>
               </div>
               <div class="sidebar__footer">
                 <div class="user-menu">

@@ -4,23 +4,22 @@ const mainMenu = [
   { title: 'Дизайн', to: '/design' },
   { title: 'Разработка', to: '/development' },
   { title: 'Деплой', to: '/deploy' },
-  { title: 'Поддержка', to: '/support' },
-  { title: 'UI-компоненты', to: '/ui-components' }
+  { title: 'Поддержка', to: '/support' }
 ]
 
 const { openCreationModal } = useCreationModal()
 
-const bottomMenu = [
-  { title: 'Настройки', action: null },
+const createMenu = [
   { title: 'Создать бриф', action: 'brief' as const },
   { title: 'Создать чеклист', action: 'checklist' as const }
 ]
 
-const handleBottomAction = (action: (typeof bottomMenu)[number]['action']) => {
-  if (!action) {
-    return
-  }
+const utilityMenu = [
+  { title: 'Настройки', to: null },
+  { title: 'UI-компоненты', to: '/ui-components' }
+]
 
+const handleCreateAction = (action: (typeof createMenu)[number]['action']) => {
   openCreationModal(action)
 }
 </script>
@@ -44,12 +43,21 @@ const handleBottomAction = (action: (typeof bottomMenu)[number]['action']) => {
         </ul>
       </nav>
 
-      <nav class="sidebar__nav sidebar__nav--bottom" aria-label="Нижнее меню">
+      <nav class="sidebar__nav sidebar__nav--create" aria-label="Создание">
         <ul class="sidebar__list">
-          <li v-for="item in bottomMenu" :key="item.title" class="sidebar__item">
-            <button class="sidebar__link" type="button" @click="handleBottomAction(item.action)">
+          <li v-for="item in createMenu" :key="item.title" class="sidebar__item">
+            <button class="sidebar__link" type="button" @click="handleCreateAction(item.action)">
               {{ item.title }}
             </button>
+          </li>
+        </ul>
+      </nav>
+
+      <nav class="sidebar__nav sidebar__nav--utility" aria-label="Настройки">
+        <ul class="sidebar__list">
+          <li v-for="item in utilityMenu" :key="item.title" class="sidebar__item">
+            <NuxtLink v-if="item.to" class="sidebar__link" :to="item.to">{{ item.title }}</NuxtLink>
+            <button v-else class="sidebar__link" type="button">{{ item.title }}</button>
           </li>
         </ul>
       </nav>

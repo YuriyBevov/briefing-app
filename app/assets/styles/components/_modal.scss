@@ -1,0 +1,128 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  align-items: end;
+  padding: var(--space-md);
+  background-color: rgba(0, 0, 0, 0.56);
+
+  &__panel {
+    width: min(100%, 720px);
+    max-height: calc(100vh - 32px);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    margin-inline: auto;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+    box-shadow: var(--shadow-shell);
+  }
+
+  &__header,
+  &__footer {
+    position: sticky;
+    z-index: 2;
+    background-color: var(--color-surface);
+  }
+
+  &__header {
+    top: 0;
+    padding: var(--space-md);
+  }
+
+  &__body {
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-md);
+  }
+
+  &__footer {
+    bottom: 0;
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+    padding: var(--space-md);
+  }
+}
+
+.modal-form {
+  display: grid;
+  gap: var(--space-md);
+  max-width: 760px;
+
+  &__field-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-md);
+  }
+
+  &__field-row--question {
+    grid-template-columns: minmax(0, 6fr) minmax(0, 4fr);
+  }
+
+  &__choice-list {
+    min-height: 40px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-sm) var(--space-md);
+    padding: 8px 0;
+  }
+
+  &__choice-list .checkbox,
+  &__choice-list .radio {
+    flex: 0 0 auto;
+  }
+
+  &__group {
+    display: grid;
+    gap: var(--space-md);
+  }
+
+  &__group-title {
+    color: var(--color-text);
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  &__row {
+    display: grid;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background-color: var(--color-surface-muted);
+  }
+}
+
+.modal-confirm {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.modal-confirm__text {
+  color: var(--color-text-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+@media (min-width: 720px) {
+  .modal {
+    align-items: center;
+
+    &__header,
+    &__body,
+    &__footer {
+      padding: var(--space-lg);
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-form__field-row {
+    grid-template-columns: 1fr;
+  }
+}

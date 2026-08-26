@@ -59,54 +59,13 @@
   cursor: grabbing;
 }
 
-.settings-section__drag-icon,
-.settings-section__toggle-icon {
+.settings-section__drag-icon {
   width: 18px;
   height: 18px;
 }
 
 .settings-section__actions {
   flex-wrap: nowrap;
-}
-
-.settings-section__toggle-icon {
-  transition: transform 0.2s ease;
-}
-
-.settings-section--collapsed .settings-section__toggle-icon {
-  transform: rotate(-90deg);
-}
-
-.settings-form {
-  display: grid;
-  gap: var(--space-md);
-  max-width: 760px;
-}
-
-.settings-form > .button-row:last-child,
-.settings-confirm > .button-row:last-child {
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  justify-content: flex-end;
-  padding: var(--space-md) 0 0;
-  background-color: var(--color-surface);
-}
-
-.settings-form__group {
-  display: grid;
-  gap: var(--space-sm);
-}
-
-.settings-form__choice-list {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-sm) var(--space-md);
-}
-
-.settings-form__choice-list .switch-field {
-  flex: 0 0 auto;
 }
 
 .settings-permission-groups {
@@ -287,51 +246,4 @@
 .settings-card__badge--success {
   color: var(--color-success);
   background-color: color-mix(in srgb, var(--color-success) 14%, transparent);
-}
-
-.settings-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  padding: var(--space-md);
-  background-color: rgba(0, 0, 0, 0.48);
-}
-
-.settings-modal__panel {
-  width: min(100%, 680px);
-  max-height: min(720px, calc(100vh - 32px));
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-shell);
-}
-
-.settings-modal__header {
-  position: sticky;
-  top: 0;
-  z-index: 3;
-  padding: var(--space-lg);
-  background-color: var(--color-surface);
-}
-
-.settings-modal__body {
-  min-height: 0;
-  overflow-y: auto;
-  padding: 0 var(--space-lg) var(--space-lg);
-}
-
-.settings-confirm {
-  display: grid;
-  gap: var(--space-md);
-}
-
-.settings-confirm__text {
-  color: var(--color-text-muted);
-  font-size: 14px;
-  line-height: 1.5;
 }

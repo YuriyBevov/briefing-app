@@ -1,0 +1,24 @@
+.disclosure-toggle {
+  width: 32px;
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+.disclosure-toggle__icon {
+  width: 18px;
+  height: 18px;
+  color: var(--color-text-muted);
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.disclosure-toggle--expanded .disclosure-toggle__icon {
+  color: var(--color-text);
+  transform: rotate(0);
+}
+
+.disclosure-toggle:disabled .disclosure-toggle__icon {
+  color: var(--color-text-muted);
+  opacity: 0.48;
+  transform: rotate(-90deg);
+}

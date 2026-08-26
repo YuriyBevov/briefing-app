@@ -85,19 +85,18 @@ const toggleValue = (value: string) => {
         :collision-padding="16"
       >
         <div class="base-multi-select__viewport">
-          <label
+          <div
             v-for="option in options"
             :key="option.value"
             class="base-multi-select__item"
           >
-            <input
-              class="switch-field__control"
-              type="checkbox"
+            <BaseCheckbox
+              class="base-multi-select__checkbox"
               :checked="selectedValueSet.has(option.value)"
-              @change="toggleValue(option.value)"
+              :label="option.label"
+              @change="() => toggleValue(option.value)"
             />
-            <span class="base-multi-select__item-label">{{ option.label }}</span>
-          </label>
+          </div>
         </div>
       </PopoverContent>
     </PopoverPortal>

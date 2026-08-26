@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { VueDraggable } from 'vue-draggable-plus'
 import type {
+	Brief,
 	BriefLink,
 	BriefLinkStatus,
 	Checklist,
@@ -22,12 +24,22 @@ const {
 	createBriefRevisionLink,
 	getBriefsBySection,
 	getChecklistsBySection,
+	reorderBriefs,
+	reorderChecklists,
+	reorderWorkspaceBlocks,
 	updateBriefLinkTitle,
 	updateChecklistItemComment,
 	updateChecklistItemStatus,
 } = useProjectStore();
-const { openEditModal } = useCreationModal();
+const { openCreationModal, openEditModal } = useCreationModal();
 const copiedLinkId = ref("");
+const deletingChecklistId = ref("");
+const deletingBriefId = ref("");
+const deletingBriefLink = ref<{
+	briefId: string;
+	linkId: string;
+	title: string;
+} | null>(null);
 const renamingBriefLink = ref<{
 	briefId: string;
 	briefTitle: string;
@@ -43,6 +55,81 @@ const canViewSection = computed(() =>
 );
 const checklists = getChecklistsBySection(props.sectionId);
 const briefs = getBriefsBySection(props.sectionId);
+const stageBlocks = [
+	{
+		id: "checklists",
+		title: "Чеклисты",
+		createLabel: "Создать чеклист",
+	},
+	{
+		id: "briefs",
+		title: "Брифы",
+		createLabel: "Создать бриф",
+	},
+] as const;
+const collapsedStageBlocks = useState<Record<string, boolean>>("stage-workspace-collapsed-blocks", () => ({
+	checklists: true,
+	briefs: true,
+}));
+const orderedStageBlocks = computed({
+	get: () => {
+		const blocksById = new Map(stageBlocks.map((block) => [block.id, block]));
+		const orderedBlocks = data.value.workspaceBlockOrder
+			.map((blockId) => blocksById.get(blockId))
+			.filter(Boolean) as Array<(typeof stageBlocks)[number]>;
+		const orderedIds = new Set(orderedBlocks.map((block) => block.id));
+
+		return [
+			...orderedBlocks,
+			...stageBlocks.filter((block) => !orderedIds.has(block.id)),
+		];
+	},
+	set: (blocks) => {
+		reorderWorkspaceBlocks(blocks.map((block) => block.id));
+	},
+});
+const orderedChecklists = computed({
+	get: () => checklists.value,
+	set: (items: Checklist[]) => {
+		reorderChecklists(items.map((item) => item.id));
+	},
+});
+const orderedBriefs = computed({
+	get: () => briefs.value,
+	set: (items: Brief[]) => {
+		reorderBriefs(items.map((item) => item.id));
+	},
+});
+
+const isStageBlockCollapsed = (blockId: string) => collapsedStageBlocks.value[blockId] ?? true;
+
+const getStageBlockItemCount = (blockId: string) => {
+	if (blockId === "checklists") {
+		return orderedChecklists.value.length;
+	}
+
+	if (blockId === "briefs") {
+		return orderedBriefs.value.length;
+	}
+
+	return 0;
+};
+
+const toggleStageBlock = (blockId: string) => {
+	if (getStageBlockItemCount(blockId) === 0) {
+		return;
+	}
+
+	collapsedStageBlocks.value = {
+		...collapsedStageBlocks.value,
+		[blockId]: !isStageBlockCollapsed(blockId),
+	};
+};
+
+const openCreateModalByBlock = (blockId: string) => {
+	openCreationModal(blockId === "checklists" ? "checklist" : "brief");
+};
+
 const getChecklistProgress = (checklist: Checklist) => {
 	if (checklist.items.length === 0) {
 		return 0;
@@ -61,7 +148,20 @@ const editChecklist = (id: string) => {
 };
 
 const removeChecklist = (id: string) => {
-	deleteChecklist(id);
+	deletingChecklistId.value = id;
+};
+
+const closeDeleteChecklistModal = () => {
+	deletingChecklistId.value = "";
+};
+
+const confirmRemoveChecklist = () => {
+	if (!deletingChecklistId.value) {
+		return;
+	}
+
+	deleteChecklist(deletingChecklistId.value);
+	closeDeleteChecklistModal();
 };
 
 const changeChecklistItemStatus = (
@@ -91,8 +191,27 @@ const editBrief = (id: string) => {
 	openEditModal("brief", id);
 };
 
+const canExpandBrief = (brief: Brief) => brief.links.length > 0;
+
+const preventSummaryToggle = (event: MouseEvent) => {
+	event.preventDefault();
+};
+
 const removeBrief = (id: string) => {
-	deleteBrief(id);
+	deletingBriefId.value = id;
+};
+
+const closeDeleteBriefModal = () => {
+	deletingBriefId.value = "";
+};
+
+const confirmRemoveBrief = () => {
+	if (!deletingBriefId.value) {
+		return;
+	}
+
+	deleteBrief(deletingBriefId.value);
+	closeDeleteBriefModal();
 };
 
 const createClientLink = (id: string) => {
@@ -174,7 +293,7 @@ const getBriefLinkStatusClasses = (status: BriefLinkStatus) => ({
 	"brief-card__link-status--archived": status === "archived",
 });
 
-const toggleBriefHistory = (event: MouseEvent) => {
+const toggleClosestDetails = (event: MouseEvent) => {
 	const details = (event.currentTarget as HTMLElement).closest("details");
 
 	if (details) {
@@ -191,7 +310,31 @@ const acceptBriefToWork = (briefId: string, linkId: string) => {
 };
 
 const removeBriefLink = (briefId: string, linkId: string) => {
-	deleteBriefLink(briefId, linkId);
+	const brief = data.value.briefs.find((item) => item.id === briefId);
+	const link = brief?.links.find((item) => item.id === linkId);
+
+	if (!brief || !link) {
+		return;
+	}
+
+	deletingBriefLink.value = {
+		briefId,
+		linkId,
+		title: getBriefLinkTitle(link, brief.title),
+	};
+};
+
+const closeDeleteBriefLinkModal = () => {
+	deletingBriefLink.value = null;
+};
+
+const confirmRemoveBriefLink = () => {
+	if (!deletingBriefLink.value) {
+		return;
+	}
+
+	deleteBriefLink(deletingBriefLink.value.briefId, deletingBriefLink.value.linkId);
+	closeDeleteBriefLinkModal();
 };
 
 const copyBriefLink = async (link: BriefLink) => {
@@ -251,19 +394,38 @@ const getBriefLink = (token: string) => {
 			<h1 class="page-title">{{ section?.title }}</h1>
 		</div>
 
-		<div class="stage-page__workspace">
-			<section class="workspace-panel">
-				<div class="section-header">
-					<h2 class="section-title">Чеклисты</h2>
-				</div>
-
-				<div v-if="checklists.length" class="checklist-list">
+		<VueDraggable
+			v-model="orderedStageBlocks"
+			class="stage-page__workspace"
+			handle=".settings-section__drag"
+			:animation="180"
+		>
+			<BaseWorkspaceBlock
+				v-for="block in orderedStageBlocks"
+				:key="block.id"
+				:title="block.title"
+				:create-label="block.createLabel"
+				:collapsed="isStageBlockCollapsed(block.id)"
+				:toggle-disabled="getStageBlockItemCount(block.id) === 0"
+				@create="openCreateModalByBlock(block.id)"
+				@toggle="toggleStageBlock(block.id)"
+			>
+				<VueDraggable
+					v-if="block.id === 'checklists' && !isStageBlockCollapsed(block.id) && orderedChecklists.length"
+					v-model="orderedChecklists"
+					class="checklist-list"
+					handle=".checklist-card__drag"
+					:animation="180"
+				>
 					<details
-						v-for="checklist in checklists"
+						v-for="checklist in orderedChecklists"
 						:key="checklist.id"
 						class="checklist-card"
 					>
-						<summary class="checklist-card__header">
+						<summary class="checklist-card__header" @click="preventSummaryToggle">
+							<button class="checklist-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
+								<BaseIcon class="checklist-card__drag-icon" name="drag-handle" />
+							</button>
 							<span class="checklist-card__summary">
 								<span class="checklist-card__title">{{ checklist.title }}</span>
 								<span class="checklist-card__meta">
@@ -271,17 +433,16 @@ const getBriefLink = (token: string) => {
 									{{ getRequiredOpenCount(checklist) }} обязательных пунктов
 								</span>
 							</span>
-							<BaseIcon class="checklist-card__toggle-icon" name="chevron-down" />
+							<div class="button-row checklist-card__actions" @click.stop.prevent>
+								<BaseIconButton label="Изменить чеклист" icon="edit" @click="editChecklist(checklist.id)" />
+								<BaseIconButton label="Удалить чеклист" icon="trash" @click="removeChecklist(checklist.id)" />
+							</div>
+							<BaseDisclosureToggle
+								class="checklist-card__toggle"
+								label="Развернуть чеклист"
+								@click.stop.prevent="toggleClosestDetails"
+							/>
 						</summary>
-
-						<div class="button-row checklist-card__actions">
-							<button class="button button--secondary" type="button" @click="editChecklist(checklist.id)">
-								Редактировать
-							</button>
-							<button class="button button--danger" type="button" @click="removeChecklist(checklist.id)">
-								Удалить
-							</button>
-						</div>
 
 						<ul class="checklist-card__list">
 							<li
@@ -300,10 +461,11 @@ const getBriefLink = (token: string) => {
 									{{ item.text }}{{ item.required ? '*' : '' }}
 								</span>
 								<div class="checklist-card__item-controls">
-									<ChecklistStatusCheckbox
+									<BaseCheckbox
 										:checked="item.status === 'completed'"
 										label="Выполнено"
 										tone="success"
+										hide-label
 										@change="
 											toggleChecklistItemStatus(
 												checklist.id,
@@ -314,10 +476,11 @@ const getBriefLink = (token: string) => {
 										"
 									/>
 
-									<ChecklistStatusCheckbox
+									<BaseCheckbox
 										:checked="item.status === 'skipped'"
 										label="Не используется"
 										tone="danger"
+										hide-label
 										@change="
 											toggleChecklistItemStatus(
 												checklist.id,
@@ -340,43 +503,49 @@ const getBriefLink = (token: string) => {
 							</li>
 						</ul>
 					</details>
-				</div>
+				</VueDraggable>
 
-				<p v-else class="card-description">Создать чеклист</p>
-			</section>
-
-			<section class="workspace-panel">
-				<div class="section-header">
-					<h2 class="section-title">Брифы</h2>
-				</div>
-
-				<div v-if="briefs.length" class="brief-list">
-					<details v-for="brief in briefs" :key="brief.id" class="brief-card">
-						<summary class="brief-card__header">
+				<VueDraggable
+					v-else-if="block.id === 'briefs' && !isStageBlockCollapsed(block.id) && orderedBriefs.length"
+					v-model="orderedBriefs"
+					class="brief-list"
+					handle=".brief-card__drag"
+					:animation="180"
+				>
+					<details
+						v-for="brief in orderedBriefs"
+						:key="brief.id"
+						class="brief-card"
+						:class="{ 'brief-card--empty': !canExpandBrief(brief) }"
+					>
+						<summary class="brief-card__header" @click="preventSummaryToggle">
+							<button class="brief-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
+								<BaseIcon class="brief-card__drag-icon" name="drag-handle" />
+							</button>
 							<span class="brief-card__body">
 								<span class="brief-card__title">{{ brief.title }}</span>
 								<span class="brief-card__meta">
 									{{ getBriefMeta(brief.links, brief.questions.length) }}
 								</span>
 							</span>
-							<BaseIcon class="brief-card__toggle-icon" name="chevron-down" />
+							<div class="button-row brief-card__actions" @click.stop.prevent>
+								<BaseIconButton label="Изменить бриф" icon="edit" @click="editBrief(brief.id)" />
+								<button
+									class="button button--secondary button--small"
+									type="button"
+									@click="createClientLink(brief.id)"
+								>
+									Создать ссылку
+								</button>
+								<BaseIconButton label="Удалить бриф" icon="trash" @click="removeBrief(brief.id)" />
+							</div>
+							<BaseDisclosureToggle
+								class="brief-card__toggle"
+								:disabled="!canExpandBrief(brief)"
+								label="Развернуть бриф"
+								@click.stop.prevent="toggleClosestDetails"
+							/>
 						</summary>
-
-						<div class="button-row brief-card__actions">
-							<button class="button button--secondary" type="button" @click="editBrief(brief.id)">
-								Редактировать
-							</button>
-							<button
-								class="button button--secondary"
-								type="button"
-								@click="createClientLink(brief.id)"
-							>
-								Создать ссылку
-							</button>
-							<button class="button button--danger" type="button" @click="removeBrief(brief.id)">
-								Удалить
-							</button>
-						</div>
 
 						<div v-if="brief.links.length" class="brief-card__links">
 							<details
@@ -384,7 +553,7 @@ const getBriefLink = (token: string) => {
 								:key="history.id"
 								class="brief-card__link-item"
 							>
-								<summary class="brief-card__link-summary">
+								<summary class="brief-card__link-summary" @click="preventSummaryToggle">
 									<div class="brief-card__link-node brief-card__link-node--current">
 										<div
 											v-if="history.links[0]"
@@ -431,47 +600,45 @@ const getBriefLink = (token: string) => {
 											>
 												{{ getBriefLinkStatusLabel(history.links[0].status) }}
 											</span>
-											<button
-												class="button button--secondary button--small brief-card__icon-button brief-card__history-toggle"
-												type="button"
+											<BaseDisclosureToggle
+												class="brief-card__history-toggle"
 												:disabled="history.links.length <= 1"
-												aria-label="Свернуть историю"
-												title="История экземпляра"
-												@click.stop.prevent="toggleBriefHistory"
-											>
-												<BaseIcon class="brief-card__link-toggle-icon" name="chevron-down" />
-											</button>
+												label="История экземпляра"
+												@click.stop.prevent="toggleClosestDetails"
+											/>
 										</div>
 
 										<div
 											v-if="history.links[0] && history.links[0].status !== 'archived'"
 											class="button-row brief-card__link-actions"
 										>
+											<div class="button-row brief-card__link-actions-main">
+												<button
+													class="button button--secondary button--small"
+													type="button"
+													:disabled="
+														history.links[0].status === 'pending' ||
+														history.links[0].status === 'revision_pending' ||
+														history.links[0].status === 'archived'
+													"
+													@click.stop="openBriefForFilling(brief.id, history.links[0].id)"
+												>
+													Открыть бриф к заполнению
+												</button>
+												<button
+													class="button button--primary button--small"
+													type="button"
+													:disabled="
+														history.links[0].status !== 'completed' &&
+														history.links[0].status !== 'revision_completed'
+													"
+													@click.stop="acceptBriefToWork(brief.id, history.links[0].id)"
+												>
+													Принять в работу
+												</button>
+											</div>
 											<button
 												class="button button--danger button--small"
-												type="button"
-												:disabled="
-													history.links[0].status === 'pending' ||
-													history.links[0].status === 'revision_pending' ||
-													history.links[0].status === 'archived'
-												"
-												@click.stop="openBriefForFilling(brief.id, history.links[0].id)"
-											>
-												Открыть бриф к заполнению
-											</button>
-											<button
-												class="button button--primary button--small"
-												type="button"
-												:disabled="
-													history.links[0].status !== 'completed' &&
-													history.links[0].status !== 'revision_completed'
-												"
-												@click.stop="acceptBriefToWork(brief.id, history.links[0].id)"
-											>
-												Принять в работу
-											</button>
-											<button
-												class="button button--secondary button--small"
 												type="button"
 												@click.stop="removeBriefLink(brief.id, history.links[0].id)"
 											>
@@ -512,11 +679,9 @@ const getBriefLink = (token: string) => {
 							</details>
 						</div>
 					</details>
-				</div>
-
-				<p v-else class="card-description">Создать бриф</p>
-			</section>
-		</div>
+				</VueDraggable>
+			</BaseWorkspaceBlock>
+		</VueDraggable>
 	</section>
 
 	<section v-else class="stage-page">
@@ -529,12 +694,12 @@ const getBriefLink = (token: string) => {
 		</section>
 	</section>
 
-	<SettingsModal
+	<BaseModal
 		v-if="renamingBriefLink"
 		title="Изменить название ссылки"
 		@close="closeRenameBriefLinkModal"
 	>
-		<form class="settings-form" @submit.prevent="submitBriefLinkTitle">
+		<form id="brief-link-title-form" class="modal-form" @submit.prevent="submitBriefLinkTitle">
 			<label class="field">
 				<span class="field__label">Название</span>
 				<input
@@ -545,15 +710,70 @@ const getBriefLink = (token: string) => {
 					autofocus
 				/>
 			</label>
-
-			<div class="button-row">
-				<button class="button button--primary" type="submit">
-					Сохранить
-				</button>
-				<button class="button button--secondary" type="button" @click="closeRenameBriefLinkModal">
-					Отменить
-				</button>
-			</div>
 		</form>
-	</SettingsModal>
+
+		<template #footer>
+			<button class="button button--primary" type="submit" form="brief-link-title-form">
+				Сохранить
+			</button>
+			<button class="button button--secondary" type="button" @click="closeRenameBriefLinkModal">
+				Отменить
+			</button>
+		</template>
+	</BaseModal>
+
+	<BaseModal v-if="deletingChecklistId" title="Удалить чеклист?" @close="closeDeleteChecklistModal">
+		<div class="modal-confirm">
+			<p class="modal-confirm__text">
+				Чеклист будет удалён. Это действие нельзя отменить.
+			</p>
+		</div>
+
+		<template #footer>
+			<button class="button button--danger" type="button" @click="confirmRemoveChecklist">
+				Удалить
+			</button>
+			<button class="button button--secondary" type="button" @click="closeDeleteChecklistModal">
+				Отменить
+			</button>
+		</template>
+	</BaseModal>
+
+	<BaseModal v-if="deletingBriefId" title="Удалить бриф?" @close="closeDeleteBriefModal">
+		<div class="modal-confirm">
+			<p class="modal-confirm__text">
+				Бриф будет удалён вместе со всеми созданными ссылками. Это действие нельзя отменить.
+			</p>
+		</div>
+
+		<template #footer>
+			<button class="button button--danger" type="button" @click="confirmRemoveBrief">
+				Удалить
+			</button>
+			<button class="button button--secondary" type="button" @click="closeDeleteBriefModal">
+				Отменить
+			</button>
+		</template>
+	</BaseModal>
+
+	<BaseModal
+		v-if="deletingBriefLink"
+		title="Удалить ссылку на бриф?"
+		@close="closeDeleteBriefLinkModal"
+	>
+		<div class="modal-confirm">
+			<p class="modal-confirm__text">
+				Экземпляр «{{ deletingBriefLink.title }}» будет удалён вместе со всей историей.
+			</p>
+		</div>
+
+		<template #footer>
+			<button class="button button--danger" type="button" @click="confirmRemoveBriefLink">
+				Удалить
+			</button>
+			<button class="button button--secondary" type="button" @click="closeDeleteBriefLinkModal">
+				Отменить
+			</button>
+		</template>
+	</BaseModal>
 </template>

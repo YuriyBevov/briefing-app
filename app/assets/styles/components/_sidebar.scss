@@ -4,6 +4,9 @@
   background-color: var(--color-surface);
 
   &__top {
+    position: sticky;
+    top: 0;
+    z-index: 3;
     min-height: var(--topbar-height);
     display: flex;
     align-items: center;

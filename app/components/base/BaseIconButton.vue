@@ -9,8 +9,8 @@ defineEmits<{
 }>()
 
 const buttonClasses = computed(() => ({
-  'button--danger': props.icon === 'trash',
-  'button--secondary': props.icon !== 'trash'
+  'button--danger': props.icon === 'trash' || props.icon === 'lock',
+  'button--secondary': props.icon !== 'trash' && props.icon !== 'lock'
 }))
 </script>
 

@@ -173,41 +173,36 @@ watch(
           </label>
 
           <div v-else-if="question.type === 'multiselect'" class="choice-list">
-            <label v-for="option in question.options" :key="option" class="switch-field">
-              <input
-                class="switch-field__control"
-                type="checkbox"
-                :checked="isOptionChecked(question.id, option)"
-                @change="toggleListAnswer(question.id, option)"
-              />
-              <span class="switch-field__label">{{ option }}</span>
-            </label>
+            <BaseCheckbox
+              v-for="option in question.options"
+              :key="option"
+              :checked="isOptionChecked(question.id, option)"
+              :label="option"
+              @change="() => toggleListAnswer(question.id, option)"
+            />
           </div>
 
           <div v-else-if="question.type === 'radio'" class="choice-list">
-            <label v-for="option in question.options" :key="option" class="switch-field">
-              <input
-                class="switch-field__control"
-                type="radio"
-                :name="question.id"
-                :required="question.required"
-                :checked="getTextAnswer(question.id) === option"
-                @change="setAnswer(question.id, option)"
-              />
-              <span class="switch-field__label">{{ option }}</span>
-            </label>
+            <BaseRadio
+              v-for="option in question.options"
+              :key="option"
+              :model-value="getTextAnswer(question.id)"
+              :value="option"
+              :name="question.id"
+              :required="question.required"
+              :label="option"
+              @update:model-value="setAnswer(question.id, $event)"
+            />
           </div>
 
           <div v-else-if="question.type === 'checkbox'" class="choice-list">
-            <label v-for="option in question.options" :key="option" class="switch-field">
-              <input
-                class="switch-field__control"
-                type="checkbox"
-                :checked="isOptionChecked(question.id, option)"
-                @change="toggleListAnswer(question.id, option)"
-              />
-              <span class="switch-field__label">{{ option }}</span>
-            </label>
+            <BaseCheckbox
+              v-for="option in question.options"
+              :key="option"
+              :checked="isOptionChecked(question.id, option)"
+              :label="option"
+              @change="() => toggleListAnswer(question.id, option)"
+            />
           </div>
 
           <label v-else class="field">

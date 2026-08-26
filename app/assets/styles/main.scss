@@ -8,10 +8,12 @@
 @use "layout/app-footer";
 
 @use "components/button";
+@use "components/choice-control";
 @use "components/base-icon-button";
 @use "components/base-select";
 @use "components/base-multi-select";
 @use "components/modal-close-button";
+@use "components/disclosure-toggle";
 @use "components/section-header";
 @use "components/sidebar";
 @use "components/logo";
@@ -22,7 +24,7 @@
 @use "components/comments-panel";
 @use "components/workspace-panel";
 @use "components/field";
-@use "components/creation-modal";
+@use "components/modal";
 @use "components/checklist-card";
 @use "components/brief-card";
 
@@ -32,4 +34,5 @@
 @use "pages/ui-page";
 @use "pages/settings-page";
 
+@use "utilities/text-ellipsis";
 @use "utilities/visually-hidden";

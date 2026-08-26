@@ -28,21 +28,54 @@
 
   &__body {
     display: grid;
+    flex: 1 1 auto;
     gap: var(--space-xs);
     min-width: 0;
   }
 
-  &__toggle-icon {
-    width: 20px;
-    height: 20px;
+  &__drag {
+    width: 32px;
+    height: 32px;
+    display: inline-grid;
+    place-items: center;
     flex: 0 0 auto;
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
     color: var(--color-text-muted);
-    transition: transform 0.2s ease, color 0.2s ease;
+    background-color: var(--color-control);
+    cursor: grab;
+    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+
+    &:hover {
+      border-color: var(--color-accent);
+      color: var(--color-text);
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
   }
 
-  &[open] &__toggle-icon {
+  &__drag-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  &[open] &__toggle .disclosure-toggle__icon {
     color: var(--color-text);
-    transform: rotate(180deg);
+    transform: rotate(0);
+  }
+
+  &--empty &__header {
+    cursor: default;
+  }
+
+  &--empty &__toggle .disclosure-toggle__icon,
+  &--empty[open] &__toggle .disclosure-toggle__icon {
+    color: var(--color-text-muted);
+    opacity: 0.48;
+    transform: rotate(-90deg);
   }
 
   &__title {
@@ -69,7 +102,8 @@
   }
 
   &__actions {
-    padding: 0 var(--space-md) var(--space-md);
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
   }
 
   &__links {
@@ -193,24 +227,18 @@
   }
 
   &__copy-icon,
-  &__edit-icon,
-  &__link-toggle-icon {
+  &__edit-icon {
     width: 16px;
     height: 16px;
-  }
-
-  &__link-toggle-icon {
-    color: var(--color-text-muted);
-    transition: transform 0.2s ease, color 0.2s ease;
   }
 
   &__history-toggle {
     flex: 0 0 auto;
   }
 
-  &__link-item[open] &__link-toggle-icon {
+  &__link-item[open] &__history-toggle .disclosure-toggle__icon {
     color: var(--color-text);
-    transform: rotate(180deg);
+    transform: rotate(0);
   }
 
   &__link-status {
@@ -253,6 +281,15 @@
   }
 
   &__link-actions {
-    justify-content: flex-start;
+    justify-content: space-between;
   }
+
+  &__link-actions-main {
+    flex: 0 1 auto;
+  }
+}
+
+.brief-card.sortable-ghost {
+  border-color: var(--color-accent);
+  opacity: 0.54;
 }

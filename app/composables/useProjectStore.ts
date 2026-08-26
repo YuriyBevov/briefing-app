@@ -41,7 +41,7 @@ export const briefQuestionTypeLabels: Record<(typeof briefQuestionTypes)[number]
   radio: 'радиокнопки',
   checkbox: 'чекбокс',
   select: 'выпадающий список',
-  multiselect: 'выпадающий список с множественным выбором',
+  multiselect: 'выпадающий список(множ.)',
   date: 'выбор даты'
 }
 
@@ -116,6 +116,7 @@ export interface Checklist {
   stage?: string
   scope: EntityScope
   projectId: string
+  sortOrder: number
   items: ChecklistItem[]
   createdAt: string
 }
@@ -137,6 +138,7 @@ export interface Brief {
   stage?: string
   scope: EntityScope
   projectId: string
+  sortOrder: number
   status: BriefStatus
   questions: BriefQuestion[]
   links: BriefLink[]
@@ -159,6 +161,7 @@ export interface BriefLink {
 interface ProjectData {
   projects: Project[]
   currentProjectId: string
+  workspaceBlockOrder: string[]
   sections: ProjectSection[]
   permissions: Permission[]
   roles: Role[]
@@ -368,6 +371,7 @@ const createDefaultAdminUser = (): User => ({
 const createInitialData = (): ProjectData => ({
   projects: [createDefaultProject()],
   currentProjectId: defaultProjectId,
+  workspaceBlockOrder: ['checklists', 'briefs'],
   sections: createDefaultSections(),
   permissions: createDefaultPermissions(),
   roles: [createAdminRole()],
@@ -519,6 +523,13 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
   const projects = normalizeProjects(projectData.projects)
   const sections = normalizeSections(projectData.sections)
   const permissions = normalizePermissions(projectData.permissions, sections)
+  const supportedWorkspaceBlockIds = ['checklists', 'briefs']
+  const orderedWorkspaceBlockIds = (projectData.workspaceBlockOrder ?? supportedWorkspaceBlockIds)
+    .filter((blockId) => supportedWorkspaceBlockIds.includes(blockId))
+  const workspaceBlockOrder = [
+    ...orderedWorkspaceBlockIds,
+    ...supportedWorkspaceBlockIds.filter((blockId) => !orderedWorkspaceBlockIds.includes(blockId))
+  ]
   const projectIds = new Set(projects.map((project) => project.id))
   const sectionIds = new Set(sections.map((section) => section.id))
   const sectionByTitle = new Map(sections.map((section) => [section.title, section]))
@@ -553,24 +564,37 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
   return {
     projects,
     currentProjectId,
+    workspaceBlockOrder,
     sections,
     permissions,
     roles,
     users,
     currentUserId,
-    checklists: (projectData.checklists ?? []).map((checklist) => ({
-      ...checklist,
-      sectionIds: getNormalizedSectionIds(checklist),
-      scope: checklist.scope ?? 'common',
-      projectId: checklist.projectId ?? currentProjectId,
-      items: checklist.items.map((item) => ({
-        ...item,
-        comment: item.comment ?? ''
-      }))
-    })),
+    checklists: (projectData.checklists ?? [])
+      .toSorted((firstChecklist, secondChecklist) =>
+        (firstChecklist.sortOrder ?? Number.POSITIVE_INFINITY) -
+          (secondChecklist.sortOrder ?? Number.POSITIVE_INFINITY) ||
+        new Date(secondChecklist.createdAt).getTime() - new Date(firstChecklist.createdAt).getTime()
+      )
+      .map((checklist, index) => ({
+        ...checklist,
+        sectionIds: getNormalizedSectionIds(checklist),
+        scope: checklist.scope ?? 'common',
+        projectId: checklist.projectId ?? currentProjectId,
+        sortOrder: index,
+        items: checklist.items.map((item) => ({
+          ...item,
+          comment: item.comment ?? ''
+        }))
+      })),
     briefs: (projectData.briefs ?? [])
       .filter((brief) => !brief.links?.some((link) => forceDeletedBriefTokens.has(link.token)))
-      .map((brief) => {
+      .toSorted((firstBrief, secondBrief) =>
+        (firstBrief.sortOrder ?? Number.POSITIVE_INFINITY) -
+          (secondBrief.sortOrder ?? Number.POSITIVE_INFINITY) ||
+        new Date(secondBrief.createdAt).getTime() - new Date(firstBrief.createdAt).getTime()
+      )
+      .map((brief, index) => {
         const legacyAnswers = brief.answers ?? {}
         const hasLegacyAnswers = Object.keys(legacyAnswers).length > 0
         const links = (brief.links ?? []).map((link, index) => {
@@ -597,6 +621,7 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
           sectionIds: getNormalizedSectionIds(brief),
           scope: brief.scope ?? 'common',
           projectId: brief.projectId ?? currentProjectId,
+          sortOrder: index,
           status,
           links,
           answers: legacyAnswers,
@@ -1181,12 +1206,17 @@ export const useProjectStore = () => {
   }
 
   const createChecklist = (payload: ChecklistPayload) => {
+    data.value.checklists.forEach((checklist) => {
+      checklist.sortOrder += 1
+    })
+
     const checklist: Checklist = {
       id: createId(),
       title: payload.title,
       sectionIds: payload.sectionIds,
       scope: payload.scope,
       projectId: data.value.currentProjectId,
+      sortOrder: 0,
       createdAt: new Date().toISOString(),
       items: payload.items.map((item) => ({
         id: createId(),
@@ -1265,12 +1295,17 @@ export const useProjectStore = () => {
   }
 
   const createBrief = (payload: BriefPayload) => {
+    data.value.briefs.forEach((brief) => {
+      brief.sortOrder += 1
+    })
+
     const brief: Brief = {
       id: createId(),
       title: payload.title,
       sectionIds: payload.sectionIds,
       scope: payload.scope,
       projectId: data.value.currentProjectId,
+      sortOrder: 0,
       status: 'draft',
       createdAt: new Date().toISOString(),
       links: [],
@@ -1472,6 +1507,7 @@ export const useProjectStore = () => {
       data.value.checklists
         .filter((checklist) => checklist.sectionIds.includes(sectionId) && isVisibleInCurrentProject(checklist))
         .toSorted((firstChecklist, secondChecklist) =>
+          firstChecklist.sortOrder - secondChecklist.sortOrder ||
           new Date(secondChecklist.createdAt).getTime() - new Date(firstChecklist.createdAt).getTime()
         )
     )
@@ -1481,9 +1517,47 @@ export const useProjectStore = () => {
       data.value.briefs
         .filter((brief) => brief.sectionIds.includes(sectionId) && isVisibleInCurrentProject(brief))
         .toSorted((firstBrief, secondBrief) =>
+          firstBrief.sortOrder - secondBrief.sortOrder ||
           new Date(secondBrief.createdAt).getTime() - new Date(firstBrief.createdAt).getTime()
         )
     )
+
+  const reorderChecklists = (checklistIds: string[]) => {
+    const orderedIds = new Set(checklistIds)
+    const orderedChecklists = checklistIds
+      .map((checklistId) => data.value.checklists.find((checklist) => checklist.id === checklistId))
+      .filter(Boolean) as Checklist[]
+    const restChecklists = data.value.checklists.filter((checklist) => !orderedIds.has(checklist.id))
+
+    data.value.checklists = [...orderedChecklists, ...restChecklists].map((checklist, index) => ({
+      ...checklist,
+      sortOrder: index
+    }))
+    save()
+  }
+
+  const reorderBriefs = (briefIds: string[]) => {
+    const orderedIds = new Set(briefIds)
+    const orderedBriefs = briefIds
+      .map((briefId) => data.value.briefs.find((brief) => brief.id === briefId))
+      .filter(Boolean) as Brief[]
+    const restBriefs = data.value.briefs.filter((brief) => !orderedIds.has(brief.id))
+
+    data.value.briefs = [...orderedBriefs, ...restBriefs].map((brief, index) => ({
+      ...brief,
+      sortOrder: index
+    }))
+    save()
+  }
+
+  const reorderWorkspaceBlocks = (blockIds: string[]) => {
+    const supportedBlockIds = ['checklists', 'briefs']
+    const orderedBlockIds = blockIds.filter((blockId) => supportedBlockIds.includes(blockId))
+    const missingBlockIds = supportedBlockIds.filter((blockId) => !orderedBlockIds.includes(blockId))
+
+    data.value.workspaceBlockOrder = [...orderedBlockIds, ...missingBlockIds]
+    save()
+  }
 
   return {
     data,
@@ -1540,6 +1614,9 @@ export const useProjectStore = () => {
     acceptBriefLinkToWork,
     updateBriefLinkTitle,
     deleteBriefLink,
+    reorderWorkspaceBlocks,
+    reorderChecklists,
+    reorderBriefs,
     getChecklistsBySection,
     getBriefsBySection
   }

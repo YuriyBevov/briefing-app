@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { VueDraggable } from 'vue-draggable-plus'
 import type { SystemPermissionId } from '~/composables/useProjectStore'
-import SettingsModal from '~/components/settings/SettingsModal.vue'
 
 const {
   activateUser,
@@ -105,6 +104,7 @@ const deactivatingUserId = ref('')
 const deletingRoleId = ref('')
 const deletingProjectId = ref('')
 const deletingSectionId = ref('')
+const deactivatingSectionId = ref('')
 const blockedSectionId = ref('')
 const settingsBlockOrder = ref<SettingsBlockId[]>(
   normalizeSettingsBlockOrder(settingsBlockOrderCookie.value ?? getDefaultSettingsBlockOrder())
@@ -231,6 +231,10 @@ const closeSectionModal = () => {
 
 const closeDeleteSectionModal = () => {
   deletingSectionId.value = ''
+}
+
+const closeDeactivateSectionModal = () => {
+  deactivatingSectionId.value = ''
 }
 
 const closeBlockedSectionModal = () => {
@@ -438,16 +442,14 @@ const requestRemoveSection = (sectionId: string) => {
   deletingSectionId.value = sectionId
 }
 
+const requestDeactivateSection = (sectionId: string) => {
+  deactivatingSectionId.value = sectionId
+}
+
 const enableSection = (sectionId: string) => {
   sectionMessage.value = activateSection(sectionId)
     ? 'Раздел активирован'
     : 'Раздел не активирован.'
-}
-
-const disableSection = (sectionId: string) => {
-  sectionMessage.value = deactivateSection(sectionId)
-    ? 'Раздел деактивирован'
-    : 'Раздел не деактивирован.'
 }
 
 const deletingRole = computed(() =>
@@ -460,6 +462,10 @@ const deletingProject = computed(() =>
 
 const deletingSection = computed(() =>
   data.value.sections.find((section) => section.id === deletingSectionId.value)
+)
+
+const deactivatingSection = computed(() =>
+  data.value.sections.find((section) => section.id === deactivatingSectionId.value)
 )
 
 const blockedSection = computed(() =>
@@ -500,6 +506,17 @@ const confirmRemoveSection = () => {
       ? 'Раздел не удалён: в разделе есть активные документы.'
       : 'Раздел не удалён: должен остаться хотя бы один раздел.'
   closeDeleteSectionModal()
+}
+
+const confirmDeactivateSection = () => {
+  if (!deactivatingSectionId.value) {
+    return
+  }
+
+  sectionMessage.value = deactivateSection(deactivatingSectionId.value)
+    ? 'Раздел деактивирован'
+    : 'Раздел не деактивирован.'
+  closeDeactivateSectionModal()
 }
 
 const getRolePermissionTitles = (permissionIds: SystemPermissionId[]) =>
@@ -550,7 +567,31 @@ const orderedSettingsBlocks = computed({
 const isSettingsBlockCollapsed = (blockId: SettingsBlockId) =>
   collapsedSettingsBlocks.value.includes(blockId)
 
+const getSettingsBlockItemCount = (blockId: SettingsBlockId) => {
+  if (blockId === 'sections') {
+    return data.value.sections.length
+  }
+
+  if (blockId === 'projects') {
+    return data.value.projects.length
+  }
+
+  if (blockId === 'users') {
+    return data.value.users.length
+  }
+
+  if (blockId === 'roles') {
+    return data.value.roles.length
+  }
+
+  return 0
+}
+
 const toggleSettingsBlock = (blockId: SettingsBlockId) => {
+  if (getSettingsBlockItemCount(blockId) === 0) {
+    return
+  }
+
   collapsedSettingsBlocks.value = isSettingsBlockCollapsed(blockId)
     ? collapsedSettingsBlocks.value.filter((item) => item !== blockId)
     : [...collapsedSettingsBlocks.value, blockId]
@@ -623,7 +664,10 @@ const orderedProjects = computed({
         v-for="block in orderedSettingsBlocks"
         :key="block.id"
         class="workspace-panel settings-section"
-        :class="{ 'settings-section--collapsed': isSettingsBlockCollapsed(block.id) }"
+        :class="{
+          'settings-section--collapsed': isSettingsBlockCollapsed(block.id) || getSettingsBlockItemCount(block.id) === 0,
+          'settings-section--toggle-disabled': getSettingsBlockItemCount(block.id) === 0
+        }"
       >
         <div class="settings-section__header">
           <button
@@ -639,15 +683,13 @@ const orderedProjects = computed({
             <button class="button button--secondary" type="button" @click="openCreateModalByBlock(block.id)">
               {{ block.createLabel }}
             </button>
-            <button
-              class="button button--secondary button--small brief-card__icon-button settings-section__toggle"
-              type="button"
-              :aria-label="isSettingsBlockCollapsed(block.id) ? 'Развернуть блок' : 'Свернуть блок'"
-              :title="isSettingsBlockCollapsed(block.id) ? 'Развернуть блок' : 'Свернуть блок'"
+            <BaseDisclosureToggle
+              class="settings-section__toggle"
+              :disabled="getSettingsBlockItemCount(block.id) === 0"
+              :expanded="!isSettingsBlockCollapsed(block.id) && getSettingsBlockItemCount(block.id) > 0"
+              :label="isSettingsBlockCollapsed(block.id) || getSettingsBlockItemCount(block.id) === 0 ? 'Развернуть блок' : 'Свернуть блок'"
               @click="toggleSettingsBlock(block.id)"
-            >
-              <BaseIcon class="settings-section__toggle-icon" name="chevron-down" />
-            </button>
+            />
           </div>
         </div>
 
@@ -681,7 +723,7 @@ const orderedProjects = computed({
                       v-if="section.isActive"
                       label="Деактивировать раздел"
                       icon="lock"
-                      @click="disableSection(section.id)"
+                      @click="requestDeactivateSection(section.id)"
                     />
                     <BaseIconButton
                       v-else
@@ -834,12 +876,12 @@ const orderedProjects = computed({
       </section>
     </VueDraggable>
 
-    <SettingsModal
+    <BaseModal
       v-if="isSectionModalOpen"
       :title="isEditingSection ? 'Изменить раздел' : 'Создать раздел'"
       @close="closeSectionModal"
     >
-      <form class="settings-form" @submit.prevent="submitSection">
+      <form id="section-settings-form" class="modal-form" @submit.prevent="submitSection">
         <label class="field">
           <span class="field__label">Название раздела</span>
           <input v-model="sectionForm.title" class="field__control" type="text" required />
@@ -849,111 +891,133 @@ const orderedProjects = computed({
           <span class="field__label">Описание</span>
           <textarea v-model="sectionForm.description" class="field__control" rows="4" />
         </label>
-
-        <div class="button-row">
-          <button class="button button--primary" type="submit">
-            {{ isEditingSection ? 'Сохранить раздел' : 'Создать раздел' }}
-          </button>
-          <button class="button button--secondary" type="button" @click="closeSectionModal">
-            Отменить
-          </button>
-        </div>
       </form>
-    </SettingsModal>
 
-    <SettingsModal v-if="deletingSection" title="Удалить раздел?" @close="closeDeleteSectionModal">
-      <div class="settings-confirm">
-        <p class="settings-confirm__text">
+      <template #footer>
+        <button class="button button--primary" type="submit" form="section-settings-form">
+          {{ isEditingSection ? 'Сохранить раздел' : 'Создать раздел' }}
+        </button>
+        <button class="button button--secondary" type="button" @click="closeSectionModal">
+          Отменить
+        </button>
+      </template>
+    </BaseModal>
+
+    <BaseModal v-if="deletingSection" title="Удалить раздел?" @close="closeDeleteSectionModal">
+      <div class="modal-confirm">
+        <p class="modal-confirm__text">
           Раздел {{ deletingSection.title }} будет удалён. Это действие нельзя отменить.
         </p>
 
-        <div class="button-row">
-          <button class="button button--danger" type="button" @click="confirmRemoveSection">
-            Удалить
-          </button>
-          <button class="button button--secondary" type="button" @click="closeDeleteSectionModal">
-            Отменить
-          </button>
-        </div>
       </div>
-    </SettingsModal>
 
-    <SettingsModal v-if="blockedSection" title="Раздел нельзя удалить" @close="closeBlockedSectionModal">
-      <div class="settings-confirm">
-        <p class="settings-confirm__text">
+      <template #footer>
+        <button class="button button--danger" type="button" @click="confirmRemoveSection">
+          Удалить
+        </button>
+        <button class="button button--secondary" type="button" @click="closeDeleteSectionModal">
+          Отменить
+        </button>
+      </template>
+    </BaseModal>
+
+    <BaseModal
+      v-if="deactivatingSection"
+      title="Деактивировать раздел?"
+      @close="closeDeactivateSectionModal"
+    >
+      <div class="modal-confirm">
+        <p class="modal-confirm__text">
+          Раздел {{ deactivatingSection.title }} будет скрыт из сайдбара и закрыт для доступа до повторной активации.
+        </p>
+      </div>
+
+      <template #footer>
+        <button class="button button--danger" type="button" @click="confirmDeactivateSection">
+          Деактивировать
+        </button>
+        <button class="button button--secondary" type="button" @click="closeDeactivateSectionModal">
+          Отменить
+        </button>
+      </template>
+    </BaseModal>
+
+    <BaseModal v-if="blockedSection" title="Раздел нельзя удалить" @close="closeBlockedSectionModal">
+      <div class="modal-confirm">
+        <p class="modal-confirm__text">
           В разделе {{ blockedSection.title }} есть активные документы:
           {{ getSectionDocumentCount(blockedSection.id) }}. Сначала перенесите или удалите связанные материалы.
         </p>
 
-        <div class="button-row">
-          <button class="button button--primary" type="button" @click="closeBlockedSectionModal">
-            Понятно
-          </button>
-        </div>
       </div>
-    </SettingsModal>
 
-    <SettingsModal
+      <template #footer>
+        <button class="button button--primary" type="button" @click="closeBlockedSectionModal">
+          Понятно
+        </button>
+      </template>
+    </BaseModal>
+
+    <BaseModal
       v-if="isProjectModalOpen"
       :title="isEditingProject ? 'Изменить проект' : 'Создать проект'"
       @close="closeProjectModal"
     >
-      <form class="settings-form" @submit.prevent="submitProject">
+      <form id="project-settings-form" class="modal-form" @submit.prevent="submitProject">
         <label class="field">
           <span class="field__label">Название проекта</span>
           <input v-model="projectForm.title" class="field__control" type="text" required />
         </label>
 
-        <div class="settings-form__group">
+        <div class="modal-form__group">
           <span class="field__label">Участники проекта</span>
-          <div class="settings-form__choice-list">
-            <label v-for="user in activeUsers" :key="user.id" class="switch-field">
-              <input
-                v-model="projectForm.userIds"
-                class="switch-field__control"
-                type="checkbox"
-                :value="user.id"
-                :disabled="isAdminUser(user.roleIds)"
-              />
-              <span class="switch-field__label">{{ user.name }}</span>
-            </label>
+          <div class="modal-form__choice-list">
+            <BaseCheckbox
+              v-for="user in activeUsers"
+              :key="user.id"
+              v-model="projectForm.userIds"
+              :value="user.id"
+              :label="user.name"
+              :disabled="isAdminUser(user.roleIds)"
+            />
           </div>
         </div>
-
-        <div class="button-row">
-          <button class="button button--primary" type="submit">
-            {{ isEditingProject ? 'Сохранить проект' : 'Создать проект' }}
-          </button>
-          <button class="button button--secondary" type="button" @click="closeProjectModal">
-            Отменить
-          </button>
-        </div>
       </form>
-    </SettingsModal>
 
-    <SettingsModal v-if="deletingProject" title="Удалить проект?" @close="closeDeleteProjectModal">
-      <div class="settings-confirm">
-        <p class="settings-confirm__text">
+      <template #footer>
+        <button class="button button--primary" type="submit" form="project-settings-form">
+          {{ isEditingProject ? 'Сохранить проект' : 'Создать проект' }}
+        </button>
+        <button class="button button--secondary" type="button" @click="closeProjectModal">
+          Отменить
+        </button>
+      </template>
+    </BaseModal>
+
+    <BaseModal v-if="deletingProject" title="Удалить проект?" @close="closeDeleteProjectModal">
+      <div class="modal-confirm">
+        <p class="modal-confirm__text">
           Проект {{ deletingProject.title }} будет удалён. Проектные брифы и чеклисты этого проекта также будут удалены.
         </p>
 
-        <div class="button-row">
-          <button class="button button--danger" type="button" @click="confirmRemoveProject">
-            Удалить
-          </button>
-          <button class="button button--secondary" type="button" @click="closeDeleteProjectModal">
-            Отменить
-          </button>
-        </div>
       </div>
-    </SettingsModal>
 
-    <SettingsModal
+      <template #footer>
+        <button class="button button--danger" type="button" @click="confirmRemoveProject">
+          Удалить
+        </button>
+        <button class="button button--secondary" type="button" @click="closeDeleteProjectModal">
+          Отменить
+        </button>
+      </template>
+    </BaseModal>
+
+    <BaseModal
       v-if="isUserModalOpen"
       :title="isEditingUser ? 'Изменить пользователя' : 'Создать пользователя'"
       @close="closeUserModal"
     >
-      <form class="settings-form" @submit.prevent="submitUser">
+      <form id="user-settings-form" class="modal-form" @submit.prevent="submitUser">
         <label class="field">
           <span class="field__label">Имя</span>
           <input v-model="userForm.name" class="field__control" type="text" required />
@@ -974,100 +1038,98 @@ const orderedProjects = computed({
           <input v-model="userForm.password" class="field__control" type="text" required />
         </label>
 
-        <div class="settings-form__group">
+        <div class="modal-form__group">
           <span class="field__label">Роли пользователя</span>
-          <div class="settings-form__choice-list">
-            <label v-for="role in data.roles" :key="role.id" class="switch-field">
-              <input
-                v-model="userForm.roleIds"
-                class="switch-field__control"
-                type="checkbox"
-                :value="role.id"
-                :disabled="role.id === adminRole?.id && Boolean(userForm.id) && isOnlyActiveAdmin(userForm.id)"
-              />
-              <span class="switch-field__label">{{ role.title }}</span>
-            </label>
+          <div class="modal-form__choice-list">
+            <BaseCheckbox
+              v-for="role in data.roles"
+              :key="role.id"
+              v-model="userForm.roleIds"
+              :value="role.id"
+              :label="role.title"
+              :disabled="role.id === adminRole?.id && Boolean(userForm.id) && isOnlyActiveAdmin(userForm.id)"
+            />
           </div>
         </div>
 
-        <div class="settings-form__group">
+        <div class="modal-form__group">
           <span class="field__label">Доступ к проектам</span>
-          <div class="settings-form__choice-list">
-            <label v-for="project in data.projects" :key="project.id" class="switch-field">
-              <input
-                v-model="userForm.projectIds"
-                class="switch-field__control"
-                type="checkbox"
-                :value="project.id"
-                :disabled="userForm.roleIds.includes(adminRole?.id ?? '')"
-              />
-              <span class="switch-field__label">{{ project.title }}</span>
-            </label>
+          <div class="modal-form__choice-list">
+            <BaseCheckbox
+              v-for="project in data.projects"
+              :key="project.id"
+              v-model="userForm.projectIds"
+              :value="project.id"
+              :label="project.title"
+              :disabled="userForm.roleIds.includes(adminRole?.id ?? '')"
+            />
           </div>
-        </div>
-
-        <div class="button-row">
-          <button class="button button--primary" type="submit">
-            {{ isEditingUser ? 'Сохранить пользователя' : 'Создать пользователя' }}
-          </button>
-          <button class="button button--secondary" type="button" @click="closeUserModal">
-            Отменить
-          </button>
         </div>
 
       </form>
-    </SettingsModal>
 
-    <SettingsModal v-if="deletingUser" title="Удалить пользователя?" @close="closeDeleteUserModal">
-      <div class="settings-confirm">
-        <p class="settings-confirm__text">
+      <template #footer>
+        <button class="button button--primary" type="submit" form="user-settings-form">
+          {{ isEditingUser ? 'Сохранить пользователя' : 'Создать пользователя' }}
+        </button>
+        <button class="button button--secondary" type="button" @click="closeUserModal">
+          Отменить
+        </button>
+      </template>
+    </BaseModal>
+
+    <BaseModal v-if="deletingUser" title="Удалить пользователя?" @close="closeDeleteUserModal">
+      <div class="modal-confirm">
+        <p class="modal-confirm__text">
           Пользователь {{ deletingUser.name }} будет удалён из системы навсегда. Это действие нельзя отменить.
         </p>
 
-        <div class="button-row">
-          <button class="button button--danger" type="button" @click="confirmRemoveUser">
-            Удалить
-          </button>
-          <button class="button button--secondary" type="button" @click="closeDeleteUserModal">
-            Отменить
-          </button>
-        </div>
       </div>
-    </SettingsModal>
 
-    <SettingsModal
+      <template #footer>
+        <button class="button button--danger" type="button" @click="confirmRemoveUser">
+          Удалить
+        </button>
+        <button class="button button--secondary" type="button" @click="closeDeleteUserModal">
+          Отменить
+        </button>
+      </template>
+    </BaseModal>
+
+    <BaseModal
       v-if="deactivatingUser"
       title="Деактивировать пользователя?"
       @close="closeDeactivateUserModal"
     >
-      <div class="settings-confirm">
-        <p class="settings-confirm__text">
+      <div class="modal-confirm">
+        <p class="modal-confirm__text">
           Пользователь {{ deactivatingUser.name }} будет временно отключён от системы. Доступ будет запрещён до повторной активации.
         </p>
 
-        <div class="button-row">
-          <button class="button button--primary" type="button" @click="confirmDeactivateUser">
-            Деактивировать
-          </button>
-          <button class="button button--secondary" type="button" @click="closeDeactivateUserModal">
-            Отменить
-          </button>
-        </div>
       </div>
-    </SettingsModal>
 
-    <SettingsModal
+      <template #footer>
+        <button class="button button--danger" type="button" @click="confirmDeactivateUser">
+          Деактивировать
+        </button>
+        <button class="button button--secondary" type="button" @click="closeDeactivateUserModal">
+          Отменить
+        </button>
+      </template>
+    </BaseModal>
+
+    <BaseModal
       v-if="isRoleModalOpen"
       :title="isEditingRole ? 'Изменить роль' : 'Создать роль'"
       @close="closeRoleModal"
     >
-      <form class="settings-form" @submit.prevent="submitRole">
+      <form id="role-settings-form" class="modal-form" @submit.prevent="submitRole">
         <label class="field">
           <span class="field__label">Название роли</span>
           <input v-model="roleForm.title" class="field__control" type="text" required />
         </label>
 
-        <div class="settings-form__group">
+        <div class="modal-form__group">
           <span class="field__label">Права</span>
           <div class="settings-permission-groups">
             <fieldset
@@ -1076,51 +1138,46 @@ const orderedProjects = computed({
               class="settings-permission-group"
             >
               <legend class="settings-permission-group__title">{{ group.title }}</legend>
-              <label
+              <BaseCheckbox
                 v-for="permissionId in group.permissionIds"
                 :key="permissionId"
-                class="switch-field"
-              >
-                <input
-                  v-model="roleForm.permissionIds"
-                  class="switch-field__control"
-                  type="checkbox"
-                  :value="permissionId"
-                />
-                <span class="switch-field__label">{{ getPermissionById(permissionId)?.title }}</span>
-              </label>
+                v-model="roleForm.permissionIds"
+                :value="permissionId"
+                :label="getPermissionById(permissionId)?.title ?? permissionId"
+              />
             </fieldset>
           </div>
         </div>
 
-        <div class="button-row">
-          <button class="button button--primary" type="submit">
-            {{ isEditingRole ? 'Сохранить роль' : 'Создать роль' }}
-          </button>
-          <button class="button button--secondary" type="button" @click="closeRoleModal">
-            Отменить
-          </button>
-        </div>
-
       </form>
-    </SettingsModal>
 
-    <SettingsModal v-if="deletingRole" title="Удалить роль?" @close="closeDeleteRoleModal">
-      <div class="settings-confirm">
-        <p class="settings-confirm__text">
+      <template #footer>
+        <button class="button button--primary" type="submit" form="role-settings-form">
+          {{ isEditingRole ? 'Сохранить роль' : 'Создать роль' }}
+        </button>
+        <button class="button button--secondary" type="button" @click="closeRoleModal">
+          Отменить
+        </button>
+      </template>
+    </BaseModal>
+
+    <BaseModal v-if="deletingRole" title="Удалить роль?" @close="closeDeleteRoleModal">
+      <div class="modal-confirm">
+        <p class="modal-confirm__text">
           Роль {{ deletingRole.title }} будет удалена из системы. Она также будет снята со всех пользователей.
         </p>
 
-        <div class="button-row">
-          <button class="button button--danger" type="button" @click="confirmRemoveRole">
-            Удалить
-          </button>
-          <button class="button button--secondary" type="button" @click="closeDeleteRoleModal">
-            Отменить
-          </button>
-        </div>
       </div>
-    </SettingsModal>
+
+      <template #footer>
+        <button class="button button--danger" type="button" @click="confirmRemoveRole">
+          Удалить
+        </button>
+        <button class="button button--secondary" type="button" @click="closeDeleteRoleModal">
+          Отменить
+        </button>
+      </template>
+    </BaseModal>
   </section>
 
   <section v-else class="stage-page">

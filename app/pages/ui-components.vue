@@ -51,6 +51,11 @@ const placeholderSelectValue = ref('')
 const disabledSelectValue = ref('approval')
 const baseMultiSelectValue = ref(['approval', 'design'])
 const emptyMultiSelectValue = ref<string[]>([])
+const defaultCheckboxValue = ref(true)
+const successCheckboxValue = ref(true)
+const dangerCheckboxValue = ref(true)
+const defaultRadioValue = ref('default')
+const toneRadioValue = ref('success')
 
 const tableRows = [
   { component: 'BriefLinkItemCompleted', status: 'Согласован', owner: 'Менеджер' },
@@ -172,6 +177,18 @@ const tableRows = [
               <button class="button button--secondary ui-force-hover" type="button">Редактировать</button>
             </div>
             <div class="ui-sample">
+              <span class="ui-name">BaseDisclosureToggle</span>
+              <BaseDisclosureToggle label="Развернуть блок" />
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BaseDisclosureToggleOpen</span>
+              <BaseDisclosureToggle expanded label="Свернуть блок" />
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BaseDisclosureToggleDisabled</span>
+              <BaseDisclosureToggle disabled label="Развернуть блок" />
+            </div>
+            <div class="ui-sample">
               <span class="ui-name">ButtonRowMixed</span>
               <div class="button-row">
                 <button class="button button--secondary" type="button">Отмена</button>
@@ -286,29 +303,31 @@ const tableRows = [
               <input class="field__control" type="text" value="Поле закрыто" disabled />
             </label>
             <div class="ui-sample">
-              <span class="ui-name">ChoiceRadioList</span>
+              <span class="ui-name">BaseRadioDefault</span>
               <div class="choice-list">
-                <label class="switch-field">
-                  <input class="switch-field__control" type="radio" name="ui-radio" checked />
-                  <span class="switch-field__label">Да</span>
-                </label>
-                <label class="switch-field">
-                  <input class="switch-field__control" type="radio" name="ui-radio" />
-                  <span class="switch-field__label">Нет</span>
-                </label>
+                <BaseRadio v-model="defaultRadioValue" name="ui-radio-default" value="default" label="По умолчанию" />
+                <BaseRadio v-model="defaultRadioValue" name="ui-radio-default" value="disabled" label="Неактивно" disabled />
               </div>
             </div>
             <div class="ui-sample">
-              <span class="ui-name">ChoiceCheckboxList</span>
+              <span class="ui-name">BaseRadioTones</span>
               <div class="choice-list">
-                <label class="switch-field">
-                  <input class="switch-field__control" type="checkbox" checked />
-                  <span class="switch-field__label">Вариант A</span>
-                </label>
-                <label class="switch-field">
-                  <input class="switch-field__control" type="checkbox" />
-                  <span class="switch-field__label">Вариант B</span>
-                </label>
+                <BaseRadio v-model="toneRadioValue" name="ui-radio-tone" value="success" label="Success" tone="success" />
+                <BaseRadio v-model="toneRadioValue" name="ui-radio-tone" value="danger" label="Danger" tone="danger" />
+              </div>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BaseCheckboxDefault</span>
+              <div class="choice-list">
+                <BaseCheckbox v-model="defaultCheckboxValue" label="По умолчанию" />
+                <BaseCheckbox :model-value="false" label="Неактивно" disabled />
+              </div>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BaseCheckboxTones</span>
+              <div class="choice-list">
+                <BaseCheckbox v-model="successCheckboxValue" label="Success" tone="success" />
+                <BaseCheckbox v-model="dangerCheckboxValue" label="Danger" tone="danger" />
               </div>
             </div>
           </div>
@@ -371,7 +390,7 @@ const tableRows = [
                 <span class="checklist-card__title">Чеклист предподготовки</span>
                 <span class="checklist-card__meta">0% · 2 обязательных пунктов</span>
               </span>
-              <BaseIcon class="checklist-card__toggle-icon" name="chevron-down" />
+              <BaseDisclosureToggle class="checklist-card__toggle" label="Развернуть чеклист" />
             </summary>
           </details>
           <details class="checklist-card" open>
@@ -381,7 +400,7 @@ const tableRows = [
                 <span class="checklist-card__title">Чеклист запуска</span>
                 <span class="checklist-card__meta">66% · 1 обязательных пунктов</span>
               </span>
-              <BaseIcon class="checklist-card__toggle-icon" name="chevron-down" />
+              <BaseDisclosureToggle class="checklist-card__toggle" expanded label="Свернуть чеклист" />
             </summary>
             <div class="button-row checklist-card__actions">
               <button class="button button--secondary" type="button">Редактировать</button>
@@ -392,8 +411,8 @@ const tableRows = [
                 <span class="ui-name">ChecklistItemPending</span>
                 <span class="checklist-card__item-text">Подготовить структуру вопросов</span>
                 <div class="checklist-card__item-controls">
-                  <ChecklistStatusCheckbox :checked="false" label="Выполнено" tone="success" />
-                  <ChecklistStatusCheckbox :checked="false" label="Не используется" tone="danger" />
+                  <BaseCheckbox :checked="false" label="Выполнено" tone="success" hide-label />
+                  <BaseCheckbox :checked="false" label="Не используется" tone="danger" hide-label />
                 </div>
                 <label class="field checklist-card__comment">
                   <span class="field__label">ChecklistCommentActive</span>
@@ -404,8 +423,8 @@ const tableRows = [
                 <span class="ui-name">ChecklistItemCompleted</span>
                 <span class="checklist-card__item-text checklist-card__item-text--required">Согласовать прототип*</span>
                 <div class="checklist-card__item-controls">
-                  <ChecklistStatusCheckbox :checked="true" label="Выполнено" tone="success" />
-                  <ChecklistStatusCheckbox :checked="false" label="Не используется" tone="danger" />
+                  <BaseCheckbox :checked="true" label="Выполнено" tone="success" hide-label />
+                  <BaseCheckbox :checked="false" label="Не используется" tone="danger" hide-label />
                 </div>
                 <label class="field checklist-card__comment">
                   <span class="field__label">ChecklistCommentDisabled</span>
@@ -416,8 +435,8 @@ const tableRows = [
                 <span class="ui-name">ChecklistItemSkipped</span>
                 <span class="checklist-card__item-text">Подключить необязательную интеграцию</span>
                 <div class="checklist-card__item-controls">
-                  <ChecklistStatusCheckbox :checked="false" label="Выполнено" tone="success" />
-                  <ChecklistStatusCheckbox :checked="true" label="Не используется" tone="danger" />
+                  <BaseCheckbox :checked="false" label="Выполнено" tone="success" hide-label />
+                  <BaseCheckbox :checked="true" label="Не используется" tone="danger" hide-label />
                 </div>
                 <label class="field checklist-card__comment">
                   <span class="field__label">ChecklistCommentDisabledDanger</span>
@@ -443,7 +462,17 @@ const tableRows = [
                   <span class="brief-card__title">Бриф на аудит интерфейса</span>
                   <span class="brief-card__meta">6 вопросов</span>
                 </span>
-                <BaseIcon class="brief-card__toggle-icon" name="chevron-down" />
+                <BaseDisclosureToggle class="brief-card__toggle" label="Развернуть бриф" />
+              </summary>
+            </details>
+            <details class="brief-card brief-card--empty">
+              <summary class="brief-card__header">
+                <span class="brief-card__body">
+                  <span class="ui-name">BriefCardEmpty</span>
+                  <span class="brief-card__title">Бриф без ссылок</span>
+                  <span class="brief-card__meta">4 вопроса</span>
+                </span>
+                <BaseDisclosureToggle class="brief-card__toggle" disabled label="Развернуть бриф" />
               </summary>
             </details>
             <details class="brief-card" open>
@@ -453,7 +482,7 @@ const tableRows = [
                   <span class="brief-card__title">Бриф на дизайн главной страницы</span>
                   <span class="brief-card__meta">4 вопроса · 2 ссылки · 1 заполнена</span>
                 </span>
-                <BaseIcon class="brief-card__toggle-icon" name="chevron-down" />
+                <BaseDisclosureToggle class="brief-card__toggle" expanded label="Свернуть бриф" />
               </summary>
               <div class="button-row brief-card__actions">
                 <button class="button button--secondary" type="button">Редактировать</button>
@@ -481,9 +510,7 @@ const tableRows = [
                           </span>
                         </span>
                         <span class="brief-card__link-status brief-card__link-status--revision-pending">Ожидает редакции</span>
-                        <button class="button button--secondary button--small brief-card__icon-button brief-card__history-toggle" type="button" aria-label="Свернуть историю" title="История экземпляра">
-                          <BaseIcon class="brief-card__link-toggle-icon" name="chevron-down" />
-                        </button>
+                        <BaseDisclosureToggle class="brief-card__history-toggle" expanded label="История экземпляра" />
                       </div>
                       <div class="button-row brief-card__link-actions">
                         <button class="button button--secondary button--small" type="button" disabled>Открыть бриф к заполнению</button>
@@ -525,9 +552,7 @@ const tableRows = [
                           </span>
                         </span>
                         <span class="brief-card__link-status brief-card__link-status--completed">Согласован</span>
-                        <button class="button button--secondary button--small brief-card__icon-button brief-card__history-toggle" type="button" disabled aria-label="История недоступна" title="История экземпляра">
-                          <BaseIcon class="brief-card__link-toggle-icon" name="chevron-down" />
-                        </button>
+                        <BaseDisclosureToggle class="brief-card__history-toggle" disabled label="История экземпляра" />
                       </div>
                       <div class="button-row brief-card__link-actions">
                         <button class="button button--secondary button--small" type="button">Открыть бриф к заполнению</button>
@@ -612,6 +637,35 @@ const tableRows = [
                 </button>
               </div>
             </aside>
+            <BaseWorkspaceBlock
+              title="Чеклисты"
+              create-label="Создать"
+              :collapsed="false"
+            >
+              <span class="ui-name">BaseWorkspaceBlock</span>
+              <div class="checklist-list">
+                <details class="checklist-card">
+                  <summary class="checklist-card__header">
+                    <button class="checklist-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
+                      <BaseIcon class="checklist-card__drag-icon" name="drag-handle" />
+                    </button>
+                    <span class="checklist-card__summary">
+                      <span class="checklist-card__title">Проверить материалы</span>
+                      <span class="checklist-card__meta">0% · 2 обязательных пункта</span>
+                    </span>
+                    <BaseDisclosureToggle class="checklist-card__toggle" label="Развернуть чеклист" />
+                  </summary>
+                </details>
+              </div>
+            </BaseWorkspaceBlock>
+            <BaseWorkspaceBlock
+              title="Пустой блок"
+              create-label="Создать"
+              :collapsed="true"
+              toggle-disabled
+            >
+              <span class="ui-name">BaseWorkspaceBlockEmpty</span>
+            </BaseWorkspaceBlock>
             <div class="workspace-panel">
               <span class="ui-name">WorkspacePanel</span>
               <div class="section-header">
@@ -632,31 +686,37 @@ const tableRows = [
       <details class="ui-accordion">
         <summary class="ui-accordion__summary">
           <span class="section-title">Модальные окна</span>
-          <span class="ui-accordion__meta">CreationModal</span>
+          <span class="ui-accordion__meta">BaseModal</span>
         </summary>
         <div class="ui-accordion__body">
-          <div class="creation-modal__panel ui-modal-preview">
-            <form class="creation-form">
-              <div class="section-header">
-                <h2 class="section-title">CreationModalPanel</h2>
-                <BaseModalCloseButton />
-              </div>
-              <label class="field">
-                <span class="field__label">CreationModalTitleField</span>
-                <input class="field__control" type="text" value="Бриф клиента" />
-              </label>
-              <div class="creation-form__group">
-                <span class="creation-form__group-title">CreationFormGroup</span>
-                <div class="creation-form__row">
-                  <label class="field">
-                    <span class="field__label">CreationFormRowField</span>
-                    <input class="field__control" type="text" value="Вопрос" />
-                  </label>
-                  <button class="button button--danger" type="button">Удалить</button>
+          <div class="modal__panel ui-modal-preview">
+            <div class="section-header modal__header">
+              <h2 class="section-title">ModalHeader</h2>
+              <BaseModalCloseButton />
+            </div>
+
+            <div class="modal__body">
+              <form class="modal-form">
+                <label class="field">
+                  <span class="field__label">ModalTitleField</span>
+                  <input class="field__control" type="text" value="Бриф клиента" />
+                </label>
+                <div class="modal-form__group">
+                  <span class="modal-form__group-title">ModalFormGroup</span>
+                  <div class="modal-form__row">
+                    <label class="field">
+                      <span class="field__label">ModalFormRowField</span>
+                      <input class="field__control" type="text" value="Вопрос" />
+                    </label>
+                    <button class="button button--danger" type="button">Удалить</button>
+                  </div>
                 </div>
-              </div>
+              </form>
+            </div>
+
+            <div class="modal__footer">
               <button class="button button--primary" type="button">Создать</button>
-            </form>
+            </div>
           </div>
         </div>
       </details>

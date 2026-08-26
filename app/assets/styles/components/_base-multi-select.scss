@@ -27,6 +27,7 @@
 
 .base-multi-select__selection {
   min-width: 0;
+  flex: 1 1 auto;
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
@@ -120,9 +121,11 @@
   background-color: var(--color-surface-muted);
 }
 
-.base-multi-select__item-label {
+.base-multi-select__checkbox {
+  width: 100%;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.base-multi-select__checkbox .checkbox__label {
+  color: inherit;
 }

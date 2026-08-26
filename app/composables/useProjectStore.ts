@@ -22,7 +22,12 @@ export const systemPermissionIds = [
   'delete_projects',
   'create_sections',
   'edit_sections',
-  'delete_sections'
+  'delete_sections',
+  'create_comments',
+  'view_comments',
+  'edit_comments',
+  'delete_comments',
+  'view_history'
 ] as const
 
 export const briefQuestionTypes = [
@@ -158,10 +163,38 @@ export interface BriefLink {
   completedAt: string
 }
 
+export interface ProjectComment {
+  id: string
+  projectId: string
+  authorId: string
+  text: string
+  createdAt: string
+}
+
+export interface ProjectHistoryEntry {
+  id: string
+  projectId: string
+  authorId: string
+  action: string
+  createdAt: string
+}
+
+export interface ProjectNote {
+  id: string
+  projectId: string
+  authorId: string
+  text: string
+  color: string
+  sortOrder: number
+  createdAt: string
+  updatedAt: string
+}
+
 interface ProjectData {
   projects: Project[]
   currentProjectId: string
   workspaceBlockOrder: string[]
+  projectFeedBlockOrder: string[]
   sections: ProjectSection[]
   permissions: Permission[]
   roles: Role[]
@@ -169,6 +202,9 @@ interface ProjectData {
   currentUserId: string
   checklists: Checklist[]
   briefs: Brief[]
+  comments: ProjectComment[]
+  history: ProjectHistoryEntry[]
+  notes: ProjectNote[]
 }
 
 interface ChecklistPayload {
@@ -338,6 +374,31 @@ const createStaticPermissions = (): Permission[] => [
     id: 'delete_sections',
     title: 'Удаление разделов',
     description: 'Разрешает удалять разделы.'
+  },
+  {
+    id: 'create_comments',
+    title: 'Создание комментариев',
+    description: 'Разрешает добавлять комментарии в проект.'
+  },
+  {
+    id: 'view_comments',
+    title: 'Просмотр комментариев',
+    description: 'Разрешает видеть общий блок комментариев проекта.'
+  },
+  {
+    id: 'edit_comments',
+    title: 'Редактирование комментариев',
+    description: 'Разрешает редактировать комментарии проекта.'
+  },
+  {
+    id: 'delete_comments',
+    title: 'Удаление комментариев',
+    description: 'Разрешает удалять комментарии проекта.'
+  },
+  {
+    id: 'view_history',
+    title: 'Просмотр истории',
+    description: 'Разрешает видеть журнал изменений проекта.'
   }
 ]
 
@@ -372,13 +433,17 @@ const createInitialData = (): ProjectData => ({
   projects: [createDefaultProject()],
   currentProjectId: defaultProjectId,
   workspaceBlockOrder: ['checklists', 'briefs'],
+  projectFeedBlockOrder: ['comments', 'notes', 'history'],
   sections: createDefaultSections(),
   permissions: createDefaultPermissions(),
   roles: [createAdminRole()],
   users: [createDefaultAdminUser()],
   currentUserId: defaultAdminUserId,
   checklists: [],
-  briefs: []
+  briefs: [],
+  comments: [],
+  history: [],
+  notes: []
 })
 
 const briefStatusLabels: Record<BriefStatus, string> = {
@@ -524,11 +589,18 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
   const sections = normalizeSections(projectData.sections)
   const permissions = normalizePermissions(projectData.permissions, sections)
   const supportedWorkspaceBlockIds = ['checklists', 'briefs']
+  const supportedProjectFeedBlockIds = ['comments', 'notes', 'history']
   const orderedWorkspaceBlockIds = (projectData.workspaceBlockOrder ?? supportedWorkspaceBlockIds)
     .filter((blockId) => supportedWorkspaceBlockIds.includes(blockId))
   const workspaceBlockOrder = [
     ...orderedWorkspaceBlockIds,
     ...supportedWorkspaceBlockIds.filter((blockId) => !orderedWorkspaceBlockIds.includes(blockId))
+  ]
+  const orderedProjectFeedBlockIds = (projectData.projectFeedBlockOrder ?? supportedProjectFeedBlockIds)
+    .filter((blockId) => supportedProjectFeedBlockIds.includes(blockId))
+  const projectFeedBlockOrder = [
+    ...orderedProjectFeedBlockIds,
+    ...supportedProjectFeedBlockIds.filter((blockId) => !orderedProjectFeedBlockIds.includes(blockId))
   ]
   const projectIds = new Set(projects.map((project) => project.id))
   const sectionIds = new Set(sections.map((section) => section.id))
@@ -565,6 +637,7 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
     projects,
     currentProjectId,
     workspaceBlockOrder,
+    projectFeedBlockOrder,
     sections,
     permissions,
     roles,
@@ -627,7 +700,47 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
           answers: legacyAnswers,
           completedAt: brief.completedAt ?? ''
         }
-      })
+      }),
+    comments: (projectData.comments ?? [])
+      .filter((comment) => projectIds.has(comment.projectId ?? currentProjectId))
+      .map((comment) => ({
+        ...comment,
+        projectId: comment.projectId ?? currentProjectId,
+        authorId: comment.authorId ?? currentUserId,
+        text: comment.text ?? '',
+        createdAt: comment.createdAt ?? new Date().toISOString()
+      }))
+      .toSorted((firstComment, secondComment) =>
+        new Date(secondComment.createdAt).getTime() - new Date(firstComment.createdAt).getTime()
+      ),
+    history: (projectData.history ?? [])
+      .filter((entry) => projectIds.has(entry.projectId ?? currentProjectId))
+      .map((entry) => ({
+        ...entry,
+        projectId: entry.projectId ?? currentProjectId,
+        authorId: entry.authorId ?? currentUserId,
+        action: entry.action ?? '',
+        createdAt: entry.createdAt ?? new Date().toISOString()
+      }))
+      .toSorted((firstEntry, secondEntry) =>
+        new Date(secondEntry.createdAt).getTime() - new Date(firstEntry.createdAt).getTime()
+      ),
+    notes: (projectData.notes ?? [])
+      .filter((note) => projectIds.has(note.projectId ?? currentProjectId))
+      .map((note, index) => ({
+        ...note,
+        projectId: note.projectId ?? currentProjectId,
+        authorId: note.authorId ?? currentUserId,
+        text: note.text ?? '',
+        color: note.color ?? '',
+        sortOrder: note.sortOrder ?? index,
+        createdAt: note.createdAt ?? new Date().toISOString(),
+        updatedAt: note.updatedAt ?? note.createdAt ?? new Date().toISOString()
+      }))
+      .toSorted((firstNote, secondNote) =>
+        firstNote.sortOrder - secondNote.sortOrder ||
+        new Date(secondNote.createdAt).getTime() - new Date(firstNote.createdAt).getTime()
+      )
   }
 }
 
@@ -702,6 +815,50 @@ export const useProjectStore = () => {
       return currentUserRoles.value.some((role) => role.permissionIds.includes(permissionId))
     })
 
+  const getUserById = (userId: string) =>
+    data.value.users.find((user) => user.id === userId)
+
+  const getUserNameById = (userId: string) =>
+    getUserById(userId)?.name ?? 'Пользователь'
+
+  const addProjectHistory = (action: string, projectId = data.value.currentProjectId) => {
+    const normalizedAction = action.trim()
+
+    if (!normalizedAction) {
+      return
+    }
+
+    data.value.history = [
+      {
+        id: createId(),
+        projectId,
+        authorId: currentUser.value?.id ?? defaultAdminUserId,
+        action: normalizedAction,
+        createdAt: new Date().toISOString()
+      },
+      ...data.value.history
+    ]
+  }
+
+  const getProjectUserIds = (projectId: string) =>
+    data.value.users
+      .filter((user) => user.projectIds.includes(projectId))
+      .map((user) => user.id)
+
+  const logProjectParticipantsChange = (projectId: string, beforeUserIds: string[]) => {
+    const before = new Set(beforeUserIds)
+    const after = new Set(getProjectUserIds(projectId))
+    const addedUsers = [...after].filter((userId) => !before.has(userId))
+    const removedUsers = [...before].filter((userId) => !after.has(userId))
+
+    addedUsers.forEach((userId) => {
+      addProjectHistory(`В проект добавлен участник ${getUserNameById(userId)}`, projectId)
+    })
+    removedUsers.forEach((userId) => {
+      addProjectHistory(`Из проекта исключён участник ${getUserNameById(userId)}`, projectId)
+    })
+  }
+
   const setCurrentProject = (projectId: string) => {
     const allowedProject = visibleProjects.value.find((project) => project.id === projectId)
 
@@ -754,6 +911,8 @@ export const useProjectStore = () => {
       sortOrder: index
     }))
     syncProjectUsers(project.id, payload.userIds)
+    addProjectHistory(`Создан проект ${project.title}`, project.id)
+    logProjectParticipantsChange(project.id, [])
     save()
 
     return true
@@ -767,8 +926,14 @@ export const useProjectStore = () => {
       return false
     }
 
+    const previousTitle = project.title
+    const previousUserIds = getProjectUserIds(projectId)
     project.title = title
     syncProjectUsers(projectId, payload.userIds)
+    if (previousTitle !== title) {
+      addProjectHistory(`Проект переименован: ${previousTitle} -> ${title}`, projectId)
+    }
+    logProjectParticipantsChange(projectId, previousUserIds)
     save()
 
     return true
@@ -1230,6 +1395,7 @@ export const useProjectStore = () => {
     }
 
     data.value.checklists = [checklist, ...data.value.checklists]
+    addProjectHistory(`Создан чеклист ${checklist.title}`)
     save()
   }
 
@@ -1240,6 +1406,7 @@ export const useProjectStore = () => {
       return
     }
 
+    const previousTitle = checklist.title
     checklist.title = payload.title
     checklist.sectionIds = payload.sectionIds
     checklist.scope = payload.scope
@@ -1257,11 +1424,23 @@ export const useProjectStore = () => {
         completedAt: currentItem?.completedAt ?? ''
       }
     })
+    addProjectHistory(
+      previousTitle === checklist.title
+        ? `Отредактирован чеклист ${checklist.title}`
+        : `Чеклист переименован: ${previousTitle} -> ${checklist.title}`
+    )
     save()
   }
 
   const deleteChecklist = (id: string) => {
+    const checklist = data.value.checklists.find((item) => item.id === id)
+
+    if (!checklist) {
+      return
+    }
+
     data.value.checklists = data.value.checklists.filter((checklist) => checklist.id !== id)
+    addProjectHistory(`Удалён чеклист ${checklist.title}`)
     save()
   }
 
@@ -1279,6 +1458,7 @@ export const useProjectStore = () => {
 
     checklistItem.status = status
     checklistItem.completedAt = status === 'completed' ? new Date().toISOString() : ''
+    addProjectHistory(`Изменён статус пункта чеклиста ${checklist.title}: ${checklistItem.text}`)
     save()
   }
 
@@ -1291,6 +1471,7 @@ export const useProjectStore = () => {
     }
 
     checklistItem.comment = comment
+    addProjectHistory(`Добавлен комментарий к пункту чеклиста ${checklist.title}: ${checklistItem.text}`)
     save()
   }
 
@@ -1322,6 +1503,7 @@ export const useProjectStore = () => {
     }
 
     data.value.briefs = [brief, ...data.value.briefs]
+    addProjectHistory(`Создан бриф ${brief.title}`)
     save()
   }
 
@@ -1332,6 +1514,7 @@ export const useProjectStore = () => {
       return
     }
 
+    const previousTitle = brief.title
     brief.title = payload.title
     brief.sectionIds = payload.sectionIds
     brief.scope = payload.scope
@@ -1344,11 +1527,23 @@ export const useProjectStore = () => {
       description: question.description,
       options: question.options
     }))
+    addProjectHistory(
+      previousTitle === brief.title
+        ? `Отредактирован бриф ${brief.title}`
+        : `Бриф переименован: ${previousTitle} -> ${brief.title}`
+    )
     save()
   }
 
   const deleteBrief = (id: string) => {
+    const brief = data.value.briefs.find((item) => item.id === id)
+
+    if (!brief) {
+      return
+    }
+
     data.value.briefs = data.value.briefs.filter((brief) => brief.id !== id)
+    addProjectHistory(`Удалён бриф ${brief.title}`)
     save()
   }
 
@@ -1360,6 +1555,7 @@ export const useProjectStore = () => {
     }
 
     brief.status = status
+    addProjectHistory(`Изменён статус брифа ${brief.title}: ${briefStatusLabels[status]}`)
     save()
   }
 
@@ -1388,6 +1584,7 @@ export const useProjectStore = () => {
       ...brief.links
     ]
     brief.status = 'link_created'
+    addProjectHistory(`Создана ссылка на бриф ${brief.title}`)
     save()
 
     return token
@@ -1423,6 +1620,7 @@ export const useProjectStore = () => {
     link.status = link.status === 'revision_pending' ? 'revision_completed' : 'completed'
     link.completedAt = new Date().toISOString()
     brief.status = 'link_created'
+    addProjectHistory(`Бриф ${brief.title} согласован клиентом`, brief.projectId)
     save()
 
     return true
@@ -1458,6 +1656,7 @@ export const useProjectStore = () => {
       completedAt: ''
     })
     brief.status = 'link_created'
+    addProjectHistory(`Бриф ${brief.title} открыт для редакции`)
     save()
 
     return token
@@ -1472,6 +1671,7 @@ export const useProjectStore = () => {
     }
 
     link.status = 'in_work'
+    addProjectHistory(`Бриф ${brief.title} принят в работу`)
     save()
   }
 
@@ -1484,6 +1684,7 @@ export const useProjectStore = () => {
     }
 
     link.title = title.trim()
+    addProjectHistory(`Изменено название ссылки на бриф ${brief.title}`)
     save()
   }
 
@@ -1499,6 +1700,7 @@ export const useProjectStore = () => {
 
     brief.links = brief.links.filter((item) => (item.historyId ?? item.id) !== historyId)
     brief.status = brief.links.length ? 'link_created' : 'draft'
+    addProjectHistory(`Удалён экземпляр ссылки на бриф ${brief.title}`)
     save()
   }
 
@@ -1521,6 +1723,169 @@ export const useProjectStore = () => {
           new Date(secondBrief.createdAt).getTime() - new Date(firstBrief.createdAt).getTime()
         )
     )
+
+  const currentProjectComments = computed(() =>
+    data.value.comments
+      .filter((comment) => comment.projectId === data.value.currentProjectId)
+      .toSorted((firstComment, secondComment) =>
+        new Date(firstComment.createdAt).getTime() - new Date(secondComment.createdAt).getTime()
+      )
+  )
+
+  const currentProjectHistory = computed(() =>
+    data.value.history
+      .filter((entry) => entry.projectId === data.value.currentProjectId)
+      .toSorted((firstEntry, secondEntry) =>
+        new Date(secondEntry.createdAt).getTime() - new Date(firstEntry.createdAt).getTime()
+      )
+  )
+
+  const currentUserNotes = computed(() =>
+    data.value.notes
+      .filter((note) =>
+        note.projectId === data.value.currentProjectId &&
+        note.authorId === currentUser.value?.id
+      )
+      .toSorted((firstNote, secondNote) =>
+        firstNote.sortOrder - secondNote.sortOrder ||
+        new Date(secondNote.createdAt).getTime() - new Date(firstNote.createdAt).getTime()
+      )
+  )
+
+  const createProjectComment = (text: string) => {
+    const normalizedText = text.trim()
+
+    if (!normalizedText) {
+      return false
+    }
+
+    data.value.comments = [
+      {
+        id: createId(),
+        projectId: data.value.currentProjectId,
+        authorId: currentUser.value?.id ?? defaultAdminUserId,
+        text: normalizedText,
+        createdAt: new Date().toISOString()
+      },
+      ...data.value.comments
+    ]
+    addProjectHistory('Добавлен комментарий к проекту')
+    save()
+
+    return true
+  }
+
+  const updateProjectComment = (commentId: string, text: string) => {
+    const comment = data.value.comments.find((item) => item.id === commentId)
+    const normalizedText = text.trim()
+
+    if (!comment || !normalizedText) {
+      return false
+    }
+
+    comment.text = normalizedText
+    addProjectHistory('Отредактирован комментарий проекта')
+    save()
+
+    return true
+  }
+
+  const deleteProjectComment = (commentId: string) => {
+    const comment = data.value.comments.find((item) => item.id === commentId)
+
+    if (!comment) {
+      return false
+    }
+
+    data.value.comments = data.value.comments.filter((item) => item.id !== commentId)
+    addProjectHistory('Удалён комментарий проекта')
+    save()
+
+    return true
+  }
+
+  const createProjectNote = (text: string, color = '') => {
+    const normalizedText = text.trim()
+
+    if (!normalizedText) {
+      return false
+    }
+
+    const authorId = currentUser.value?.id ?? defaultAdminUserId
+    data.value.notes = data.value.notes.map((note) => (
+      note.projectId === data.value.currentProjectId && note.authorId === authorId
+        ? { ...note, sortOrder: (note.sortOrder ?? 0) + 1 }
+        : note
+    ))
+
+    data.value.notes = [
+      {
+        id: createId(),
+        projectId: data.value.currentProjectId,
+        authorId,
+        text: normalizedText,
+        color,
+        sortOrder: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      ...data.value.notes
+    ]
+    save()
+
+    return true
+  }
+
+  const updateProjectNote = (noteId: string, text: string) => {
+    const note = data.value.notes.find((item) =>
+      item.id === noteId && item.authorId === currentUser.value?.id
+    )
+    const normalizedText = text.trim()
+
+    if (!note || !normalizedText) {
+      return false
+    }
+
+    note.text = normalizedText
+    note.updatedAt = new Date().toISOString()
+    save()
+
+    return true
+  }
+
+  const deleteProjectNote = (noteId: string) => {
+    const note = data.value.notes.find((item) =>
+      item.id === noteId && item.authorId === currentUser.value?.id
+    )
+
+    if (!note) {
+      return false
+    }
+
+    data.value.notes = data.value.notes.filter((item) => item.id !== noteId)
+    save()
+
+    return true
+  }
+
+  const reorderProjectNotes = (noteIds: string[]) => {
+    const orderedIds = new Set(noteIds)
+    const orderedNotes = noteIds
+      .map((noteId) => data.value.notes.find((note) =>
+        note.id === noteId &&
+        note.projectId === data.value.currentProjectId &&
+        note.authorId === currentUser.value?.id
+      ))
+      .filter(Boolean) as ProjectNote[]
+    const nextOrder = new Map(orderedNotes.map((note, index) => [note.id, index]))
+
+    data.value.notes = data.value.notes.map((note) =>
+      orderedIds.has(note.id) && nextOrder.has(note.id)
+        ? { ...note, sortOrder: nextOrder.get(note.id) ?? note.sortOrder }
+        : note
+    )
+    save()
+  }
 
   const reorderChecklists = (checklistIds: string[]) => {
     const orderedIds = new Set(checklistIds)
@@ -1559,6 +1924,15 @@ export const useProjectStore = () => {
     save()
   }
 
+  const reorderProjectFeedBlocks = (blockIds: string[]) => {
+    const supportedBlockIds = ['comments', 'notes', 'history']
+    const orderedBlockIds = blockIds.filter((blockId) => supportedBlockIds.includes(blockId))
+    const missingBlockIds = supportedBlockIds.filter((blockId) => !orderedBlockIds.includes(blockId))
+
+    data.value.projectFeedBlockOrder = [...orderedBlockIds, ...missingBlockIds]
+    save()
+  }
+
   return {
     data,
     getSectionPermissionId,
@@ -1571,9 +1945,14 @@ export const useProjectStore = () => {
     currentUserRoles,
     isCurrentUserAdmin,
     visibleProjects,
+    currentProjectComments,
+    currentProjectHistory,
+    currentUserNotes,
     isLoaded,
     load,
     canUsePermission,
+    getUserById,
+    getUserNameById,
     setCurrentProject,
     createProject,
     updateProject,
@@ -1614,7 +1993,15 @@ export const useProjectStore = () => {
     acceptBriefLinkToWork,
     updateBriefLinkTitle,
     deleteBriefLink,
+    createProjectComment,
+    updateProjectComment,
+    deleteProjectComment,
+    createProjectNote,
+    updateProjectNote,
+    deleteProjectNote,
+    reorderProjectNotes,
     reorderWorkspaceBlocks,
+    reorderProjectFeedBlocks,
     reorderChecklists,
     reorderBriefs,
     getChecklistsBySection,

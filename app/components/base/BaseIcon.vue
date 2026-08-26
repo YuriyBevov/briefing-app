@@ -7,8 +7,10 @@ import {
   GripVertical,
   Lock,
   LockOpen,
+  Maximize2,
   Moon,
   Pencil,
+  SendHorizontal,
   Sun,
   Trash2,
   X
@@ -22,7 +24,9 @@ type BaseIconName =
   | 'close'
   | 'drag-handle'
   | 'lock'
+  | 'maximize'
   | 'moon'
+  | 'send'
   | 'sun'
   | 'unlock'
   | 'trash'
@@ -39,7 +43,9 @@ const icons: Record<BaseIconName, Component> = {
   close: X,
   'drag-handle': GripVertical,
   lock: Lock,
+  maximize: Maximize2,
   moon: Moon,
+  send: SendHorizontal,
   sun: Sun,
   unlock: LockOpen,
   trash: Trash2

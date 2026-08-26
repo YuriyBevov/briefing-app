@@ -20,6 +20,10 @@
     box-shadow: var(--shadow-shell);
   }
 
+  &__panel--wide {
+    width: min(100%, 1040px);
+  }
+
   &__header,
   &__footer {
     position: sticky;

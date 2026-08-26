@@ -34,7 +34,9 @@ const iconNames = [
   'close',
   'drag-handle',
   'lock',
+  'maximize',
   'moon',
+  'send',
   'sun',
   'unlock',
   'trash'
@@ -675,8 +677,62 @@ const tableRows = [
             </div>
             <div class="comments-panel">
               <span class="ui-name">CommentsPanel</span>
-              <div class="section-header">
-                <h2 class="section-title">Комментарии</h2>
+              <div class="comments-panel__blocks">
+                <BaseWorkspaceBlock title="Комментарии" :collapsed="false">
+                  <template #actions>
+                    <BaseIconButton label="Вывести в окне" icon="maximize" />
+                  </template>
+                  <ProjectFeedBlock :framed="false" form-position="bottom" :has-items="true">
+                    <template #form>
+                      <form class="comments-panel__form">
+                        <label class="comments-panel__composer">
+                          <textarea
+                            class="field__control comments-panel__input"
+                            rows="1"
+                            aria-label="Комментарий"
+                            value="Текст комментария"
+                          />
+                          <button class="button button--small comments-panel__send" type="button" aria-label="Отправить" title="Отправить">
+                            <BaseIcon class="comments-panel__send-icon" name="send" />
+                          </button>
+                        </label>
+                      </form>
+                    </template>
+
+                    <ProjectFeedCard
+                      author="Администратор"
+                      date="26.08.2026, 12:30"
+                      text="Добавлен комментарий по проекту."
+                      actions-mode="context"
+                      readonly
+                    />
+                  </ProjectFeedBlock>
+                </BaseWorkspaceBlock>
+                <BaseWorkspaceBlock title="Заметки" :collapsed="false">
+                  <ProjectFeedBlock :framed="false" :has-items="true">
+                    <ProjectFeedCard
+                      author=""
+                      date="26.08.2026, 12:40"
+                      text="Проверить материалы перед созвоном."
+                      color="linear-gradient(135deg, #fff8d6 0%, #ffe8a3 100%)"
+                      actions-mode="context"
+                      draggable
+                      hide-author
+                      readonly
+                    />
+                  </ProjectFeedBlock>
+                </BaseWorkspaceBlock>
+                <BaseWorkspaceBlock title="История" :collapsed="false">
+                  <ProjectFeedBlock :framed="false" :has-items="true">
+                    <ProjectFeedCard
+                      author="Администратор"
+                      date="26.08.2026, 12:45"
+                      text="Создана ссылка на бриф Дизайн-макет"
+                      variant="history"
+                      readonly
+                    />
+                  </ProjectFeedBlock>
+                </BaseWorkspaceBlock>
               </div>
             </div>
           </div>

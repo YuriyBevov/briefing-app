@@ -141,6 +141,14 @@ const permissionGroups: Array<{
     permissionIds: ['create_sections', 'edit_sections', 'delete_sections']
   },
   {
+    title: 'Комментарии',
+    permissionIds: ['create_comments', 'view_comments', 'edit_comments', 'delete_comments']
+  },
+  {
+    title: 'История',
+    permissionIds: ['view_history']
+  },
+  {
     title: 'Разделы и блоки приложения',
     permissionIds: ['view_ui_components', 'view_settings']
   },

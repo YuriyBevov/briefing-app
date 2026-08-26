@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   title: string
-  createLabel: string
+  createLabel?: string
   collapsed: boolean
   toggleDisabled?: boolean
 }>()
@@ -31,9 +31,10 @@ defineEmits<{
       </button>
       <h2 class="section-title">{{ title }}</h2>
       <div class="button-row settings-section__actions">
-        <button class="button button--secondary" type="button" @click="$emit('create')">
+        <button v-if="createLabel" class="button button--secondary" type="button" @click="$emit('create')">
           {{ createLabel }}
         </button>
+        <slot name="actions" />
         <BaseDisclosureToggle
           class="settings-section__toggle"
           :disabled="toggleDisabled"

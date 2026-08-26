@@ -1,16 +1,19 @@
 <script setup lang="ts">
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   label: string
-  icon: 'check' | 'copy' | 'edit' | 'chevron-down' | 'close' | 'drag-handle' | 'lock' | 'moon' | 'sun' | 'unlock' | 'trash'
-}>()
+  icon: 'check' | 'copy' | 'edit' | 'chevron-down' | 'close' | 'drag-handle' | 'lock' | 'maximize' | 'moon' | 'send' | 'sun' | 'unlock' | 'trash'
+  tone?: 'secondary' | 'danger'
+}>(), {
+  tone: undefined
+})
 
 defineEmits<{
   click: []
 }>()
 
 const buttonClasses = computed(() => ({
-  'button--danger': props.icon === 'trash' || props.icon === 'lock',
-  'button--secondary': props.icon !== 'trash' && props.icon !== 'lock'
+  'button--danger': props.tone === 'danger' || props.icon === 'trash' || props.icon === 'lock',
+  'button--secondary': props.tone !== 'danger' && props.icon !== 'trash' && props.icon !== 'lock'
 }))
 </script>
 

@@ -12,8 +12,10 @@ import {
   Maximize2,
   MessageSquare,
   Moon,
+  PanelTop,
   Pencil,
   SendHorizontal,
+  Settings,
   StickyNote,
   Sun,
   Trash2,
@@ -34,7 +36,9 @@ type BaseIconName =
   | 'message'
   | 'moon'
   | 'note'
+  | 'panel'
   | 'send'
+  | 'settings'
   | 'sun'
   | 'unlock'
   | 'trash'
@@ -57,7 +61,9 @@ const icons: Record<BaseIconName, Component> = {
   message: MessageSquare,
   moon: Moon,
   note: StickyNote,
+  panel: PanelTop,
   send: SendHorizontal,
+  settings: Settings,
   sun: Sun,
   unlock: LockOpen,
   trash: Trash2

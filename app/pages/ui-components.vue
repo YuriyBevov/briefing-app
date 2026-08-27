@@ -40,7 +40,9 @@ const iconNames = [
   'message',
   'moon',
   'note',
+  'panel',
   'send',
+  'settings',
   'sun',
   'unlock',
   'trash'
@@ -146,6 +148,10 @@ const tableRows = [
             <div class="ui-sample">
               <span class="ui-name">Logo</span>
               <a class="logo" href="/">Логотип</a>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">AppFooterLogo</span>
+              <AppFooterLogo />
             </div>
           </div>
         </div>
@@ -605,26 +611,6 @@ const tableRows = [
                     </li>
                   </ul>
                 </nav>
-                <nav class="sidebar__nav sidebar__nav--create" aria-label="Демо создание">
-                  <ul class="sidebar__list">
-                    <li class="sidebar__item">
-                      <button class="sidebar__link" type="button">Создать бриф</button>
-                    </li>
-                    <li class="sidebar__item">
-                      <button class="sidebar__link" type="button">Создать чеклист</button>
-                    </li>
-                  </ul>
-                </nav>
-                <nav class="sidebar__nav sidebar__nav--utility" aria-label="Демо настройки">
-                  <ul class="sidebar__list">
-                    <li class="sidebar__item">
-                      <button class="sidebar__link" type="button">Настройки</button>
-                    </li>
-                    <li class="sidebar__item">
-                      <a class="sidebar__link" href="/ui-components">UI-компоненты</a>
-                    </li>
-                  </ul>
-                </nav>
               </div>
               <div class="sidebar__footer">
                 <div class="user-menu">
@@ -683,15 +669,26 @@ const tableRows = [
                 </header>
 
                 <nav class="side-rail__actions" aria-label="Быстрые панели проекта">
-                  <button class="side-rail__rail-action side-rail__rail-action--active" type="button" aria-label="Чат проекта" title="Чат проекта">
-                    <BaseIcon class="side-rail__rail-icon" name="message" />
-                  </button>
-                  <button class="side-rail__rail-action" type="button" disabled aria-label="Заметки" title="Заметки">
-                    <BaseIcon class="side-rail__rail-icon" name="note" />
-                  </button>
-                  <button class="side-rail__rail-action" type="button" disabled aria-label="История изменений" title="История изменений">
-                    <BaseIcon class="side-rail__rail-icon" name="history" />
-                  </button>
+                  <div class="side-rail__action-group">
+                    <button class="side-rail__rail-action side-rail__rail-action--active" type="button" aria-label="Чат проекта" title="Чат проекта">
+                      <BaseIcon class="side-rail__rail-icon" name="message" />
+                    </button>
+                    <button class="side-rail__rail-action" type="button" disabled aria-label="Заметки" title="Заметки">
+                      <BaseIcon class="side-rail__rail-icon" name="note" />
+                    </button>
+                    <button class="side-rail__rail-action" type="button" disabled aria-label="История изменений" title="История изменений">
+                      <BaseIcon class="side-rail__rail-icon" name="history" />
+                    </button>
+                  </div>
+
+                  <div class="side-rail__action-group side-rail__action-group--utility">
+                    <a class="side-rail__rail-action" href="/settings" aria-label="Настройки" title="Настройки">
+                      <BaseIcon class="side-rail__rail-icon" name="settings" />
+                    </a>
+                    <a class="side-rail__rail-action" href="/ui-components" aria-label="UI-компоненты" title="UI-компоненты">
+                      <BaseIcon class="side-rail__rail-icon" name="panel" />
+                    </a>
+                  </div>
                 </nav>
 
                 <footer class="side-rail__footer">

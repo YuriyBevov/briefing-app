@@ -16,9 +16,10 @@
   }
 
   &__content {
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    height: 100%;
     min-height: 0;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
     overflow: hidden;
   }
 
@@ -32,23 +33,6 @@
     min-height: 0;
     padding: var(--space-md);
     overflow-y: auto;
-  }
-
-  &__nav--create {
-    padding-top: var(--space-md);
-    border-top: 1px solid var(--color-border);
-    overflow: visible;
-  }
-
-  &__nav--utility {
-    position: sticky;
-    bottom: var(--topbar-height);
-    z-index: 1;
-    align-self: end;
-    padding-top: var(--space-md);
-    border-top: 1px solid var(--color-border);
-    background-color: var(--color-surface);
-    overflow: visible;
   }
 
   &__list {

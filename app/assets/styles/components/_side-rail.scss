@@ -1,26 +1,22 @@
 .side-rail {
   position: sticky;
   top: 0;
-  z-index: 5;
-  width: 80px;
+  z-index: 20;
+  width: var(--side-rail-width);
   height: 100vh;
   min-height: 100vh;
   display: block;
   border-left: 1px solid var(--color-border);
   background-color: var(--color-surface);
-  overflow: hidden;
-}
-
-.side-rail--open {
-  width: 600px;
+  overflow: visible;
 }
 
 .side-rail__rail {
   position: absolute;
   top: 0;
   right: 0;
-  z-index: 3;
-  width: 80px;
+  z-index: 22;
+  width: var(--side-rail-width);
   height: 100%;
   display: grid;
   grid-template-rows: var(--topbar-height) minmax(0, 1fr) var(--topbar-height);
@@ -52,12 +48,23 @@
 
 .side-rail__actions {
   width: 100%;
-  display: grid;
-  align-content: start;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   justify-items: center;
   gap: var(--space-sm);
   padding: 60px var(--space-md);
-  min-height: 0;
+}
+
+.side-rail__action-group {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-sm);
+}
+
+.side-rail__action-group--utility {
+  margin-top: auto;
 }
 
 .side-rail__rail-action {
@@ -82,6 +89,7 @@
 
 .side-rail__rail-action:hover,
 .side-rail__rail-action:focus-visible,
+.side-rail__rail-action.router-link-active,
 .side-rail__rail-action--active {
   border-color: var(--color-accent);
   color: var(--color-accent);
@@ -142,22 +150,28 @@
   right: auto;
   width: 100%;
   height: 480px;
+  inset: 0;
+  padding-right: var(--side-rail-width);
   box-shadow: none;
 }
 
 .side-rail__drawer {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  width: 100%;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 21;
+  width: calc(var(--side-rail-drawer-width) + var(--side-rail-width));
   height: 100vh;
   min-width: 0;
-  padding-right: 80px;
+  padding-right: var(--side-rail-width);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   gap: 0;
+  border-left: 1px solid var(--color-border);
   background-color: var(--color-surface);
   overflow: hidden;
+  will-change: transform, opacity;
 }
 
 .side-rail__drawer-header {
@@ -214,14 +228,14 @@
 .side-rail-drawer-enter-active,
 .side-rail-drawer-leave-active {
   transition:
-    opacity 0.24s ease,
-    transform 0.24s ease;
+    opacity 0.28s ease,
+    transform 0.28s ease;
 }
 
 .side-rail-drawer-enter-from,
 .side-rail-drawer-leave-to {
   opacity: 0;
-  transform: translateX(24px);
+  transform: translateX(100%);
 }
 
 .side-rail-drawer-enter-to,
@@ -470,12 +484,13 @@
   }
 
   .side-rail__drawer {
-    position: absolute;
+    position: fixed;
     top: 0;
-    right: 64px;
-    width: min(360px, calc(100vw - 64px));
+    right: 0;
+    bottom: 0;
+    width: min(424px, 100vw);
     min-width: 0;
-    padding-right: 0;
+    padding-right: 64px;
     border-left: 1px solid var(--color-border);
     box-shadow: var(--shadow-shell);
   }

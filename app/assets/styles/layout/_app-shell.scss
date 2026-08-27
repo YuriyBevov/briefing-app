@@ -1,6 +1,7 @@
 .app-shell {
   min-height: 100vh;
   background-color: var(--color-background);
+  overflow-x: clip;
 
   &__main {
     min-width: 0;
@@ -10,6 +11,7 @@
     display: grid;
     gap: var(--space-md);
     padding: var(--space-md);
+    transition: padding-right 0.28s ease;
   }
 
   &__workspace {
@@ -31,6 +33,10 @@
     &__content {
       align-items: start;
       padding: var(--space-lg);
+    }
+
+    &__content--side-rail-open {
+      padding-right: calc(var(--space-lg) + var(--side-rail-drawer-width));
     }
 
     &__workspace {

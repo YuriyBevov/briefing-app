@@ -15,8 +15,9 @@ type FeedContextMenu =
   { type: 'comment'; item: ProjectComment; x: number; y: number }
 type SidebarPanelId = 'comments'
 type SidebarActionId = 'comments' | 'notes' | 'history'
+type SideRailIconName = 'history' | 'message' | 'note' | 'panel' | 'settings'
 
-const activeSidebarPanel = ref<SidebarPanelId | ''>('')
+const activeSidebarPanel = useState<SidebarPanelId | ''>('active-side-rail-panel', () => '')
 const commentText = ref('')
 const feedContextMenu = ref<FeedContextMenu | null>(null)
 const feedContextMenuKey = ref(0)
@@ -29,13 +30,15 @@ const canCreateComments = canUsePermission('create_comments')
 const canEditComments = canUsePermission('edit_comments')
 const canDeleteComments = canUsePermission('delete_comments')
 const canViewHistory = canUsePermission('view_history')
+const canViewSettings = canUsePermission('view_settings')
+const canViewUiComponents = canUsePermission('view_ui_components')
 const currentTime = ref('')
 let timer: ReturnType<typeof window.setInterval> | undefined
 
 const sidebarActions = computed<Array<{
   id: SidebarActionId
   label: string
-  icon: 'message' | 'note' | 'history'
+  icon: SideRailIconName
   disabled?: boolean
 }>>(() => [
   {
@@ -57,6 +60,33 @@ const sidebarActions = computed<Array<{
     disabled: !canViewHistory.value || currentProjectHistory.value.length === 0
   }
 ])
+
+const utilityActions = computed<Array<{
+  label: string
+  to: string
+  icon: SideRailIconName
+}>>(() => [
+  {
+    label: 'Настройки',
+    to: '/settings',
+    icon: 'settings'
+  },
+  {
+    label: 'UI-компоненты',
+    to: '/ui-components',
+    icon: 'panel'
+  }
+].filter((action) => {
+  if (action.to === '/settings') {
+    return canViewSettings.value
+  }
+
+  if (action.to === '/ui-components') {
+    return canViewUiComponents.value
+  }
+
+  return true
+}))
 
 const isChatOpen = computed(() => activeSidebarPanel.value === 'comments')
 
@@ -232,19 +262,34 @@ onBeforeUnmount(() => {
       </header>
 
       <nav class="side-rail__actions" aria-label="Быстрые панели проекта">
-        <button
-          v-for="action in sidebarActions"
-          :key="action.id"
-          class="side-rail__rail-action"
-          :class="{ 'side-rail__rail-action--active': action.id === 'comments' && isChatOpen }"
-          type="button"
-          :disabled="action.disabled || action.id !== 'comments'"
-          :aria-label="action.label"
-          :title="action.label"
-          @click="toggleSidebarAction(action.id)"
-        >
-          <BaseIcon class="side-rail__rail-icon" :name="action.icon" />
-        </button>
+        <div class="side-rail__action-group">
+          <button
+            v-for="action in sidebarActions"
+            :key="action.id"
+            class="side-rail__rail-action"
+            :class="{ 'side-rail__rail-action--active': action.id === 'comments' && isChatOpen }"
+            type="button"
+            :disabled="action.disabled || action.id !== 'comments'"
+            :aria-label="action.label"
+            :title="action.label"
+            @click="toggleSidebarAction(action.id)"
+          >
+            <BaseIcon class="side-rail__rail-icon" :name="action.icon" />
+          </button>
+        </div>
+
+        <div class="side-rail__action-group side-rail__action-group--utility">
+          <NuxtLink
+            v-for="action in utilityActions"
+            :key="action.to"
+            class="side-rail__rail-action"
+            :to="action.to"
+            :aria-label="action.label"
+            :title="action.label"
+          >
+            <BaseIcon class="side-rail__rail-icon" :name="action.icon" />
+          </NuxtLink>
+        </div>
       </nav>
 
       <footer class="side-rail__footer">

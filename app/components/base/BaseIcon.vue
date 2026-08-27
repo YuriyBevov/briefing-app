@@ -5,12 +5,16 @@ import {
   ChevronDown,
   Copy,
   GripVertical,
+  History,
   Lock,
   LockOpen,
+  LogOut,
   Maximize2,
+  MessageSquare,
   Moon,
   Pencil,
   SendHorizontal,
+  StickyNote,
   Sun,
   Trash2,
   X
@@ -23,9 +27,13 @@ type BaseIconName =
   | 'chevron-down'
   | 'close'
   | 'drag-handle'
+  | 'history'
   | 'lock'
+  | 'logout'
   | 'maximize'
+  | 'message'
   | 'moon'
+  | 'note'
   | 'send'
   | 'sun'
   | 'unlock'
@@ -42,9 +50,13 @@ const icons: Record<BaseIconName, Component> = {
   'chevron-down': ChevronDown,
   close: X,
   'drag-handle': GripVertical,
+  history: History,
   lock: Lock,
+  logout: LogOut,
   maximize: Maximize2,
+  message: MessageSquare,
   moon: Moon,
+  note: StickyNote,
   send: SendHorizontal,
   sun: Sun,
   unlock: LockOpen,

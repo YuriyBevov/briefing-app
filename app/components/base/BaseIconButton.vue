@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = withDefaults(defineProps<{
   label: string
-  icon: 'check' | 'copy' | 'edit' | 'chevron-down' | 'close' | 'drag-handle' | 'lock' | 'maximize' | 'moon' | 'send' | 'sun' | 'unlock' | 'trash'
+  icon: 'check' | 'copy' | 'edit' | 'chevron-down' | 'close' | 'drag-handle' | 'history' | 'lock' | 'logout' | 'maximize' | 'message' | 'moon' | 'note' | 'send' | 'sun' | 'unlock' | 'trash'
   tone?: 'secondary' | 'danger'
 }>(), {
   tone: undefined

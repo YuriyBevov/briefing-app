@@ -20,7 +20,7 @@
 @media (min-width: 960px) {
   .app-shell {
     display: grid;
-    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr) auto;
 
     &__main {
       min-height: 100vh;
@@ -29,9 +29,14 @@
     }
 
     &__content {
-      grid-template-columns: minmax(0, 1fr) 440px;
       align-items: start;
       padding: var(--space-lg);
+    }
+
+    &__workspace {
+      position: sticky;
+      top: calc(var(--topbar-height) + var(--space-lg));
+      align-self: start;
     }
 
     &__content--wide {

@@ -33,9 +33,13 @@ const iconNames = [
   'chevron-down',
   'close',
   'drag-handle',
+  'history',
   'lock',
+  'logout',
   'maximize',
+  'message',
   'moon',
+  'note',
   'send',
   'sun',
   'unlock',
@@ -582,10 +586,6 @@ const tableRows = [
                 <span class="ui-name">TopbarProject</span>
                 <span class="topbar__title">Проект Alpha</span>
               </div>
-              <div class="topbar__actions">
-                <time class="topbar__time">12:40</time>
-                <button class="button button--secondary" type="button">Выйти</button>
-              </div>
             </div>
             <aside class="sidebar ui-sidebar-preview">
               <div class="sidebar__top">
@@ -675,65 +675,62 @@ const tableRows = [
                 <button class="button button--secondary" type="button">Создать</button>
               </div>
             </div>
-            <div class="comments-panel">
-              <span class="ui-name">CommentsPanel</span>
-              <div class="comments-panel__blocks">
-                <BaseWorkspaceBlock title="Комментарии" :collapsed="false">
-                  <template #actions>
-                    <BaseIconButton label="Вывести в окне" icon="maximize" />
-                  </template>
-                  <ProjectFeedBlock :framed="false" form-position="bottom" :has-items="true">
-                    <template #form>
-                      <form class="comments-panel__form">
-                        <label class="comments-panel__composer">
-                          <textarea
-                            class="field__control comments-panel__input"
-                            rows="1"
-                            aria-label="Комментарий"
-                            value="Текст комментария"
-                          />
-                          <button class="button button--small comments-panel__send" type="button" aria-label="Отправить" title="Отправить">
-                            <BaseIcon class="comments-panel__send-icon" name="send" />
-                          </button>
-                        </label>
-                      </form>
-                    </template>
+            <div class="side-rail side-rail--demo side-rail--open">
+              <span class="ui-name">SideRailRightSidebar</span>
+              <div class="side-rail__rail">
+                <header class="side-rail__header">
+                  <time class="side-rail__time">14:30</time>
+                </header>
 
-                    <ProjectFeedCard
-                      author="Администратор"
-                      date="26.08.2026, 12:30"
-                      text="Добавлен комментарий по проекту."
-                      actions-mode="context"
-                      readonly
-                    />
-                  </ProjectFeedBlock>
-                </BaseWorkspaceBlock>
-                <BaseWorkspaceBlock title="Заметки" :collapsed="false">
-                  <ProjectFeedBlock :framed="false" :has-items="true">
-                    <ProjectFeedCard
-                      author=""
-                      date="26.08.2026, 12:40"
-                      text="Проверить материалы перед созвоном."
-                      color="linear-gradient(135deg, #fff8d6 0%, #ffe8a3 100%)"
-                      actions-mode="context"
-                      draggable
-                      hide-author
-                      readonly
-                    />
-                  </ProjectFeedBlock>
-                </BaseWorkspaceBlock>
-                <BaseWorkspaceBlock title="История" :collapsed="false">
-                  <ProjectFeedBlock :framed="false" :has-items="true">
-                    <ProjectFeedCard
-                      author="Администратор"
-                      date="26.08.2026, 12:45"
-                      text="Создана ссылка на бриф Дизайн-макет"
-                      variant="history"
-                      readonly
-                    />
-                  </ProjectFeedBlock>
-                </BaseWorkspaceBlock>
+                <nav class="side-rail__actions" aria-label="Быстрые панели проекта">
+                  <button class="side-rail__rail-action side-rail__rail-action--active" type="button" aria-label="Чат проекта" title="Чат проекта">
+                    <BaseIcon class="side-rail__rail-icon" name="message" />
+                  </button>
+                  <button class="side-rail__rail-action" type="button" disabled aria-label="Заметки" title="Заметки">
+                    <BaseIcon class="side-rail__rail-icon" name="note" />
+                  </button>
+                  <button class="side-rail__rail-action" type="button" disabled aria-label="История изменений" title="История изменений">
+                    <BaseIcon class="side-rail__rail-icon" name="history" />
+                  </button>
+                </nav>
+
+                <footer class="side-rail__footer">
+                  <button class="button button--secondary side-rail__system-action" type="button" aria-label="Выйти" title="Выйти">
+                    <BaseIcon class="side-rail__system-icon" name="logout" />
+                  </button>
+                </footer>
               </div>
+              <section class="side-rail__drawer" aria-label="Чат проекта">
+                <header class="side-rail__drawer-header">
+                  <h2 class="section-title">Чат проекта</h2>
+                  <BaseIconButton label="Скрыть чат проекта" icon="close" />
+                </header>
+                <ProjectFeedBlock class="side-rail__chat" :framed="false" form-position="bottom" :has-items="true">
+                  <template #form>
+                    <form class="side-rail__form">
+                      <label class="side-rail__composer">
+                        <textarea
+                          class="field__control side-rail__input"
+                          rows="1"
+                          aria-label="Сообщение"
+                          value="Текст сообщения"
+                        />
+                        <button class="button button--small side-rail__send" type="button" aria-label="Отправить" title="Отправить">
+                          <BaseIcon class="side-rail__send-icon" name="send" />
+                        </button>
+                      </label>
+                    </form>
+                  </template>
+
+                  <ProjectFeedCard
+                    author="Администратор"
+                    date="26.08.2026, 12:30"
+                    text="Добавлено сообщение по проекту."
+                    actions-mode="context"
+                    readonly
+                  />
+                </ProjectFeedBlock>
+              </section>
             </div>
           </div>
         </div>

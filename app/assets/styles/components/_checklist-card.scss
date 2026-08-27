@@ -1,90 +1,4 @@
-.checklist-list {
-  display: grid;
-  gap: var(--space-sm);
-  margin-top: var(--space-md);
-}
-
 .checklist-card {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background-color: var(--color-surface-muted);
-
-  &__header {
-    display: flex;
-    gap: var(--space-md);
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-md);
-    cursor: pointer;
-
-    &::marker {
-      content: "";
-    }
-
-    &::-webkit-details-marker {
-      display: none;
-    }
-  }
-
-  &__summary {
-    display: grid;
-    flex: 1 1 auto;
-    gap: var(--space-xs);
-    min-width: 0;
-  }
-
-  &__drag {
-    width: 32px;
-    height: 32px;
-    display: inline-grid;
-    place-items: center;
-    flex: 0 0 auto;
-    padding: 0;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    color: var(--color-text-muted);
-    background-color: var(--color-control);
-    cursor: grab;
-    transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
-
-    &:hover {
-      border-color: var(--color-accent);
-      color: var(--color-text);
-    }
-
-    &:active {
-      cursor: grabbing;
-    }
-  }
-
-  &__drag-icon {
-    width: 18px;
-    height: 18px;
-  }
-
-  &[open] &__toggle .disclosure-toggle__icon {
-    color: var(--color-text);
-    transform: rotate(0);
-  }
-
-  &__actions {
-    flex: 0 0 auto;
-    flex-wrap: nowrap;
-  }
-
-  &__title {
-    color: var(--color-text);
-    font-size: 14px;
-    line-height: 1.2;
-    font-weight: 700;
-  }
-
-  &__meta {
-    color: var(--color-text-muted);
-    font-size: 12px;
-    line-height: 1.2;
-  }
-
   &__list {
     display: grid;
     gap: var(--space-xs);
@@ -127,11 +41,6 @@
   &__comment {
     margin-top: var(--space-xs);
   }
-}
-
-.checklist-card.sortable-ghost {
-  border-color: var(--color-accent);
-  opacity: 0.54;
 }
 
 @media (min-width: 720px) {

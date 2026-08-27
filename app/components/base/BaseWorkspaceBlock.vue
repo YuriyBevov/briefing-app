@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import type { BaseIconName } from './BaseIcon.vue'
+
 defineProps<{
   title: string
   createLabel?: string
+  createIcon?: BaseIconName
   collapsed: boolean
   toggleDisabled?: boolean
 }>()
@@ -14,29 +17,35 @@ defineEmits<{
 
 <template>
   <section
-    class="workspace-panel settings-section"
+    class="workspace-block"
     :class="{
-      'settings-section--collapsed': collapsed || toggleDisabled,
-      'settings-section--toggle-disabled': toggleDisabled
+      'workspace-block--collapsed': collapsed || toggleDisabled,
+      'workspace-block--toggle-disabled': toggleDisabled
     }"
   >
-    <div class="settings-section__header">
+    <div class="workspace-block__header">
       <button
-        class="settings-section__drag"
+        class="workspace-block__drag"
         type="button"
         aria-label="Перетащить блок"
         title="Перетащить блок"
       >
-        <BaseIcon class="settings-section__drag-icon" name="drag-handle" />
+        <BaseIcon class="workspace-block__drag-icon" name="drag-handle" />
       </button>
       <h2 class="section-title">{{ title }}</h2>
-      <div class="button-row settings-section__actions">
-        <button v-if="createLabel" class="button button--secondary" type="button" @click="$emit('create')">
+      <div class="button-row workspace-block__actions">
+        <BaseIconButton
+          v-if="createLabel && createIcon"
+          :label="createLabel"
+          :icon="createIcon"
+          @click="$emit('create')"
+        />
+        <button v-else-if="createLabel" class="button button--secondary" type="button" @click="$emit('create')">
           {{ createLabel }}
         </button>
         <slot name="actions" />
         <BaseDisclosureToggle
-          class="settings-section__toggle"
+          class="workspace-block__toggle"
           :disabled="toggleDisabled"
           :expanded="!collapsed && !toggleDisabled"
           :label="collapsed || toggleDisabled ? 'Развернуть блок' : 'Свернуть блок'"

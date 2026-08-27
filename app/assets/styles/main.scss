@@ -12,6 +12,7 @@
 @use "components/base-icon-button";
 @use "components/base-select";
 @use "components/base-multi-select";
+@use "components/label";
 @use "components/modal-close-button";
 @use "components/disclosure-toggle";
 @use "components/section-header";
@@ -23,7 +24,7 @@
 @use "components/topbar";
 @use "components/side-rail";
 @use "components/project-feed";
-@use "components/workspace-panel";
+@use "components/workspace-block";
 @use "components/field";
 @use "components/modal";
 @use "components/checklist-card";

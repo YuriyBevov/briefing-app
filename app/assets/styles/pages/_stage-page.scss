@@ -11,10 +11,10 @@
     gap: var(--space-md);
   }
 
-  &__workspace > .settings-section {
+  &__workspace > .workspace-block {
     width: 100%;
     min-width: 0;
-    overflow: auto;
+    overflow: visible;
   }
 }
 

@@ -10,10 +10,12 @@ import {
   LockOpen,
   LogOut,
   Maximize2,
+  Menu,
   MessageSquare,
   Moon,
   PanelTop,
   Pencil,
+  Plus,
   SendHorizontal,
   Settings,
   StickyNote,
@@ -22,7 +24,7 @@ import {
   X
 } from '@lucide/vue'
 
-type BaseIconName =
+export type BaseIconName =
   | 'check'
   | 'copy'
   | 'edit'
@@ -33,10 +35,12 @@ type BaseIconName =
   | 'lock'
   | 'logout'
   | 'maximize'
+  | 'menu'
   | 'message'
   | 'moon'
   | 'note'
   | 'panel'
+  | 'plus'
   | 'send'
   | 'settings'
   | 'sun'
@@ -58,10 +62,12 @@ const icons: Record<BaseIconName, Component> = {
   lock: Lock,
   logout: LogOut,
   maximize: Maximize2,
+  menu: Menu,
   message: MessageSquare,
   moon: Moon,
   note: StickyNote,
   panel: PanelTop,
+  plus: Plus,
   send: SendHorizontal,
   settings: Settings,
   sun: Sun,

@@ -37,10 +37,12 @@ const iconNames = [
   'lock',
   'logout',
   'maximize',
+  'menu',
   'message',
   'moon',
   'note',
   'panel',
+  'plus',
   'send',
   'settings',
   'sun',
@@ -229,7 +231,8 @@ const tableRows = [
             <div class="ui-sample">
               <span class="ui-name">BriefCardLink</span>
               <a class="brief-card__link" href="/brief/example" target="_blank">
-                http://localhost:3000/brief/example
+                <span class="brief-card__link-title">Бриф на дизайн</span>
+                <span class="brief-card__link-url">http://localhost:3000/brief/example</span>
               </a>
             </div>
             <div class="ui-sample">
@@ -355,31 +358,31 @@ const tableRows = [
           <div class="ui-sample-row">
             <div class="ui-sample">
               <span class="ui-name">BriefLinkStatusPending</span>
-              <span class="brief-card__link-status brief-card__link-status--pending">Ожидает заполнения</span>
+              <div class="label label--pending">Ожидает заполнения</div>
             </div>
             <div class="ui-sample">
               <span class="ui-name">BriefLinkStatusCompleted</span>
-              <span class="brief-card__link-status brief-card__link-status--completed">Согласован</span>
+              <div class="label label--completed">Согласован</div>
             </div>
             <div class="ui-sample">
               <span class="ui-name">BriefLinkStatusRevisionPending</span>
-              <span class="brief-card__link-status brief-card__link-status--revision-pending">
+              <div class="label label--revision-pending">
                 Ожидает редакции
-              </span>
+              </div>
             </div>
             <div class="ui-sample">
               <span class="ui-name">BriefLinkStatusRevisionCompleted</span>
-              <span class="brief-card__link-status brief-card__link-status--completed">
+              <div class="label label--completed">
                 Отредактирован и согласован
-              </span>
+              </div>
             </div>
             <div class="ui-sample">
               <span class="ui-name">BriefLinkStatusInWork</span>
-              <span class="brief-card__link-status brief-card__link-status--in-work">В работе</span>
+              <div class="label label--in-work">В работе</div>
             </div>
             <div class="ui-sample">
               <span class="ui-name">BriefLinkStatusArchived</span>
-              <span class="brief-card__link-status brief-card__link-status--archived">Архив</span>
+              <div class="label label--archived">Архив</div>
             </div>
             <div class="ui-sample">
               <span class="ui-name">TopbarStatus</span>
@@ -395,28 +398,36 @@ const tableRows = [
           <span class="ui-accordion__meta">ChecklistComponents</span>
         </summary>
         <div class="ui-accordion__body">
-          <details class="checklist-card">
-            <summary class="checklist-card__header">
-              <span class="checklist-card__summary">
+          <details class="workspace-card checklist-card">
+            <summary class="workspace-card__header">
+              <span class="workspace-card__summary">
                 <span class="ui-name">ChecklistCardCollapsed</span>
-                <span class="checklist-card__title">Чеклист предподготовки</span>
-                <span class="checklist-card__meta">0% · 2 обязательных пунктов</span>
+                <span class="workspace-card__title">Чеклист предподготовки</span>
+                <span class="workspace-card__meta">0% · 2 обязательных пунктов</span>
               </span>
-              <BaseDisclosureToggle class="checklist-card__toggle" label="Развернуть чеклист" />
+              <BaseDisclosureToggle class="workspace-card__toggle" label="Развернуть чеклист" />
             </summary>
           </details>
-          <details class="checklist-card" open>
-            <summary class="checklist-card__header">
-              <span class="checklist-card__summary">
+          <details class="workspace-card checklist-card" open>
+            <summary class="workspace-card__header">
+              <span class="workspace-card__summary">
                 <span class="ui-name">ChecklistCardOpen</span>
-                <span class="checklist-card__title">Чеклист запуска</span>
-                <span class="checklist-card__meta">66% · 1 обязательных пунктов</span>
+                <span class="workspace-card__title">Чеклист запуска</span>
+                <span class="workspace-card__meta">66% · 1 обязательных пунктов</span>
               </span>
-              <BaseDisclosureToggle class="checklist-card__toggle" expanded label="Свернуть чеклист" />
+              <BaseDisclosureToggle class="workspace-card__toggle" expanded label="Свернуть чеклист" />
             </summary>
-            <div class="button-row checklist-card__actions">
-              <button class="button button--secondary" type="button">Редактировать</button>
-              <button class="button button--danger" type="button">Удалить</button>
+            <div class="workspace-card__actions">
+              <BaseActionMenu label="Действия чеклиста">
+                <button class="action-menu__item" type="button">
+                  <BaseIcon class="action-menu__icon" name="edit" />
+                  <span>Изменить</span>
+                </button>
+                <button class="action-menu__item action-menu__item--danger" type="button">
+                  <BaseIcon class="action-menu__icon" name="trash" />
+                  <span>Удалить</span>
+                </button>
+              </BaseActionMenu>
             </div>
             <ul class="checklist-card__list">
               <li class="checklist-card__item">
@@ -466,40 +477,51 @@ const tableRows = [
           <span class="ui-accordion__meta">BriefComponents</span>
         </summary>
         <div class="ui-accordion__body">
-          <div class="brief-list">
-            <details class="brief-card">
-              <summary class="brief-card__header">
-                <span class="brief-card__body">
+          <div class="workspace-block__content">
+            <details class="workspace-card brief-card">
+              <summary class="workspace-card__header">
+                <span class="workspace-card__summary">
                   <span class="ui-name">BriefCardCollapsed</span>
-                  <span class="brief-card__title">Бриф на аудит интерфейса</span>
-                  <span class="brief-card__meta">6 вопросов</span>
+                  <span class="workspace-card__title">Бриф на аудит интерфейса</span>
+                  <span class="workspace-card__meta">6 вопросов</span>
                 </span>
-                <BaseDisclosureToggle class="brief-card__toggle" label="Развернуть бриф" />
+                <BaseDisclosureToggle class="workspace-card__toggle" label="Развернуть бриф" />
               </summary>
             </details>
-            <details class="brief-card brief-card--empty">
-              <summary class="brief-card__header">
-                <span class="brief-card__body">
+            <details class="workspace-card workspace-card--empty brief-card">
+              <summary class="workspace-card__header">
+                <span class="workspace-card__summary">
                   <span class="ui-name">BriefCardEmpty</span>
-                  <span class="brief-card__title">Бриф без ссылок</span>
-                  <span class="brief-card__meta">4 вопроса</span>
+                  <span class="workspace-card__title">Бриф без ссылок</span>
+                  <span class="workspace-card__meta">4 вопроса</span>
                 </span>
-                <BaseDisclosureToggle class="brief-card__toggle" disabled label="Развернуть бриф" />
+                <BaseDisclosureToggle class="workspace-card__toggle" disabled label="Развернуть бриф" />
               </summary>
             </details>
-            <details class="brief-card" open>
-              <summary class="brief-card__header">
-                <span class="brief-card__body">
+            <details class="workspace-card brief-card" open>
+              <summary class="workspace-card__header">
+                <span class="workspace-card__summary">
                   <span class="ui-name">BriefCardOpen</span>
-                  <span class="brief-card__title">Бриф на дизайн главной страницы</span>
-                  <span class="brief-card__meta">4 вопроса · 2 ссылки · 1 заполнена</span>
+                  <span class="workspace-card__title">Бриф на дизайн главной страницы</span>
+                  <span class="workspace-card__meta">4 вопроса · 2 ссылки · 1 заполнена</span>
                 </span>
-                <BaseDisclosureToggle class="brief-card__toggle" expanded label="Свернуть бриф" />
+                <BaseDisclosureToggle class="workspace-card__toggle" expanded label="Свернуть бриф" />
               </summary>
-              <div class="button-row brief-card__actions">
-                <button class="button button--secondary" type="button">Редактировать</button>
-                <button class="button button--secondary" type="button">Создать ссылку</button>
-                <button class="button button--danger" type="button">Удалить</button>
+              <div class="workspace-card__actions">
+                <BaseActionMenu label="Действия брифа">
+                  <button class="action-menu__item" type="button">
+                    <BaseIcon class="action-menu__icon" name="edit" />
+                    <span>Изменить</span>
+                  </button>
+                  <button class="action-menu__item" type="button">
+                    <BaseIcon class="action-menu__icon" name="plus" />
+                    <span>Создать ссылку</span>
+                  </button>
+                  <button class="action-menu__item action-menu__item--danger" type="button">
+                    <BaseIcon class="action-menu__icon" name="trash" />
+                    <span>Удалить</span>
+                  </button>
+                </BaseActionMenu>
               </div>
               <div class="brief-card__links">
                 <details class="brief-card__link-item" open>
@@ -508,26 +530,37 @@ const tableRows = [
                       <span class="ui-name">BriefLinkHistoryItemRevisionOpen</span>
                       <div class="brief-card__link-header">
                         <span class="brief-card__link-main">
-                          <span class="brief-card__link-tools">
-                            <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Копировать ссылку" title="Копировать ссылку">
-                              <BaseIcon class="brief-card__copy-icon" name="copy" />
-                            </button>
-                            <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Изменить название" title="Изменить название">
-                              <BaseIcon class="brief-card__edit-icon" name="edit" />
-                            </button>
-                          </span>
-                          <span class="brief-card__link-content">
-                            <a class="brief-card__link" href="/brief/example-revision-pending" target="_blank">Главная страница, редакция клиента</a>
+                          <a class="brief-card__link" href="/brief/example-revision-pending" target="_blank">
+                            <span class="brief-card__link-title">Главная страница, редакция клиента</span>
                             <span class="brief-card__link-url">http://localhost:3000/brief/example-revision-pending</span>
-                          </span>
+                          </a>
                         </span>
-                        <span class="brief-card__link-status brief-card__link-status--revision-pending">Ожидает редакции</span>
-                        <BaseDisclosureToggle class="brief-card__history-toggle" expanded label="История экземпляра" />
-                      </div>
-                      <div class="button-row brief-card__link-actions">
-                        <button class="button button--secondary button--small" type="button" disabled>Открыть бриф к заполнению</button>
-                        <button class="button button--primary button--small" type="button" disabled>Принять в работу</button>
-                        <button class="button button--danger button--small" type="button">Удалить</button>
+                        <div class="label label--revision-pending">Ожидает редакции</div>
+                        <span class="brief-card__link-controls">
+                          <BaseActionMenu label="Действия ссылки на бриф">
+                            <button class="action-menu__item" type="button">
+                              <BaseIcon class="action-menu__icon" name="copy" />
+                              <span>Копировать</span>
+                            </button>
+                            <button class="action-menu__item" type="button">
+                              <BaseIcon class="action-menu__icon" name="edit" />
+                              <span>Редактировать</span>
+                            </button>
+                            <button class="action-menu__item" type="button" disabled>
+                              <BaseIcon class="action-menu__icon" name="unlock" />
+                              <span>Создать ссылку</span>
+                            </button>
+                            <button class="action-menu__item" type="button" disabled>
+                              <BaseIcon class="action-menu__icon" name="check" />
+                              <span>Принять в работу</span>
+                            </button>
+                            <button class="action-menu__item action-menu__item--danger" type="button">
+                              <BaseIcon class="action-menu__icon" name="trash" />
+                              <span>Удалить</span>
+                            </button>
+                          </BaseActionMenu>
+                          <BaseDisclosureToggle class="brief-card__history-toggle" expanded label="История экземпляра" />
+                        </span>
                       </div>
                     </div>
                   </summary>
@@ -535,12 +568,12 @@ const tableRows = [
                     <div class="brief-card__link-node">
                       <span class="ui-name">BriefLinkHistoryNodeArchived</span>
                       <div class="brief-card__link-header">
-                        <span class="brief-card__link-content">
-                          <a class="brief-card__link" href="/brief/example-archived" target="_blank">
+                        <a class="brief-card__link" href="/brief/example-archived" target="_blank">
+                          <span class="brief-card__link-title">
                             http://localhost:3000/brief/example-archived
-                          </a>
-                        </span>
-                        <span class="brief-card__link-status brief-card__link-status--archived">Архив</span>
+                          </span>
+                        </a>
+                        <div class="label label--archived">Архив</div>
                       </div>
                     </div>
                   </div>
@@ -551,25 +584,37 @@ const tableRows = [
                       <span class="ui-name">BriefLinkHistoryItemCollapsed</span>
                       <div class="brief-card__link-header">
                         <span class="brief-card__link-main">
-                          <span class="brief-card__link-tools">
-                            <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Копировать ссылку" title="Копировать ссылку">
-                              <BaseIcon class="brief-card__copy-icon" name="copy" />
-                            </button>
-                            <button class="button button--secondary button--small brief-card__icon-button" type="button" aria-label="Изменить название" title="Изменить название">
-                              <BaseIcon class="brief-card__edit-icon" name="edit" />
-                            </button>
-                          </span>
-                          <span class="brief-card__link-content">
-                            <a class="brief-card__link" href="/brief/example-completed" target="_blank">http://localhost:3000/brief/example-completed</a>
-                          </span>
+                          <a class="brief-card__link" href="/brief/example-completed" target="_blank">
+                            <span class="brief-card__link-title">Бриф на дизайн главной страницы</span>
+                            <span class="brief-card__link-url">http://localhost:3000/brief/example-completed</span>
+                          </a>
                         </span>
-                        <span class="brief-card__link-status brief-card__link-status--completed">Согласован</span>
-                        <BaseDisclosureToggle class="brief-card__history-toggle" disabled label="История экземпляра" />
-                      </div>
-                      <div class="button-row brief-card__link-actions">
-                        <button class="button button--secondary button--small" type="button">Открыть бриф к заполнению</button>
-                        <button class="button button--primary button--small" type="button">Принять в работу</button>
-                        <button class="button button--danger button--small" type="button">Удалить</button>
+                        <div class="label label--completed">Согласован</div>
+                        <span class="brief-card__link-controls">
+                          <BaseActionMenu label="Действия ссылки на бриф">
+                            <button class="action-menu__item" type="button">
+                              <BaseIcon class="action-menu__icon" name="copy" />
+                              <span>Копировать</span>
+                            </button>
+                            <button class="action-menu__item" type="button">
+                              <BaseIcon class="action-menu__icon" name="edit" />
+                              <span>Редактировать</span>
+                            </button>
+                            <button class="action-menu__item" type="button">
+                              <BaseIcon class="action-menu__icon" name="unlock" />
+                              <span>Создать ссылку</span>
+                            </button>
+                            <button class="action-menu__item" type="button">
+                              <BaseIcon class="action-menu__icon" name="check" />
+                              <span>Принять в работу</span>
+                            </button>
+                            <button class="action-menu__item action-menu__item--danger" type="button">
+                              <BaseIcon class="action-menu__icon" name="trash" />
+                              <span>Удалить</span>
+                            </button>
+                          </BaseActionMenu>
+                          <BaseDisclosureToggle class="brief-card__history-toggle" disabled label="История экземпляра" />
+                        </span>
                       </div>
                     </div>
                   </summary>
@@ -628,20 +673,21 @@ const tableRows = [
             <BaseWorkspaceBlock
               title="Чеклисты"
               create-label="Создать"
+              create-icon="plus"
               :collapsed="false"
             >
               <span class="ui-name">BaseWorkspaceBlock</span>
-              <div class="checklist-list">
-                <details class="checklist-card">
-                  <summary class="checklist-card__header">
-                    <button class="checklist-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
-                      <BaseIcon class="checklist-card__drag-icon" name="drag-handle" />
+              <div class="workspace-block__content">
+                <details class="workspace-card checklist-card">
+                  <summary class="workspace-card__header">
+                    <button class="workspace-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
+                      <BaseIcon class="workspace-card__drag-icon" name="drag-handle" />
                     </button>
-                    <span class="checklist-card__summary">
-                      <span class="checklist-card__title">Проверить материалы</span>
-                      <span class="checklist-card__meta">0% · 2 обязательных пункта</span>
+                    <span class="workspace-card__summary">
+                      <span class="workspace-card__title">Проверить материалы</span>
+                      <span class="workspace-card__meta">0% · 2 обязательных пункта</span>
                     </span>
-                    <BaseDisclosureToggle class="checklist-card__toggle" label="Развернуть чеклист" />
+                    <BaseDisclosureToggle class="workspace-card__toggle" label="Развернуть чеклист" />
                   </summary>
                 </details>
               </div>
@@ -654,8 +700,8 @@ const tableRows = [
             >
               <span class="ui-name">BaseWorkspaceBlockEmpty</span>
             </BaseWorkspaceBlock>
-            <div class="workspace-panel">
-              <span class="ui-name">WorkspacePanel</span>
+            <div class="workspace-block">
+              <span class="ui-name">WorkspaceBlock</span>
               <div class="section-header">
                 <h2 class="section-title">Чеклисты</h2>
                 <button class="button button--secondary" type="button">Создать</button>
@@ -835,7 +881,7 @@ const tableRows = [
       <h1 class="page-title">UI-компоненты</h1>
     </div>
 
-    <section class="workspace-panel">
+    <section class="workspace-block">
       <p class="card-description">У вас нет прав на просмотр этого раздела.</p>
     </section>
   </section>

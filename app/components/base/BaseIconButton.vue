@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import type { BaseIconName } from './BaseIcon.vue'
+
 const props = withDefaults(defineProps<{
   label: string
-  icon: 'check' | 'copy' | 'edit' | 'chevron-down' | 'close' | 'drag-handle' | 'history' | 'lock' | 'logout' | 'maximize' | 'message' | 'moon' | 'note' | 'panel' | 'send' | 'settings' | 'sun' | 'unlock' | 'trash'
+  icon: BaseIconName
   tone?: 'secondary' | 'danger'
 }>(), {
   tone: undefined

@@ -665,34 +665,34 @@ const orderedProjects = computed({
     <VueDraggable
       v-model="orderedSettingsBlocks"
       class="settings-block-list"
-      handle=".settings-section__drag"
+      handle=".workspace-block__drag"
       :animation="180"
     >
       <section
         v-for="block in orderedSettingsBlocks"
         :key="block.id"
-        class="workspace-panel settings-section"
+        class="workspace-block"
         :class="{
-          'settings-section--collapsed': isSettingsBlockCollapsed(block.id) || getSettingsBlockItemCount(block.id) === 0,
-          'settings-section--toggle-disabled': getSettingsBlockItemCount(block.id) === 0
+          'workspace-block--collapsed': isSettingsBlockCollapsed(block.id) || getSettingsBlockItemCount(block.id) === 0,
+          'workspace-block--toggle-disabled': getSettingsBlockItemCount(block.id) === 0
         }"
       >
-        <div class="settings-section__header">
+        <div class="workspace-block__header">
           <button
-            class="settings-section__drag"
+            class="workspace-block__drag"
             type="button"
             aria-label="Перетащить блок"
             title="Перетащить блок"
           >
-            <BaseIcon class="settings-section__drag-icon" name="drag-handle" />
+            <BaseIcon class="workspace-block__drag-icon" name="drag-handle" />
           </button>
           <h2 class="section-title">{{ block.title }}</h2>
-          <div class="button-row settings-section__actions">
+          <div class="button-row workspace-block__actions">
             <button class="button button--secondary" type="button" @click="openCreateModalByBlock(block.id)">
               {{ block.createLabel }}
             </button>
             <BaseDisclosureToggle
-              class="settings-section__toggle"
+              class="workspace-block__toggle"
               :disabled="getSettingsBlockItemCount(block.id) === 0"
               :expanded="!isSettingsBlockCollapsed(block.id) && getSettingsBlockItemCount(block.id) > 0"
               :label="isSettingsBlockCollapsed(block.id) || getSettingsBlockItemCount(block.id) === 0 ? 'Развернуть блок' : 'Свернуть блок'"
@@ -1193,7 +1193,7 @@ const orderedProjects = computed({
       <h1 class="page-title">Настройки</h1>
     </div>
 
-    <section class="workspace-panel">
+    <section class="workspace-block">
       <p class="card-description">У вас нет прав на просмотр этого раздела.</p>
     </section>
   </section>

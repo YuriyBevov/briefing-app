@@ -60,11 +60,13 @@ const stageBlocks = [
 		id: "checklists",
 		title: "Чеклисты",
 		createLabel: "Создать чеклист",
+		createIcon: "plus",
 	},
 	{
 		id: "briefs",
 		title: "Брифы",
 		createLabel: "Создать бриф",
+		createIcon: "plus",
 	},
 ] as const;
 const collapsedStageBlocks = useState<Record<string, boolean>>("stage-workspace-collapsed-blocks", () => ({
@@ -286,11 +288,11 @@ const getBriefLinkHistories = (links: BriefLink[]) => {
 };
 
 const getBriefLinkStatusClasses = (status: BriefLinkStatus) => ({
-	"brief-card__link-status--pending": status === "pending",
-	"brief-card__link-status--revision-pending": status === "revision_pending",
-	"brief-card__link-status--completed": status === "completed" || status === "revision_completed",
-	"brief-card__link-status--in-work": status === "in_work",
-	"brief-card__link-status--archived": status === "archived",
+	"label--pending": status === "pending",
+	"label--revision-pending": status === "revision_pending",
+	"label--completed": status === "completed" || status === "revision_completed",
+	"label--in-work": status === "in_work",
+	"label--archived": status === "archived",
 });
 
 const toggleClosestDetails = (event: MouseEvent) => {
@@ -397,7 +399,7 @@ const getBriefLink = (token: string) => {
 		<VueDraggable
 			v-model="orderedStageBlocks"
 			class="stage-page__workspace"
-			handle=".settings-section__drag"
+			handle=".workspace-block__drag"
 			:animation="180"
 		>
 			<BaseWorkspaceBlock
@@ -405,6 +407,7 @@ const getBriefLink = (token: string) => {
 				:key="block.id"
 				:title="block.title"
 				:create-label="block.createLabel"
+				:create-icon="block.createIcon"
 				:collapsed="isStageBlockCollapsed(block.id)"
 				:toggle-disabled="getStageBlockItemCount(block.id) === 0"
 				@create="openCreateModalByBlock(block.id)"
@@ -413,32 +416,40 @@ const getBriefLink = (token: string) => {
 				<VueDraggable
 					v-if="block.id === 'checklists' && !isStageBlockCollapsed(block.id) && orderedChecklists.length"
 					v-model="orderedChecklists"
-					class="checklist-list"
-					handle=".checklist-card__drag"
+					class="workspace-block__content"
+					handle=".workspace-card__drag"
 					:animation="180"
 				>
 					<details
 						v-for="checklist in orderedChecklists"
 						:key="checklist.id"
-						class="checklist-card"
+						class="workspace-card checklist-card"
 					>
-						<summary class="checklist-card__header" @click="preventSummaryToggle">
-							<button class="checklist-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
-								<BaseIcon class="checklist-card__drag-icon" name="drag-handle" />
+						<summary class="workspace-card__header" @click="preventSummaryToggle">
+							<button class="workspace-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
+								<BaseIcon class="workspace-card__drag-icon" name="drag-handle" />
 							</button>
-							<span class="checklist-card__summary">
-								<span class="checklist-card__title">{{ checklist.title }}</span>
-								<span class="checklist-card__meta">
+							<span class="workspace-card__summary">
+								<span class="workspace-card__title">{{ checklist.title }}</span>
+								<span class="workspace-card__meta">
 									{{ getChecklistProgress(checklist) }}% ·
 									{{ getRequiredOpenCount(checklist) }} обязательных пунктов
 								</span>
 							</span>
-							<div class="button-row checklist-card__actions" @click.stop.prevent>
-								<BaseIconButton label="Изменить чеклист" icon="edit" @click="editChecklist(checklist.id)" />
-								<BaseIconButton label="Удалить чеклист" icon="trash" @click="removeChecklist(checklist.id)" />
+							<div class="workspace-card__actions">
+								<BaseActionMenu label="Действия чеклиста">
+									<button class="action-menu__item" type="button" @click="editChecklist(checklist.id)">
+										<BaseIcon class="action-menu__icon" name="edit" />
+										<span>Изменить</span>
+									</button>
+									<button class="action-menu__item action-menu__item--danger" type="button" @click="removeChecklist(checklist.id)">
+										<BaseIcon class="action-menu__icon" name="trash" />
+										<span>Удалить</span>
+									</button>
+								</BaseActionMenu>
 							</div>
 							<BaseDisclosureToggle
-								class="checklist-card__toggle"
+								class="workspace-card__toggle"
 								label="Развернуть чеклист"
 								@click.stop.prevent="toggleClosestDetails"
 							/>
@@ -508,39 +519,44 @@ const getBriefLink = (token: string) => {
 				<VueDraggable
 					v-else-if="block.id === 'briefs' && !isStageBlockCollapsed(block.id) && orderedBriefs.length"
 					v-model="orderedBriefs"
-					class="brief-list"
-					handle=".brief-card__drag"
+					class="workspace-block__content"
+					handle=".workspace-card__drag"
 					:animation="180"
 				>
 					<details
 						v-for="brief in orderedBriefs"
 						:key="brief.id"
-						class="brief-card"
-						:class="{ 'brief-card--empty': !canExpandBrief(brief) }"
+						class="workspace-card brief-card"
+						:class="{ 'workspace-card--empty': !canExpandBrief(brief) }"
 					>
-						<summary class="brief-card__header" @click="preventSummaryToggle">
-							<button class="brief-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
-								<BaseIcon class="brief-card__drag-icon" name="drag-handle" />
+						<summary class="workspace-card__header" @click="preventSummaryToggle">
+							<button class="workspace-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
+								<BaseIcon class="workspace-card__drag-icon" name="drag-handle" />
 							</button>
-							<span class="brief-card__body">
-								<span class="brief-card__title">{{ brief.title }}</span>
-								<span class="brief-card__meta">
+							<span class="workspace-card__summary">
+								<span class="workspace-card__title">{{ brief.title }}</span>
+								<span class="workspace-card__meta">
 									{{ getBriefMeta(brief.links, brief.questions.length) }}
 								</span>
 							</span>
-							<div class="button-row brief-card__actions" @click.stop.prevent>
-								<BaseIconButton label="Изменить бриф" icon="edit" @click="editBrief(brief.id)" />
-								<button
-									class="button button--secondary button--small"
-									type="button"
-									@click="createClientLink(brief.id)"
-								>
-									Создать ссылку
-								</button>
-								<BaseIconButton label="Удалить бриф" icon="trash" @click="removeBrief(brief.id)" />
+							<div class="workspace-card__actions">
+								<BaseActionMenu label="Действия брифа">
+									<button class="action-menu__item" type="button" @click="editBrief(brief.id)">
+										<BaseIcon class="action-menu__icon" name="edit" />
+										<span>Изменить</span>
+									</button>
+									<button class="action-menu__item" type="button" @click="createClientLink(brief.id)">
+										<BaseIcon class="action-menu__icon" name="plus" />
+										<span>Создать ссылку</span>
+									</button>
+									<button class="action-menu__item action-menu__item--danger" type="button" @click="removeBrief(brief.id)">
+										<BaseIcon class="action-menu__icon" name="trash" />
+										<span>Удалить</span>
+									</button>
+								</BaseActionMenu>
 							</div>
 							<BaseDisclosureToggle
-								class="brief-card__toggle"
+								class="workspace-card__toggle"
 								:disabled="!canExpandBrief(brief)"
 								label="Развернуть бриф"
 								@click.stop.prevent="toggleClosestDetails"
@@ -560,90 +576,89 @@ const getBriefLink = (token: string) => {
 											class="brief-card__link-header"
 										>
 											<span class="brief-card__link-main">
-												<span class="brief-card__link-tools">
-													<button
-														class="button button--secondary button--small brief-card__icon-button"
-														type="button"
-														aria-label="Копировать ссылку"
-														:title="copiedLinkId === history.links[0].id ? 'Скопировано' : 'Копировать ссылку'"
-														@click.stop="copyBriefLink(history.links[0])"
-													>
-														<BaseIcon class="brief-card__copy-icon" name="copy" />
-													</button>
-													<button
-														class="button button--secondary button--small brief-card__icon-button"
-														type="button"
-														aria-label="Изменить название"
-														title="Изменить название"
-														@click.stop="openRenameBriefLinkModal(brief.id, brief.title, history.links[0])"
-													>
-														<BaseIcon class="brief-card__edit-icon" name="edit" />
-													</button>
-												</span>
-												<span class="brief-card__link-content">
-													<a
-														class="brief-card__link"
-														:href="getBriefLink(history.links[0].token)"
-														target="_blank"
-														@click.stop
-													>
+												<a
+													class="brief-card__link"
+													:href="getBriefLink(history.links[0].token)"
+													target="_blank"
+													rel="noreferrer"
+													@click.stop
+												>
+													<span class="brief-card__link-title">
 														{{ getBriefLinkTitle(history.links[0], brief.title) }}
-													</a>
+													</span>
 													<span class="brief-card__link-url">
 														{{ getBriefLink(history.links[0].token) }}
 													</span>
-												</span>
+												</a>
 											</span>
-											<span
-												class="brief-card__link-status"
+											<div
+												class="label"
 												:class="getBriefLinkStatusClasses(history.links[0].status)"
 											>
 												{{ getBriefLinkStatusLabel(history.links[0].status) }}
-											</span>
-											<BaseDisclosureToggle
-												class="brief-card__history-toggle"
-												:disabled="history.links.length <= 1"
-												label="История экземпляра"
-												@click.stop.prevent="toggleClosestDetails"
-											/>
-										</div>
-
-										<div
-											v-if="history.links[0] && history.links[0].status !== 'archived'"
-											class="button-row brief-card__link-actions"
-										>
-											<div class="button-row brief-card__link-actions-main">
-												<button
-													class="button button--secondary button--small"
-													type="button"
-													:disabled="
-														history.links[0].status === 'pending' ||
-														history.links[0].status === 'revision_pending' ||
-														history.links[0].status === 'archived'
-													"
-													@click.stop="openBriefForFilling(brief.id, history.links[0].id)"
-												>
-													Открыть бриф к заполнению
-												</button>
-												<button
-													class="button button--primary button--small"
-													type="button"
-													:disabled="
-														history.links[0].status !== 'completed' &&
-														history.links[0].status !== 'revision_completed'
-													"
-													@click.stop="acceptBriefToWork(brief.id, history.links[0].id)"
-												>
-													Принять в работу
-												</button>
 											</div>
-											<button
-												class="button button--danger button--small"
-												type="button"
-												@click.stop="removeBriefLink(brief.id, history.links[0].id)"
-											>
-												Удалить
-											</button>
+											<span class="brief-card__link-controls">
+												<BaseActionMenu
+													v-if="history.links[0].status !== 'archived'"
+													label="Действия ссылки на бриф"
+												>
+													<button
+														class="action-menu__item"
+														type="button"
+														@click="copyBriefLink(history.links[0])"
+													>
+														<BaseIcon class="action-menu__icon" name="copy" />
+														<span>{{ copiedLinkId === history.links[0].id ? 'Скопировано' : 'Копировать' }}</span>
+													</button>
+													<button
+														class="action-menu__item"
+														type="button"
+														@click="openRenameBriefLinkModal(brief.id, brief.title, history.links[0])"
+													>
+														<BaseIcon class="action-menu__icon" name="edit" />
+														<span>Редактировать</span>
+													</button>
+													<button
+														class="action-menu__item"
+														type="button"
+														:disabled="
+															history.links[0].status === 'pending' ||
+															history.links[0].status === 'revision_pending' ||
+															history.links[0].status === 'archived'
+														"
+														@click="openBriefForFilling(brief.id, history.links[0].id)"
+													>
+														<BaseIcon class="action-menu__icon" name="unlock" />
+														<span>Создать ссылку</span>
+													</button>
+													<button
+														class="action-menu__item"
+														type="button"
+														:disabled="
+															history.links[0].status !== 'completed' &&
+															history.links[0].status !== 'revision_completed'
+														"
+														@click="acceptBriefToWork(brief.id, history.links[0].id)"
+													>
+														<BaseIcon class="action-menu__icon" name="check" />
+														<span>Принять в работу</span>
+													</button>
+													<button
+														class="action-menu__item action-menu__item--danger"
+														type="button"
+														@click="removeBriefLink(brief.id, history.links[0].id)"
+													>
+														<BaseIcon class="action-menu__icon" name="trash" />
+														<span>Удалить</span>
+													</button>
+												</BaseActionMenu>
+												<BaseDisclosureToggle
+													class="brief-card__history-toggle"
+													:disabled="history.links.length <= 1"
+													label="История экземпляра"
+													@click.stop.prevent="toggleClosestDetails"
+												/>
+											</span>
 										</div>
 									</div>
 								</summary>
@@ -658,21 +673,23 @@ const getBriefLink = (token: string) => {
 										class="brief-card__link-node"
 									>
 										<div class="brief-card__link-header">
-											<span class="brief-card__link-content">
-												<a
-													class="brief-card__link"
-													:href="getBriefLink(link.token)"
-													target="_blank"
-												>
+											<a
+												class="brief-card__link"
+												:href="getBriefLink(link.token)"
+												target="_blank"
+												rel="noreferrer"
+												@click.stop
+											>
+												<span class="brief-card__link-title">
 													{{ getBriefLink(link.token) }}
-												</a>
-											</span>
-											<span
-												class="brief-card__link-status"
+												</span>
+											</a>
+											<div
+												class="label"
 												:class="getBriefLinkStatusClasses(link.status)"
 											>
 												{{ getBriefLinkStatusLabel(link.status) }}
-											</span>
+											</div>
 										</div>
 									</div>
 								</div>
@@ -689,7 +706,7 @@ const getBriefLink = (token: string) => {
 			<h1 class="page-title">{{ section?.title ?? "Раздел" }}</h1>
 		</div>
 
-		<section class="workspace-panel">
+		<section class="workspace-block">
 			<p class="card-description">Раздел отключён или у вас нет прав на его просмотр.</p>
 		</section>
 	</section>

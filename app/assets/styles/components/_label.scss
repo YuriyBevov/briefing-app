@@ -1,0 +1,35 @@
+.label {
+  flex: 0 0 auto;
+  width: fit-content;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.2;
+  background-color: var(--color-surface-muted);
+  cursor: default;
+}
+
+.label--pending,
+.label--revision-pending {
+  color: var(--color-danger);
+  background-color: color-mix(in srgb, var(--color-danger) 16%, transparent);
+}
+
+.label--completed {
+  color: var(--color-warning);
+  background-color: color-mix(in srgb, var(--color-warning) 24%, transparent);
+}
+
+.label--in-work {
+  color: var(--color-success);
+  background-color: color-mix(in srgb, var(--color-success) 16%, transparent);
+}
+
+.label--archived {
+  color: var(--color-accent);
+  background-color: var(--color-accent-soft);
+}

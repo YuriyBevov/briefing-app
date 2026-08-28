@@ -58,6 +58,11 @@ export type BriefLinkStatus = 'pending' | 'completed' | 'revision_pending' | 're
 export type BriefAnswerValue = string | string[]
 export type SystemPermissionId = string
 
+export interface EntitySectionPlacement {
+  sectionId: string
+  scope: EntityScope
+}
+
 export interface Project {
   id: string
   title: string
@@ -118,6 +123,7 @@ export interface Checklist {
   title: string
   sectionId?: string
   sectionIds: string[]
+  sectionPlacements: EntitySectionPlacement[]
   stage?: string
   scope: EntityScope
   projectId: string
@@ -140,6 +146,7 @@ export interface Brief {
   title: string
   sectionId?: string
   sectionIds: string[]
+  sectionPlacements: EntitySectionPlacement[]
   stage?: string
   scope: EntityScope
   projectId: string
@@ -169,6 +176,7 @@ export interface ProjectComment {
   authorId: string
   text: string
   createdAt: string
+  editedAt: string
 }
 
 export interface ProjectHistoryEntry {
@@ -209,8 +217,7 @@ interface ProjectData {
 
 interface ChecklistPayload {
   title: string
-  sectionIds: string[]
-  scope: EntityScope
+  sectionPlacements: EntitySectionPlacement[]
   items: Array<{
     text: string
     required: boolean
@@ -219,8 +226,7 @@ interface ChecklistPayload {
 
 interface BriefPayload {
   title: string
-  sectionIds: string[]
-  scope: EntityScope
+  sectionPlacements: EntitySectionPlacement[]
   questions: Array<{
     text: string
     type: BriefQuestionType
@@ -388,13 +394,13 @@ const createStaticPermissions = (): Permission[] => [
   },
   {
     id: 'edit_comments',
-    title: 'Редактирование комментариев',
-    description: 'Разрешает редактировать комментарии проекта.'
+    title: 'Редактирование своих комментариев',
+    description: 'Разрешает редактировать свои комментарии проекта.'
   },
   {
     id: 'delete_comments',
-    title: 'Удаление комментариев',
-    description: 'Разрешает удалять комментарии проекта.'
+    title: 'Удаление своих комментариев',
+    description: 'Разрешает удалять свои комментарии проекта.'
   },
   {
     id: 'view_history',
@@ -449,7 +455,8 @@ const createDefaultComments = (): ProjectComment[] => [
     projectId: defaultProjectId,
     authorId: defaultDesignerUserId,
     text: 'Посмотрел материалы, нужен доступ к макету.',
-    createdAt: '2026-08-26T11:33:00.000Z'
+    createdAt: '2026-08-26T11:33:00.000Z',
+    editedAt: ''
   }
 ]
 
@@ -654,6 +661,25 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
 
     return [sections[0].id]
   }
+  const getNormalizedSectionPlacements = (item: {
+    sectionId?: string
+    sectionIds?: string[]
+    sectionPlacements?: EntitySectionPlacement[]
+    stage?: string
+    scope?: EntityScope
+  }) => {
+    const normalizedSectionIds = getNormalizedSectionIds(item)
+    const placementBySectionId = new Map(
+      (item.sectionPlacements ?? [])
+        .filter((placement) => sectionIds.has(placement.sectionId))
+        .map((placement) => [placement.sectionId, placement])
+    )
+
+    return normalizedSectionIds.map((sectionId) => ({
+      sectionId,
+      scope: placementBySectionId.get(sectionId)?.scope ?? item.scope ?? 'common'
+    }))
+  }
   const currentProjectId = projectIds.has(projectData.currentProjectId ?? '')
     ? projectData.currentProjectId as string
     : projects[0].id
@@ -689,6 +715,7 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
       .map((checklist, index) => ({
         ...checklist,
         sectionIds: getNormalizedSectionIds(checklist),
+        sectionPlacements: getNormalizedSectionPlacements(checklist),
         scope: checklist.scope ?? 'common',
         projectId: checklist.projectId ?? currentProjectId,
         sortOrder: index,
@@ -729,6 +756,7 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
         return {
           ...brief,
           sectionIds: getNormalizedSectionIds(brief),
+          sectionPlacements: getNormalizedSectionPlacements(brief),
           scope: brief.scope ?? 'common',
           projectId: brief.projectId ?? currentProjectId,
           sortOrder: index,
@@ -745,7 +773,8 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
         projectId: comment.projectId ?? currentProjectId,
         authorId: comment.authorId ?? currentUserId,
         text: comment.text ?? '',
-        createdAt: comment.createdAt ?? new Date().toISOString()
+        createdAt: comment.createdAt ?? new Date().toISOString(),
+        editedAt: comment.editedAt ?? ''
       }))
       .toSorted((firstComment, secondComment) =>
         new Date(secondComment.createdAt).getTime() - new Date(firstComment.createdAt).getTime()
@@ -1032,6 +1061,17 @@ export const useProjectStore = () => {
 
   const isVisibleInCurrentProject = (entity: { scope: EntityScope, projectId: string }) =>
     entity.scope === 'common' || entity.projectId === data.value.currentProjectId
+
+  const isVisibleInCurrentProjectSection = (
+    entity: { sectionPlacements?: EntitySectionPlacement[]; scope: EntityScope; projectId: string },
+    sectionId: string
+  ) => {
+    const placement = entity.sectionPlacements?.find((item) => item.sectionId === sectionId)
+
+    return placement
+      ? placement.scope === 'common' || entity.projectId === data.value.currentProjectId
+      : isVisibleInCurrentProject(entity)
+  }
 
   const isUserAdmin = (user: User) => user.roleIds.includes(adminRoleId)
 
@@ -1408,6 +1448,11 @@ export const useProjectStore = () => {
   }
 
   const createChecklist = (payload: ChecklistPayload) => {
+    const sectionIds = payload.sectionPlacements.map((placement) => placement.sectionId)
+    const scope = payload.sectionPlacements.every((placement) => placement.scope === 'common')
+      ? 'common'
+      : 'project'
+
     data.value.checklists.forEach((checklist) => {
       checklist.sortOrder += 1
     })
@@ -1415,8 +1460,9 @@ export const useProjectStore = () => {
     const checklist: Checklist = {
       id: createId(),
       title: payload.title,
-      sectionIds: payload.sectionIds,
-      scope: payload.scope,
+      sectionIds,
+      sectionPlacements: payload.sectionPlacements,
+      scope,
       projectId: data.value.currentProjectId,
       sortOrder: 0,
       createdAt: new Date().toISOString(),
@@ -1444,10 +1490,16 @@ export const useProjectStore = () => {
     }
 
     const previousTitle = checklist.title
+    const sectionIds = payload.sectionPlacements.map((placement) => placement.sectionId)
+    const scope = payload.sectionPlacements.every((placement) => placement.scope === 'common')
+      ? 'common'
+      : 'project'
+
     checklist.title = payload.title
-    checklist.sectionIds = payload.sectionIds
-    checklist.scope = payload.scope
-    checklist.projectId = payload.scope === 'project' ? data.value.currentProjectId : checklist.projectId
+    checklist.sectionIds = sectionIds
+    checklist.sectionPlacements = payload.sectionPlacements
+    checklist.scope = scope
+    checklist.projectId = scope === 'project' ? data.value.currentProjectId : checklist.projectId
     checklist.items = payload.items.map((item, index) => {
       const currentItem = checklist.items[index]
 
@@ -1513,6 +1565,11 @@ export const useProjectStore = () => {
   }
 
   const createBrief = (payload: BriefPayload) => {
+    const sectionIds = payload.sectionPlacements.map((placement) => placement.sectionId)
+    const scope = payload.sectionPlacements.every((placement) => placement.scope === 'common')
+      ? 'common'
+      : 'project'
+
     data.value.briefs.forEach((brief) => {
       brief.sortOrder += 1
     })
@@ -1520,8 +1577,9 @@ export const useProjectStore = () => {
     const brief: Brief = {
       id: createId(),
       title: payload.title,
-      sectionIds: payload.sectionIds,
-      scope: payload.scope,
+      sectionIds,
+      sectionPlacements: payload.sectionPlacements,
+      scope,
       projectId: data.value.currentProjectId,
       sortOrder: 0,
       status: 'draft',
@@ -1552,10 +1610,16 @@ export const useProjectStore = () => {
     }
 
     const previousTitle = brief.title
+    const sectionIds = payload.sectionPlacements.map((placement) => placement.sectionId)
+    const scope = payload.sectionPlacements.every((placement) => placement.scope === 'common')
+      ? 'common'
+      : 'project'
+
     brief.title = payload.title
-    brief.sectionIds = payload.sectionIds
-    brief.scope = payload.scope
-    brief.projectId = payload.scope === 'project' ? data.value.currentProjectId : brief.projectId
+    brief.sectionIds = sectionIds
+    brief.sectionPlacements = payload.sectionPlacements
+    brief.scope = scope
+    brief.projectId = scope === 'project' ? data.value.currentProjectId : brief.projectId
     brief.questions = payload.questions.map((question, index) => ({
       id: brief.questions[index]?.id ?? createId(),
       text: question.text,
@@ -1744,7 +1808,10 @@ export const useProjectStore = () => {
   const getChecklistsBySection = (sectionId: string) =>
     computed(() =>
       data.value.checklists
-        .filter((checklist) => checklist.sectionIds.includes(sectionId) && isVisibleInCurrentProject(checklist))
+        .filter((checklist) =>
+          checklist.sectionIds.includes(sectionId) &&
+          isVisibleInCurrentProjectSection(checklist, sectionId)
+        )
         .toSorted((firstChecklist, secondChecklist) =>
           firstChecklist.sortOrder - secondChecklist.sortOrder ||
           new Date(secondChecklist.createdAt).getTime() - new Date(firstChecklist.createdAt).getTime()
@@ -1754,7 +1821,10 @@ export const useProjectStore = () => {
   const getBriefsBySection = (sectionId: string) =>
     computed(() =>
       data.value.briefs
-        .filter((brief) => brief.sectionIds.includes(sectionId) && isVisibleInCurrentProject(brief))
+        .filter((brief) =>
+          brief.sectionIds.includes(sectionId) &&
+          isVisibleInCurrentProjectSection(brief, sectionId)
+        )
         .toSorted((firstBrief, secondBrief) =>
           firstBrief.sortOrder - secondBrief.sortOrder ||
           new Date(secondBrief.createdAt).getTime() - new Date(firstBrief.createdAt).getTime()
@@ -1802,7 +1872,8 @@ export const useProjectStore = () => {
         projectId: data.value.currentProjectId,
         authorId: currentUser.value?.id ?? defaultAdminUserId,
         text: normalizedText,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        editedAt: ''
       },
       ...data.value.comments
     ]
@@ -1816,11 +1887,17 @@ export const useProjectStore = () => {
     const comment = data.value.comments.find((item) => item.id === commentId)
     const normalizedText = text.trim()
 
-    if (!comment || !normalizedText) {
+    if (
+      !comment ||
+      !normalizedText ||
+      comment.authorId !== currentUser.value?.id ||
+      !canUsePermission('edit_comments').value
+    ) {
       return false
     }
 
     comment.text = normalizedText
+    comment.editedAt = new Date().toISOString()
     addProjectHistory('Отредактирован комментарий проекта')
     save()
 
@@ -1830,7 +1907,11 @@ export const useProjectStore = () => {
   const deleteProjectComment = (commentId: string) => {
     const comment = data.value.comments.find((item) => item.id === commentId)
 
-    if (!comment) {
+    if (
+      !comment ||
+      comment.authorId !== currentUser.value?.id ||
+      !canUsePermission('delete_comments').value
+    ) {
       return false
     }
 

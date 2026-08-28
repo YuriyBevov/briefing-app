@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { BriefQuestionType, EntityScope } from '~/composables/useProjectStore'
+import type { BriefQuestionType, EntitySectionPlacement } from '~/composables/useProjectStore'
 
 const { activeType, closeCreationModal, editingId } = useCreationModal()
 const {
@@ -20,16 +20,17 @@ const getDefaultSectionIds = () => {
 
   return sectionId ? [sectionId] : []
 }
+const getDefaultSectionPlacements = (): EntitySectionPlacement[] =>
+  getDefaultSectionIds().map((sectionId) => ({
+    sectionId,
+    scope: 'common'
+  }))
 const sectionOptions = computed(() =>
   activeSections.value.map((section) => ({
     value: section.id,
     label: section.title
   }))
 )
-const scopeOptions = [
-  { value: 'common', label: 'Общий' },
-  { value: 'project', label: 'Проектный' }
-]
 const questionTypeOptions = computed(() =>
   briefQuestionTypes.map((type) => ({
     value: type,
@@ -39,8 +40,7 @@ const questionTypeOptions = computed(() =>
 
 const createChecklistForm = () => ({
   title: '',
-  sectionIds: getDefaultSectionIds(),
-  scope: 'common' as EntityScope,
+  sectionPlacements: getDefaultSectionPlacements(),
   items: [
     {
       text: '',
@@ -51,8 +51,7 @@ const createChecklistForm = () => ({
 
 const createBriefForm = () => ({
   title: '',
-  sectionIds: getDefaultSectionIds(),
-  scope: 'common' as EntityScope,
+  sectionPlacements: getDefaultSectionPlacements(),
   questions: [
     {
       text: '',
@@ -92,14 +91,54 @@ const getEntitySectionIds = (entity: { sectionId?: string; sectionIds?: string[]
   return entity.sectionId ? [entity.sectionId] : getDefaultSectionIds()
 }
 
-const normalizeFormSectionIds = (sectionIds: string[]) => {
-  const activeSectionIds = new Set(activeSections.value.map((section) => section.id))
-  const normalizedSectionIds = [...new Set(sectionIds)].filter((sectionId) =>
-    activeSectionIds.has(sectionId)
-  )
+const getEntitySectionPlacements = (entity: {
+  sectionId?: string
+  sectionIds?: string[]
+  sectionPlacements?: EntitySectionPlacement[]
+  scope?: EntitySectionPlacement['scope']
+}) => {
+  if (entity.sectionPlacements?.length) {
+    return entity.sectionPlacements.map((placement) => ({ ...placement }))
+  }
 
-  return normalizedSectionIds.length ? normalizedSectionIds : getDefaultSectionIds()
+  return getEntitySectionIds(entity).map((sectionId) => ({
+    sectionId,
+    scope: entity.scope ?? 'common'
+  }))
 }
+
+const normalizeFormSectionPlacements = (placements: EntitySectionPlacement[]) => {
+  const activeSectionIds = new Set(activeSections.value.map((section) => section.id))
+  const normalizedPlacements = [...new Map(
+    placements
+      .filter((placement) => activeSectionIds.has(placement.sectionId))
+      .map((placement) => [placement.sectionId, placement])
+  ).values()]
+
+  return normalizedPlacements.length ? normalizedPlacements : getDefaultSectionPlacements()
+}
+
+const syncChecklistPlacements = () => {
+  checklistForm.sectionPlacements = normalizeFormSectionPlacements(checklistForm.sectionPlacements)
+}
+
+const syncBriefPlacements = () => {
+  briefForm.sectionPlacements = normalizeFormSectionPlacements(briefForm.sectionPlacements)
+}
+
+watch(
+  activeSections,
+  () => {
+    syncChecklistPlacements()
+    syncBriefPlacements()
+  }
+)
+
+const getPlacementPayload = (placements: EntitySectionPlacement[]) =>
+  normalizeFormSectionPlacements(placements).map((placement) => ({
+    sectionId: placement.sectionId,
+    scope: placement.scope
+  }))
 
 const fillChecklistForm = (id: string) => {
   const checklist = data.value.checklists.find((item) => item.id === id)
@@ -110,8 +149,7 @@ const fillChecklistForm = (id: string) => {
   }
 
   checklistForm.title = checklist.title
-  checklistForm.sectionIds = getEntitySectionIds(checklist)
-  checklistForm.scope = checklist.scope
+  checklistForm.sectionPlacements = getEntitySectionPlacements(checklist)
   checklistForm.items = checklist.items.map((item) => ({
     text: item.text,
     required: item.required
@@ -127,8 +165,7 @@ const fillBriefForm = (id: string) => {
   }
 
   briefForm.title = brief.title
-  briefForm.sectionIds = getEntitySectionIds(brief)
-  briefForm.scope = brief.scope
+  briefForm.sectionPlacements = getEntitySectionPlacements(brief)
   briefForm.questions = brief.questions.map((question) => ({
     text: question.text,
     type: question.type,
@@ -213,8 +250,7 @@ const submitChecklist = () => {
 
   const payload = {
     title: checklistForm.title.trim(),
-    sectionIds: normalizeFormSectionIds(checklistForm.sectionIds),
-    scope: checklistForm.scope,
+    sectionPlacements: getPlacementPayload(checklistForm.sectionPlacements),
     items
   }
 
@@ -248,8 +284,7 @@ const submitBrief = () => {
 
   const payload = {
     title: briefForm.title.trim(),
-    sectionIds: normalizeFormSectionIds(briefForm.sectionIds),
-    scope: briefForm.scope,
+    sectionPlacements: getPlacementPayload(briefForm.sectionPlacements),
     questions
   }
 
@@ -277,20 +312,13 @@ const submitBrief = () => {
         <input v-model="checklistForm.title" class="field__control" type="text" required />
       </label>
 
-      <div class="modal-form__field-row">
-        <div class="field">
-          <span class="field__label">Раздел</span>
-          <BaseMultiSelect
-            v-model="checklistForm.sectionIds"
-            :options="sectionOptions"
-            placeholder="Выберите разделы"
-          />
-        </div>
-
-        <div class="field">
-          <span class="field__label">Тип</span>
-          <BaseSelect v-model="checklistForm.scope" :options="scopeOptions" />
-        </div>
+      <div class="field">
+        <span class="field__label">Раздел</span>
+        <BasePlacementSelect
+          v-model="checklistForm.sectionPlacements"
+          :options="sectionOptions"
+          placeholder="Выберите разделы"
+        />
       </div>
 
       <div class="modal-form__group">
@@ -330,20 +358,13 @@ const submitBrief = () => {
         <input v-model="briefForm.title" class="field__control" type="text" required />
       </label>
 
-      <div class="modal-form__field-row">
-        <div class="field">
-          <span class="field__label">Раздел</span>
-          <BaseMultiSelect
-            v-model="briefForm.sectionIds"
-            :options="sectionOptions"
-            placeholder="Выберите разделы"
-          />
-        </div>
-
-        <div class="field">
-          <span class="field__label">Тип</span>
-          <BaseSelect v-model="briefForm.scope" :options="scopeOptions" />
-        </div>
+      <div class="field">
+        <span class="field__label">Раздел</span>
+        <BasePlacementSelect
+          v-model="briefForm.sectionPlacements"
+          :options="sectionOptions"
+          placeholder="Выберите разделы"
+        />
       </div>
 
       <div class="modal-form__group">

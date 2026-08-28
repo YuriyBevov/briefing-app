@@ -18,7 +18,9 @@ const visibleSections = computed(() =>
 <template>
   <aside class="sidebar">
     <div class="sidebar__top">
-      <NuxtLink class="logo" to="/">Логотип</NuxtLink>
+      <NuxtLink class="logo" to="/" aria-label="На главную">
+        <img class="logo__image" src="/lw-logo.svg" alt="Little Web" />
+      </NuxtLink>
     </div>
 
     <div class="sidebar__content">

@@ -10,6 +10,7 @@ const props = withDefaults(defineProps<{
   hideAuthor?: boolean
   color?: string
   direction?: 'incoming' | 'outgoing' | ''
+  edited?: boolean
 }>(), {
   readonly: false,
   variant: 'default',
@@ -17,7 +18,8 @@ const props = withDefaults(defineProps<{
   draggable: false,
   hideAuthor: false,
   color: '',
-  direction: ''
+  direction: '',
+  edited: false
 })
 
 const emit = defineEmits<{
@@ -86,6 +88,7 @@ const avatarText = computed(() =>
           <span v-if="!hideAuthor" class="project-feed-card__author">{{ author }}</span>
         </div>
         <div class="project-feed-card__meta">
+          <BaseIcon v-if="edited" class="project-feed-card__edited-icon" name="edit" />
           <time class="project-feed-card__date">{{ date }}</time>
         </div>
       </header>

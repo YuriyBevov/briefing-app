@@ -1,4 +1,7 @@
 <script setup lang="ts">
+const pageTitle = useState('app-page-title', () => 'UI-компоненты')
+pageTitle.value = 'UI-компоненты'
+
 const { canUsePermission } = useProjectStore()
 const canViewUiComponents = canUsePermission('view_ui_components')
 
@@ -61,6 +64,10 @@ const placeholderSelectValue = ref('')
 const disabledSelectValue = ref('approval')
 const baseMultiSelectValue = ref(['approval', 'design'])
 const emptyMultiSelectValue = ref<string[]>([])
+const basePlacementSelectValue = ref([
+  { sectionId: 'approval', scope: 'common' as const },
+  { sectionId: 'design', scope: 'project' as const }
+])
 const defaultCheckboxValue = ref(true)
 const successCheckboxValue = ref(true)
 const dangerCheckboxValue = ref(true)
@@ -78,7 +85,6 @@ const tableRows = [
   <section v-if="canViewUiComponents" class="ui-page">
     <div class="section-header ui-page__header">
       <div>
-        <h1 class="page-title">UI-компоненты</h1>
         <p class="ui-page__lead">Компоненты сгруппированы по назначению. Каждый пример имеет уникальное имя.</p>
       </div>
     </div>
@@ -149,7 +155,9 @@ const tableRows = [
             </div>
             <div class="ui-sample">
               <span class="ui-name">Logo</span>
-              <a class="logo" href="/">Логотип</a>
+              <a class="logo" href="/" aria-label="На главную">
+                <img class="logo__image" src="/lw-logo.svg" alt="Little Web" />
+              </a>
             </div>
             <div class="ui-sample">
               <span class="ui-name">AppFooterLogo</span>
@@ -299,6 +307,24 @@ const tableRows = [
               <code class="ui-code">placeholder="Выберите разделы"</code>
             </div>
             <div class="ui-sample">
+              <span class="ui-name">BasePlacementSelect</span>
+              <BasePlacementSelect
+                v-model="basePlacementSelectValue"
+                :options="fieldSelectOptions"
+                placeholder="Выберите разделы"
+              />
+              <code class="ui-code">Разделы + общий тип</code>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BaseTooltip</span>
+              <BaseTooltip text="Сделать общим для всех проектов">
+                <button class="button button--secondary button--icon" type="button" aria-label="Подсказка">
+                  <BaseIcon name="check" />
+                </button>
+              </BaseTooltip>
+              <code class="ui-code">BaseTooltip text</code>
+            </div>
+            <div class="ui-sample">
               <span class="ui-name">ProjectSwitcherCombobox</span>
               <ProjectSwitcher />
               <code class="ui-code">Combobox с поиском</code>
@@ -411,24 +437,24 @@ const tableRows = [
           <span class="ui-accordion__meta">ChecklistComponents</span>
         </summary>
         <div class="ui-accordion__body">
-          <details class="workspace-card checklist-card">
-            <summary class="workspace-card__header">
-              <span class="workspace-card__summary">
+          <details class="content-card checklist-card">
+            <summary class="content-card__header">
+              <span class="content-card__summary">
                 <span class="ui-name">ChecklistCardCollapsed</span>
-                <span class="workspace-card__title">Чеклист предподготовки</span>
-                <span class="workspace-card__meta">0% · 2 обязательных пунктов</span>
+                <span class="content-card__title">Чеклист предподготовки</span>
+                <span class="content-card__meta">0% · 2 обязательных пунктов</span>
               </span>
-              <BaseDisclosureToggle class="workspace-card__toggle" label="Развернуть чеклист" />
+              <BaseDisclosureToggle class="content-card__toggle" label="Развернуть чеклист" />
             </summary>
           </details>
-          <details class="workspace-card checklist-card" open>
-            <summary class="workspace-card__header">
-              <span class="workspace-card__summary">
+          <details class="content-card checklist-card" open>
+            <summary class="content-card__header">
+              <span class="content-card__summary">
                 <span class="ui-name">ChecklistCardOpen</span>
-                <span class="workspace-card__title">Чеклист запуска</span>
-                <span class="workspace-card__meta">66% · 1 обязательных пунктов</span>
+                <span class="content-card__title">Чеклист запуска</span>
+                <span class="content-card__meta">66% · 1 обязательных пунктов</span>
               </span>
-              <div class="workspace-card__actions">
+              <div class="content-card__actions">
                 <BaseActionMenu label="Действия чеклиста">
                   <button class="action-menu__item" type="button">
                     <BaseIcon class="action-menu__icon" name="edit" />
@@ -440,7 +466,7 @@ const tableRows = [
                   </button>
                 </BaseActionMenu>
               </div>
-              <BaseDisclosureToggle class="workspace-card__toggle" expanded label="Свернуть чеклист" />
+              <BaseDisclosureToggle class="content-card__toggle" expanded label="Свернуть чеклист" />
             </summary>
             <ul class="checklist-card__list">
               <li class="checklist-card__item">
@@ -490,35 +516,35 @@ const tableRows = [
           <span class="ui-accordion__meta">BriefComponents</span>
         </summary>
         <div class="ui-accordion__body">
-          <div class="workspace-block__content">
-            <details class="workspace-card brief-card">
-              <summary class="workspace-card__header">
-                <span class="workspace-card__summary">
+          <div class="content-list">
+            <details class="content-card brief-card">
+              <summary class="content-card__header">
+                <span class="content-card__summary">
                   <span class="ui-name">BriefCardCollapsed</span>
-                  <span class="workspace-card__title">Бриф на аудит интерфейса</span>
-                  <span class="workspace-card__meta">6 вопросов</span>
+                  <span class="content-card__title">Бриф на аудит интерфейса</span>
+                  <span class="content-card__meta">6 вопросов</span>
                 </span>
-                <BaseDisclosureToggle class="workspace-card__toggle" label="Развернуть бриф" />
+                <BaseDisclosureToggle class="content-card__toggle" label="Развернуть бриф" />
               </summary>
             </details>
-            <details class="workspace-card workspace-card--empty brief-card">
-              <summary class="workspace-card__header">
-                <span class="workspace-card__summary">
+            <details class="content-card content-card--empty brief-card">
+              <summary class="content-card__header">
+                <span class="content-card__summary">
                   <span class="ui-name">BriefCardEmpty</span>
-                  <span class="workspace-card__title">Бриф без ссылок</span>
-                  <span class="workspace-card__meta">4 вопроса</span>
+                  <span class="content-card__title">Бриф без ссылок</span>
+                  <span class="content-card__meta">4 вопроса</span>
                 </span>
-                <BaseDisclosureToggle class="workspace-card__toggle" disabled label="Развернуть бриф" />
+                <BaseDisclosureToggle class="content-card__toggle" disabled label="Развернуть бриф" />
               </summary>
             </details>
-            <details class="workspace-card brief-card" open>
-              <summary class="workspace-card__header">
-                <span class="workspace-card__summary">
+            <details class="content-card brief-card" open>
+              <summary class="content-card__header">
+                <span class="content-card__summary">
                   <span class="ui-name">BriefCardOpen</span>
-                  <span class="workspace-card__title">Бриф на дизайн главной страницы</span>
-                  <span class="workspace-card__meta">4 вопроса · 2 ссылки · 1 заполнена</span>
+                  <span class="content-card__title">Бриф на дизайн главной страницы</span>
+                  <span class="content-card__meta">4 вопроса · 2 ссылки · 1 заполнена</span>
                 </span>
-                <div class="workspace-card__actions">
+                <div class="content-card__actions">
                   <BaseActionMenu label="Действия брифа">
                     <button class="action-menu__item" type="button">
                       <BaseIcon class="action-menu__icon" name="edit" />
@@ -534,7 +560,7 @@ const tableRows = [
                     </button>
                   </BaseActionMenu>
                 </div>
-                <BaseDisclosureToggle class="workspace-card__toggle" expanded label="Свернуть бриф" />
+                <BaseDisclosureToggle class="content-card__toggle" expanded label="Свернуть бриф" />
               </summary>
               <div class="brief-card__links">
                 <details class="brief-card__link-item" open>
@@ -647,13 +673,15 @@ const tableRows = [
           <div class="ui-stack">
             <div class="topbar ui-framed">
               <div class="topbar__project">
-                <span class="ui-name">TopbarProject</span>
-                <span class="topbar__title">Проект Alpha</span>
+                <span class="ui-name">TopbarPageTitle</span>
+                <h1 class="page-title">Согласование</h1>
               </div>
             </div>
             <aside class="sidebar ui-sidebar-preview">
               <div class="sidebar__top">
-                <a class="logo" href="/">Логотип</a>
+                <a class="logo" href="/" aria-label="На главную">
+                  <img class="logo__image" src="/lw-logo.svg" alt="Little Web" />
+                </a>
               </div>
               <div class="sidebar__content">
                 <div class="sidebar__project">
@@ -690,17 +718,17 @@ const tableRows = [
               :collapsed="false"
             >
               <span class="ui-name">BaseWorkspaceBlock</span>
-              <div class="workspace-block__content">
-                <details class="workspace-card checklist-card">
-                  <summary class="workspace-card__header">
-                    <button class="workspace-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
-                      <BaseIcon class="workspace-card__drag-icon" name="drag-handle" />
+              <div class="content-list">
+                <details class="content-card checklist-card">
+                  <summary class="content-card__header">
+                    <button class="content-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
+                      <BaseIcon class="content-card__drag-icon" name="drag-handle" />
                     </button>
-                    <span class="workspace-card__summary">
-                      <span class="workspace-card__title">Проверить материалы</span>
-                      <span class="workspace-card__meta">0% · 2 обязательных пункта</span>
+                    <span class="content-card__summary">
+                      <span class="content-card__title">Проверить материалы</span>
+                      <span class="content-card__meta">0% · 2 обязательных пункта</span>
                     </span>
-                    <BaseDisclosureToggle class="workspace-card__toggle" label="Развернуть чеклист" />
+                    <BaseDisclosureToggle class="content-card__toggle" label="Развернуть чеклист" />
                   </summary>
                 </details>
               </div>
@@ -801,6 +829,7 @@ const tableRows = [
                     date="14:40"
                     text="Доступ выдал, можно продолжать работу."
                     direction="outgoing"
+                    edited
                     actions-mode="context"
                     readonly
                   />
@@ -909,10 +938,6 @@ const tableRows = [
   </section>
 
   <section v-else class="stage-page">
-    <div class="section-header stage-page__header">
-      <h1 class="page-title">UI-компоненты</h1>
-    </div>
-
     <section class="workspace-block">
       <p class="card-description">У вас нет прав на просмотр этого раздела.</p>
     </section>

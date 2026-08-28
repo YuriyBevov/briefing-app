@@ -50,6 +50,10 @@ const briefLinkTitleForm = reactive({
 });
 
 const section = computed(() => data.value.sections.find((item) => item.id === props.sectionId));
+const pageTitle = useState("app-page-title", () => "Раздел");
+watchEffect(() => {
+	pageTitle.value = section.value?.title ?? "Раздел";
+});
 const canViewSection = computed(() =>
 	Boolean(section.value?.isActive) && canUsePermission(`view_section_${props.sectionId}`).value
 );
@@ -392,10 +396,6 @@ const getBriefLink = (token: string) => {
 
 <template>
 	<section v-if="canViewSection" class="stage-page">
-		<div class="section-header stage-page__header">
-			<h1 class="page-title">{{ section?.title }}</h1>
-		</div>
-
 		<VueDraggable
 			v-model="orderedStageBlocks"
 			class="stage-page__workspace"
@@ -416,27 +416,27 @@ const getBriefLink = (token: string) => {
 				<VueDraggable
 					v-if="block.id === 'checklists' && !isStageBlockCollapsed(block.id) && orderedChecklists.length"
 					v-model="orderedChecklists"
-					class="workspace-block__content"
-					handle=".workspace-card__drag"
+					class="content-list"
+					handle=".content-card__drag"
 					:animation="180"
 				>
 					<details
 						v-for="checklist in orderedChecklists"
 						:key="checklist.id"
-						class="workspace-card checklist-card"
+						class="content-card checklist-card"
 					>
-						<summary class="workspace-card__header" @click="preventSummaryToggle">
-							<button class="workspace-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
-								<BaseIcon class="workspace-card__drag-icon" name="drag-handle" />
+						<summary class="content-card__header" @click="preventSummaryToggle">
+							<button class="content-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
+								<BaseIcon class="content-card__drag-icon" name="drag-handle" />
 							</button>
-							<span class="workspace-card__summary">
-								<span class="workspace-card__title">{{ checklist.title }}</span>
-								<span class="workspace-card__meta">
+							<span class="content-card__summary">
+								<span class="content-card__title">{{ checklist.title }}</span>
+								<span class="content-card__meta">
 									{{ getChecklistProgress(checklist) }}% ·
 									{{ getRequiredOpenCount(checklist) }} обязательных пунктов
 								</span>
 							</span>
-							<div class="workspace-card__actions">
+							<div class="content-card__actions">
 								<BaseActionMenu label="Действия чеклиста">
 									<button class="action-menu__item" type="button" @click="editChecklist(checklist.id)">
 										<BaseIcon class="action-menu__icon" name="edit" />
@@ -449,7 +449,7 @@ const getBriefLink = (token: string) => {
 								</BaseActionMenu>
 							</div>
 							<BaseDisclosureToggle
-								class="workspace-card__toggle"
+								class="content-card__toggle"
 								label="Развернуть чеклист"
 								@click.stop.prevent="toggleClosestDetails"
 							/>
@@ -519,27 +519,27 @@ const getBriefLink = (token: string) => {
 				<VueDraggable
 					v-else-if="block.id === 'briefs' && !isStageBlockCollapsed(block.id) && orderedBriefs.length"
 					v-model="orderedBriefs"
-					class="workspace-block__content"
-					handle=".workspace-card__drag"
+					class="content-list"
+					handle=".content-card__drag"
 					:animation="180"
 				>
 					<details
 						v-for="brief in orderedBriefs"
 						:key="brief.id"
-						class="workspace-card brief-card"
-						:class="{ 'workspace-card--empty': !canExpandBrief(brief) }"
+						class="content-card brief-card"
+						:class="{ 'content-card--empty': !canExpandBrief(brief) }"
 					>
-						<summary class="workspace-card__header" @click="preventSummaryToggle">
-							<button class="workspace-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
-								<BaseIcon class="workspace-card__drag-icon" name="drag-handle" />
+						<summary class="content-card__header" @click="preventSummaryToggle">
+							<button class="content-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
+								<BaseIcon class="content-card__drag-icon" name="drag-handle" />
 							</button>
-							<span class="workspace-card__summary">
-								<span class="workspace-card__title">{{ brief.title }}</span>
-								<span class="workspace-card__meta">
+							<span class="content-card__summary">
+								<span class="content-card__title">{{ brief.title }}</span>
+								<span class="content-card__meta">
 									{{ getBriefMeta(brief.links, brief.questions.length) }}
 								</span>
 							</span>
-							<div class="workspace-card__actions">
+							<div class="content-card__actions">
 								<BaseActionMenu label="Действия брифа">
 									<button class="action-menu__item" type="button" @click="editBrief(brief.id)">
 										<BaseIcon class="action-menu__icon" name="edit" />
@@ -556,7 +556,7 @@ const getBriefLink = (token: string) => {
 								</BaseActionMenu>
 							</div>
 							<BaseDisclosureToggle
-								class="workspace-card__toggle"
+								class="content-card__toggle"
 								:disabled="!canExpandBrief(brief)"
 								label="Развернуть бриф"
 								@click.stop.prevent="toggleClosestDetails"
@@ -702,10 +702,6 @@ const getBriefLink = (token: string) => {
 	</section>
 
 	<section v-else class="stage-page">
-		<div class="section-header stage-page__header">
-			<h1 class="page-title">{{ section?.title ?? "Раздел" }}</h1>
-		</div>
-
 		<section class="workspace-block">
 			<p class="card-description">Раздел отключён или у вас нет прав на его просмотр.</p>
 		</section>

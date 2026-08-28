@@ -185,6 +185,13 @@
   line-height: 1.2;
 }
 
+.project-feed-card__edited-icon {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  color: var(--color-warning);
+}
+
 .project-feed-card--colored .project-feed-card__author,
 .project-feed-card--colored .project-feed-card__text {
   color: #111827;

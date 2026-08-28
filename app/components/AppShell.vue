@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { currentProject } = useProjectStore()
+const pageTitle = useState('app-page-title', () => 'Раздел')
 const activeSideRailPanel = useState<'comments' | ''>('active-side-rail-panel', () => '')
 const isSideRailOpen = computed(() => activeSideRailPanel.value === 'comments')
 </script>
@@ -10,7 +10,7 @@ const isSideRailOpen = computed(() => activeSideRailPanel.value === 'comments')
 
     <div class="app-shell__main">
       <Topbar
-        :project-title="currentProject.title"
+        :title="pageTitle"
       />
 
       <main class="app-shell__content" :class="{ 'app-shell__content--side-rail-open': isSideRailOpen }">

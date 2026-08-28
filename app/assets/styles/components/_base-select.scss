@@ -61,7 +61,7 @@
 }
 
 .base-select__content {
-  z-index: 50;
+  z-index: 120;
   width: var(--reka-select-trigger-width);
   max-height: min(var(--reka-select-content-available-height), 280px);
   overflow: hidden;

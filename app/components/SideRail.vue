@@ -282,8 +282,17 @@ const canShowFeedContextMenu = computed(() => {
     return false
   }
 
-  return canEditComments.value || canDeleteComments.value
+  return canEditComment(feedContextMenu.value.item) || canDeleteComment(feedContextMenu.value.item)
 })
+
+const isOwnComment = (comment: ProjectComment) =>
+  comment.authorId === currentUser.value?.id
+
+const canEditComment = (comment: ProjectComment) =>
+  isOwnComment(comment) && canEditComments.value
+
+const canDeleteComment = (comment: ProjectComment) =>
+  isOwnComment(comment) && canDeleteComments.value
 
 const updateTime = () => {
   const now = new Date()
@@ -342,7 +351,7 @@ const openFeedContextMenu = (menu: FeedContextMenu) => {
 }
 
 const openCommentContextMenu = (comment: ProjectComment, event: MouseEvent) => {
-  if (!canEditComments.value && !canDeleteComments.value) {
+  if (!canEditComment(comment) && !canDeleteComment(comment)) {
     return
   }
 
@@ -538,6 +547,7 @@ onBeforeUnmount(() => {
               :author="getUserNameById(comment.authorId)"
               :date="formatMessageTime(comment.createdAt)"
               :text="comment.text"
+              :edited="Boolean(comment.editedAt)"
               :direction="comment.authorId === currentUser?.id ? 'outgoing' : 'incoming'"
               actions-mode="context"
               readonly
@@ -557,7 +567,7 @@ onBeforeUnmount(() => {
       @click.stop
     >
       <button
-        v-if="canEditComments"
+        v-if="canEditComment(feedContextMenu.item)"
         class="side-rail__context-action"
         type="button"
         @click="editContextMenuItem"
@@ -566,7 +576,7 @@ onBeforeUnmount(() => {
         <span>Изменить</span>
       </button>
       <button
-        v-if="canDeleteComments"
+        v-if="canDeleteComment(feedContextMenu.item)"
         class="side-rail__context-action side-rail__context-action--danger"
         type="button"
         @click="removeContextMenuItem"

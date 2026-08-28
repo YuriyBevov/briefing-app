@@ -2,6 +2,9 @@
 import { VueDraggable } from 'vue-draggable-plus'
 import type { SystemPermissionId } from '~/composables/useProjectStore'
 
+const pageTitle = useState('app-page-title', () => 'Настройки')
+pageTitle.value = 'Настройки'
+
 const {
   activateUser,
   activateSection,
@@ -657,7 +660,6 @@ const orderedProjects = computed({
   <section v-if="canViewSettings" class="settings-page">
     <div class="section-header settings-page__header">
       <div>
-        <h1 class="page-title">Настройки</h1>
         <p class="settings-page__lead">Разделы, пользователи, роли, права и доступ к проектам.</p>
       </div>
     </div>
@@ -704,47 +706,49 @@ const orderedProjects = computed({
         <VueDraggable
           v-if="block.id === 'sections' && !isSettingsBlockCollapsed(block.id)"
           v-model="orderedSections"
-          class="settings-list"
-          handle=".settings-card__drag"
+          class="content-list"
+          handle=".content-card__drag"
           :animation="180"
         >
-          <article v-for="section in orderedSections" :key="section.id" class="settings-card">
-            <button class="settings-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
-              <BaseIcon class="settings-card__drag-icon" name="drag-handle" />
-            </button>
-            <div class="settings-card__body settings-card__body--wide">
-              <div class="settings-card__headline">
-                <div class="settings-card__content">
-                  <strong>{{ section.title }}</strong>
-                  <span v-if="section.description">{{ section.description }}</span>
-                </div>
-                <div class="settings-card__headline-actions">
-                  <span
-                    class="settings-card__status"
-                    :class="section.isActive ? 'settings-card__status--active' : 'settings-card__status--blocked'"
-                  >
-                    {{ section.isActive ? 'Активен' : 'Отключён' }}
-                  </span>
-                  <div class="button-row settings-card__actions">
-                    <BaseIconButton label="Изменить раздел" icon="edit" @click="editSection(section.id)" />
-                    <BaseIconButton
-                      v-if="section.isActive"
-                      label="Деактивировать раздел"
-                      icon="lock"
-                      @click="requestDeactivateSection(section.id)"
-                    />
-                    <BaseIconButton
-                      v-else
-                      label="Активировать раздел"
-                      icon="unlock"
-                      @click="enableSection(section.id)"
-                    />
-                    <BaseIconButton
-                      label="Удалить раздел"
-                      icon="trash"
-                      :disabled="data.sections.length <= 1"
-                      @click="requestRemoveSection(section.id)"
-                    />
+          <article v-for="section in orderedSections" :key="section.id" class="content-card">
+            <div class="content-card__header">
+              <button class="content-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
+                <BaseIcon class="content-card__drag-icon" name="drag-handle" />
+              </button>
+              <div class="content-card__body content-card__body--wide">
+                <div class="content-card__headline">
+                  <div class="content-card__content">
+                    <strong>{{ section.title }}</strong>
+                    <span v-if="section.description">{{ section.description }}</span>
+                  </div>
+                  <div class="content-card__headline-actions">
+                    <span
+                      class="content-card__status"
+                      :class="section.isActive ? 'content-card__status--active' : 'content-card__status--blocked'"
+                    >
+                      {{ section.isActive ? 'Активен' : 'Отключён' }}
+                    </span>
+                    <div class="button-row content-card__actions">
+                      <BaseIconButton label="Изменить раздел" icon="edit" @click="editSection(section.id)" />
+                      <BaseIconButton
+                        v-if="section.isActive"
+                        label="Деактивировать раздел"
+                        icon="lock"
+                        @click="requestDeactivateSection(section.id)"
+                      />
+                      <BaseIconButton
+                        v-else
+                        label="Активировать раздел"
+                        icon="unlock"
+                        @click="enableSection(section.id)"
+                      />
+                      <BaseIconButton
+                        label="Удалить раздел"
+                        icon="trash"
+                        :disabled="data.sections.length <= 1"
+                        @click="requestRemoveSection(section.id)"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -755,27 +759,29 @@ const orderedProjects = computed({
         <VueDraggable
           v-else-if="block.id === 'projects' && !isSettingsBlockCollapsed(block.id)"
           v-model="orderedProjects"
-          class="settings-list"
-          handle=".settings-card__drag"
+          class="content-list"
+          handle=".content-card__drag"
           :animation="180"
         >
-          <article v-for="project in orderedProjects" :key="project.id" class="settings-card">
-            <button class="settings-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
-              <BaseIcon class="settings-card__drag-icon" name="drag-handle" />
-            </button>
-            <div class="settings-card__body settings-card__body--wide">
-              <div class="settings-card__headline">
-                <div class="settings-card__content">
-                  <strong>{{ project.title }}</strong>
-                </div>
-                <div class="button-row settings-card__actions">
-                  <BaseIconButton label="Изменить проект" icon="edit" @click="editProject(project.id)" />
-                  <BaseIconButton
-                    label="Удалить проект"
-                    icon="trash"
-                    :disabled="data.projects.length <= 1"
-                    @click="requestRemoveProject(project.id)"
-                  />
+          <article v-for="project in orderedProjects" :key="project.id" class="content-card">
+            <div class="content-card__header">
+              <button class="content-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
+                <BaseIcon class="content-card__drag-icon" name="drag-handle" />
+              </button>
+              <div class="content-card__body content-card__body--wide">
+                <div class="content-card__headline">
+                  <div class="content-card__content">
+                    <strong>{{ project.title }}</strong>
+                  </div>
+                  <div class="button-row content-card__actions">
+                    <BaseIconButton label="Изменить проект" icon="edit" @click="editProject(project.id)" />
+                    <BaseIconButton
+                      label="Удалить проект"
+                      icon="trash"
+                      :disabled="data.projects.length <= 1"
+                      @click="requestRemoveProject(project.id)"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -785,48 +791,50 @@ const orderedProjects = computed({
         <VueDraggable
           v-else-if="block.id === 'users' && !isSettingsBlockCollapsed(block.id)"
           v-model="orderedUsers"
-          class="settings-list"
-          handle=".settings-card__drag"
+          class="content-list"
+          handle=".content-card__drag"
           :animation="180"
         >
-          <article v-for="user in orderedUsers" :key="user.id" class="settings-card">
-            <button class="settings-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
-              <BaseIcon class="settings-card__drag-icon" name="drag-handle" />
-            </button>
-            <div class="settings-card__body settings-card__body--wide">
-              <div class="settings-card__headline">
-                <div class="settings-card__content">
-                  <strong>{{ user.name }}</strong>
-                  <span>{{ getUserRoleTitle(user.roleIds) }}</span>
-                </div>
-                <div class="settings-card__headline-actions">
-                  <span
-                    class="settings-card__status"
-                    :class="user.isActive ? 'settings-card__status--active' : 'settings-card__status--blocked'"
-                  >
-                    {{ user.isActive ? 'Активен' : 'Заблокирован' }}
-                  </span>
-                  <div class="button-row settings-card__actions">
-                    <BaseIconButton label="Изменить пользователя" icon="edit" @click="editUser(user.id)" />
-                    <BaseIconButton
-                      v-if="user.isActive"
-                      label="Деактивировать пользователя"
-                      icon="lock"
-                      :disabled="isOnlyActiveAdmin(user.id)"
-                      @click="requestDeactivateUser(user.id)"
-                    />
-                    <BaseIconButton
-                      v-else
-                      label="Активировать пользователя"
-                      icon="unlock"
-                      @click="enableUser(user.id)"
-                    />
-                    <BaseIconButton
-                      label="Удалить пользователя"
-                      icon="trash"
-                      :disabled="user.isActive && isOnlyActiveAdmin(user.id)"
-                      @click="requestRemoveUser(user.id)"
-                    />
+          <article v-for="user in orderedUsers" :key="user.id" class="content-card">
+            <div class="content-card__header">
+              <button class="content-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
+                <BaseIcon class="content-card__drag-icon" name="drag-handle" />
+              </button>
+              <div class="content-card__body content-card__body--wide">
+                <div class="content-card__headline">
+                  <div class="content-card__content">
+                    <strong>{{ user.name }}</strong>
+                    <span>{{ getUserRoleTitle(user.roleIds) }}</span>
+                  </div>
+                  <div class="content-card__headline-actions">
+                    <span
+                      class="content-card__status"
+                      :class="user.isActive ? 'content-card__status--active' : 'content-card__status--blocked'"
+                    >
+                      {{ user.isActive ? 'Активен' : 'Заблокирован' }}
+                    </span>
+                    <div class="button-row content-card__actions">
+                      <BaseIconButton label="Изменить пользователя" icon="edit" @click="editUser(user.id)" />
+                      <BaseIconButton
+                        v-if="user.isActive"
+                        label="Деактивировать пользователя"
+                        icon="lock"
+                        :disabled="isOnlyActiveAdmin(user.id)"
+                        @click="requestDeactivateUser(user.id)"
+                      />
+                      <BaseIconButton
+                        v-else
+                        label="Активировать пользователя"
+                        icon="unlock"
+                        @click="enableUser(user.id)"
+                      />
+                      <BaseIconButton
+                        label="Удалить пользователя"
+                        icon="trash"
+                        :disabled="user.isActive && isOnlyActiveAdmin(user.id)"
+                        @click="requestRemoveUser(user.id)"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -837,47 +845,49 @@ const orderedProjects = computed({
         <VueDraggable
           v-else-if="block.id === 'roles' && !isSettingsBlockCollapsed(block.id)"
           v-model="orderedRoles"
-          class="settings-list"
-          handle=".settings-card__drag"
+          class="content-list"
+          handle=".content-card__drag"
           :animation="180"
         >
-          <article v-for="role in orderedRoles" :key="role.id" class="settings-card">
-            <button class="settings-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
-              <BaseIcon class="settings-card__drag-icon" name="drag-handle" />
-            </button>
-            <div class="settings-card__body">
-              <strong>{{ role.title }}</strong>
-              <span v-if="hasAllPermissions(role.permissionIds)">Полный доступ</span>
-              <div v-else-if="getVisibleRolePermissions(role.permissionIds).length" class="settings-card__badges">
-                <span
-                  v-for="permissionTitle in getVisibleRolePermissions(role.permissionIds)"
-                  :key="permissionTitle"
-                  class="settings-card__badge"
-                >
-                  {{ permissionTitle }}
-                </span>
-                <span
-                  v-if="getHiddenRolePermissionCount(role.permissionIds)"
-                  class="settings-card__badge settings-card__badge--success"
-                >
-                  + еще {{ getHiddenRolePermissionCount(role.permissionIds) }}
-                </span>
+          <article v-for="role in orderedRoles" :key="role.id" class="content-card">
+            <div class="content-card__header">
+              <button class="content-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
+                <BaseIcon class="content-card__drag-icon" name="drag-handle" />
+              </button>
+              <div class="content-card__body">
+                <strong>{{ role.title }}</strong>
+                <span v-if="hasAllPermissions(role.permissionIds)">Полный доступ</span>
+                <div v-else-if="getVisibleRolePermissions(role.permissionIds).length" class="content-card__badges">
+                  <span
+                    v-for="permissionTitle in getVisibleRolePermissions(role.permissionIds)"
+                    :key="permissionTitle"
+                    class="content-card__badge"
+                  >
+                    {{ permissionTitle }}
+                  </span>
+                  <span
+                    v-if="getHiddenRolePermissionCount(role.permissionIds)"
+                    class="content-card__badge content-card__badge--success"
+                  >
+                    + еще {{ getHiddenRolePermissionCount(role.permissionIds) }}
+                  </span>
+                </div>
+                <span v-else>Права пока не назначены</span>
               </div>
-              <span v-else>Права пока не назначены</span>
-            </div>
-            <div class="button-row settings-card__actions">
-              <BaseIconButton
-                label="Изменить роль"
-                icon="edit"
-                :disabled="role.system"
-                @click="editRole(role.id)"
-              />
-              <BaseIconButton
-                label="Удалить роль"
-                icon="trash"
-                :disabled="role.system"
-                @click="requestRemoveRole(role.id)"
-              />
+              <div class="button-row content-card__actions">
+                <BaseIconButton
+                  label="Изменить роль"
+                  icon="edit"
+                  :disabled="role.system"
+                  @click="editRole(role.id)"
+                />
+                <BaseIconButton
+                  label="Удалить роль"
+                  icon="trash"
+                  :disabled="role.system"
+                  @click="requestRemoveRole(role.id)"
+                />
+              </div>
             </div>
           </article>
         </VueDraggable>
@@ -1189,10 +1199,6 @@ const orderedProjects = computed({
   </section>
 
   <section v-else class="stage-page">
-    <div class="section-header stage-page__header">
-      <h1 class="page-title">Настройки</h1>
-    </div>
-
     <section class="workspace-block">
       <p class="card-description">У вас нет прав на просмотр этого раздела.</p>
     </section>

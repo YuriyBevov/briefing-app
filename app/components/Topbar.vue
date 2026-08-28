@@ -1,13 +1,13 @@
 <script setup lang="ts">
 defineProps<{
-  projectTitle: string
+  title: string
 }>()
 </script>
 
 <template>
   <header class="topbar">
     <div class="topbar__project">
-      <span class="topbar__title">{{ projectTitle }}</span>
+      <h1 class="page-title">{{ title }}</h1>
     </div>
   </header>
 </template>

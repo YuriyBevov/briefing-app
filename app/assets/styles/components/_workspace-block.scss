@@ -52,28 +52,28 @@
   flex-wrap: nowrap;
 }
 
-.workspace-block__content {
+.content-list {
   display: grid;
   gap: var(--space-sm);
 }
 
-.workspace-card {
+.content-card {
   position: relative;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background-color: var(--color-surface-muted);
 }
 
-.workspace-card:has(.action-menu[open]) {
+.content-card:has(.action-menu[open]) {
   z-index: 10;
 }
 
-.workspace-card.sortable-ghost {
+.content-card.sortable-ghost {
   border-color: var(--color-accent);
   opacity: 0.54;
 }
 
-.workspace-card__header {
+.content-card__header {
   display: flex;
   gap: var(--space-md);
   align-items: center;
@@ -89,18 +89,19 @@
   }
 }
 
-.workspace-card__summary {
+.content-card__summary {
   display: grid;
   flex: 1 1 auto;
   gap: var(--space-xs);
   min-width: 0;
 }
 
-.workspace-card__drag {
+.content-card__drag {
   width: 32px;
   height: 32px;
   display: inline-grid;
   place-items: center;
+  gap: 2px;
   flex: 0 0 auto;
   padding: 0;
   border: 1px solid var(--color-border);
@@ -120,39 +121,140 @@
   }
 }
 
-.workspace-card__drag-icon {
+.content-card__drag-icon {
   width: 18px;
   height: 18px;
 }
 
-.workspace-card[open] .workspace-card__toggle .disclosure-toggle__icon {
+.content-card[open] .content-card__toggle .disclosure-toggle__icon {
   color: var(--color-text);
   transform: rotate(0);
 }
 
-.workspace-card--empty .workspace-card__toggle .disclosure-toggle__icon,
-.workspace-card--empty[open] .workspace-card__toggle .disclosure-toggle__icon {
+.content-card--empty .content-card__toggle .disclosure-toggle__icon,
+.content-card--empty[open] .content-card__toggle .disclosure-toggle__icon {
   color: var(--color-text-muted);
   opacity: 0.48;
   transform: rotate(-90deg);
 }
 
-.workspace-card__title {
+.content-card__title {
   color: var(--color-text);
   font-size: 12px;
   line-height: 1.2;
   font-weight: 400;
 }
 
-.workspace-card__meta {
+.content-card__meta {
   color: var(--color-text-muted);
   font-size: 12px;
   line-height: 1.2;
 }
 
-.workspace-card__actions {
+.content-card__actions {
   position: relative;
   flex: 0 0 auto;
+  flex-wrap: nowrap;
+}
+
+.content-card__body {
+  display: grid;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.content-card__body--wide {
+  flex: 1 1 auto;
+}
+
+.content-card__headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.content-card__content {
+  display: grid;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.content-card__headline-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 0 0 auto;
+}
+
+.content-card__body strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.content-card__status {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 600;
+}
+
+.content-card__status::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  display: block;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+.content-card__status--active {
+  color: var(--color-success);
+  background-color: color-mix(in srgb, var(--color-success) 14%, transparent);
+}
+
+.content-card__status--blocked {
+  color: var(--color-danger);
+  background-color: color-mix(in srgb, var(--color-danger) 18%, transparent);
+}
+
+.content-card__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.content-card__badge {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 1.2;
+  background-color: var(--color-control);
+}
+
+.content-card__badge--success {
+  color: var(--color-success);
+  background-color: color-mix(in srgb, var(--color-success) 14%, transparent);
 }
 
 .action-menu {

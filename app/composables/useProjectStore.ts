@@ -259,6 +259,7 @@ const storageKey = 'brief-os-project-data'
 const defaultProjectId = 'project-brief-os'
 const adminRoleId = 'role-admin'
 const defaultAdminUserId = 'user-admin'
+const defaultDesignerUserId = 'user-designer'
 const forceDeletedBriefTokens = new Set([
   '1d3edbaf2a864c3abf58a05761001e0f'
 ])
@@ -429,6 +430,29 @@ const createDefaultAdminUser = (): User => ({
   createdAt: '2026-08-25T00:00:00.000Z'
 })
 
+const createDefaultDesignerUser = (): User => ({
+  id: defaultDesignerUserId,
+  name: 'Александр Островский',
+  login: 'alexander',
+  email: 'alexander@brief-os.local',
+  password: 'alexander',
+  roleIds: [],
+  projectIds: [defaultProjectId],
+  isActive: true,
+  sortOrder: 1,
+  createdAt: '2026-08-25T00:00:00.000Z'
+})
+
+const createDefaultComments = (): ProjectComment[] => [
+  {
+    id: 'comment-default-incoming',
+    projectId: defaultProjectId,
+    authorId: defaultDesignerUserId,
+    text: 'Посмотрел материалы, нужен доступ к макету.',
+    createdAt: '2026-08-26T11:33:00.000Z'
+  }
+]
+
 const createInitialData = (): ProjectData => ({
   projects: [createDefaultProject()],
   currentProjectId: defaultProjectId,
@@ -437,11 +461,11 @@ const createInitialData = (): ProjectData => ({
   sections: createDefaultSections(),
   permissions: createDefaultPermissions(),
   roles: [createAdminRole()],
-  users: [createDefaultAdminUser()],
+  users: [createDefaultAdminUser(), createDefaultDesignerUser()],
   currentUserId: defaultAdminUserId,
   checklists: [],
   briefs: [],
-  comments: [],
+  comments: createDefaultComments(),
   history: [],
   notes: []
 })
@@ -538,7 +562,13 @@ const normalizeRoles = (roles: Role[] = [], permissions: Permission[]) => {
 
 const normalizeUsers = (users: User[] = [], projects: Project[]) => {
   const defaultAdmin = createDefaultAdminUser()
-  const normalizedUsers = (users.length ? users : [defaultAdmin]).map((user, index) => ({
+  const defaultDesigner = createDefaultDesignerUser()
+  const savedUsers = users.length ? users : [defaultAdmin]
+  const usersWithDefaults = savedUsers.some((user) => user.id === defaultDesignerUserId)
+    ? savedUsers
+    : [...savedUsers, defaultDesigner]
+
+  const normalizedUsers = usersWithDefaults.map((user, index) => ({
     ...defaultAdmin,
     ...user,
     roleIds: user.roleIds?.length ? user.roleIds : [],
@@ -632,6 +662,13 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
   const currentUserId = users.some((user) => user.id === projectData.currentUserId)
     ? projectData.currentUserId as string
     : users[0].id
+  const savedComments = projectData.comments ?? []
+  const commentsWithDefaults = [
+    ...savedComments,
+    ...createDefaultComments().filter((comment) =>
+      !savedComments.some((savedComment) => savedComment.id === comment.id)
+    )
+  ]
 
   return {
     projects,
@@ -701,7 +738,7 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
           completedAt: brief.completedAt ?? ''
         }
       }),
-    comments: (projectData.comments ?? [])
+    comments: commentsWithDefaults
       .filter((comment) => projectIds.has(comment.projectId ?? currentProjectId))
       .map((comment) => ({
         ...comment,

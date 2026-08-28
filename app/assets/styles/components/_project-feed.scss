@@ -42,7 +42,7 @@
   display: grid;
   place-items: center;
   color: var(--color-text-muted);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.4;
   text-align: center;
 }
@@ -55,6 +55,12 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   background: var(--project-feed-card-background, var(--color-surface-muted));
+}
+
+.project-feed-card__bubble {
+  display: grid;
+  gap: var(--space-sm);
+  min-width: 0;
 }
 
 .project-feed-card--context {
@@ -139,9 +145,9 @@
 
 .project-feed-card__author {
   color: var(--color-text);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.25;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .project-feed-card__drag {
@@ -215,4 +221,76 @@
 
 .project-feed-card__event .project-feed-card__date {
   font-size: 11px;
+}
+
+.project-feed-card--incoming,
+.project-feed-card--outgoing {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.project-feed-card--incoming {
+  grid-template-columns: 32px minmax(0, 75%);
+  align-items: end;
+  justify-content: start;
+}
+
+.project-feed-card--outgoing {
+  grid-template-columns: minmax(0, 75%);
+  justify-content: end;
+}
+
+.project-feed-card--incoming .project-feed-card__bubble,
+.project-feed-card--outgoing .project-feed-card__bubble {
+  position: relative;
+  padding: var(--space-sm);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-muted);
+}
+
+.project-feed-card--outgoing .project-feed-card__bubble {
+  border-top-right-radius: 0;
+  background-color: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface-muted));
+}
+
+.project-feed-card--incoming .project-feed-card__bubble {
+  border-bottom-left-radius: 0;
+  background-color: color-mix(in srgb, var(--color-surface) 82%, var(--color-accent-contrast) 18%);
+}
+
+.project-feed-card--incoming .project-feed-card__bubble::after,
+.project-feed-card--outgoing .project-feed-card__bubble::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: inherit;
+}
+
+.project-feed-card--incoming .project-feed-card__bubble::after {
+  bottom: -1px;
+  left: -6px;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%);
+}
+
+.project-feed-card--outgoing .project-feed-card__bubble::after {
+  top: -1px;
+  right: -6px;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+}
+
+.project-feed-card__avatar {
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--color-accent-contrast);
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 700;
+  background-color: var(--color-accent);
 }

@@ -8,7 +8,9 @@ const {
   deleteProjectComment,
   getUserNameById,
   updateProjectComment,
-  currentProjectHistory
+  currentProjectHistory,
+  currentUser,
+  currentProject
 } = useProjectStore()
 
 type FeedContextMenu =
@@ -25,6 +27,7 @@ const feedContextMenuElement = ref<HTMLElement | null>(null)
 const editingComment = ref<ProjectComment | null>(null)
 const deletingComment = ref<ProjectComment | null>(null)
 const commentFormText = ref('')
+const chatReadState = ref<Record<string, string[]>>({})
 const canViewComments = canUsePermission('view_comments')
 const canCreateComments = canUsePermission('create_comments')
 const canEditComments = canUsePermission('edit_comments')
@@ -33,7 +36,18 @@ const canViewHistory = canUsePermission('view_history')
 const canViewSettings = canUsePermission('view_settings')
 const canViewUiComponents = canUsePermission('view_ui_components')
 const currentTime = ref('')
+const currentDate = ref('')
 let timer: ReturnType<typeof window.setInterval> | undefined
+let chatObserver: IntersectionObserver | undefined
+
+const getLocalDateKey = (value: string) => {
+  const date = new Date(value)
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
 
 const sidebarActions = computed<Array<{
   id: SidebarActionId
@@ -90,12 +104,173 @@ const utilityActions = computed<Array<{
 
 const isChatOpen = computed(() => activeSidebarPanel.value === 'comments')
 
+const chatReadStorageKey = 'brief-os-chat-read-state'
+const chatReadKey = computed(() =>
+  `${currentProject.value?.id ?? 'project'}:${currentUser.value?.id ?? 'user'}`
+)
+
+const readCommentIds = computed(() =>
+  new Set(chatReadState.value[chatReadKey.value] ?? [])
+)
+
+const unreadCommentsCount = computed(() => {
+  if (!canViewComments.value) {
+    return 0
+  }
+
+  return currentProjectComments.value.filter((comment) =>
+    comment.authorId !== currentUser.value?.id &&
+    !readCommentIds.value.has(comment.id)
+  ).length
+})
+
+const loadChatReadState = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  const savedState = window.localStorage.getItem(chatReadStorageKey)
+
+  if (!savedState) {
+    return
+  }
+
+  try {
+    const parsedState = JSON.parse(savedState) as Record<string, string[] | string>
+
+    chatReadState.value = Object.fromEntries(
+      Object.entries(parsedState).map(([key, value]) => [
+        key,
+        Array.isArray(value) ? value : []
+      ])
+    )
+  } catch {
+    chatReadState.value = {}
+  }
+}
+
+const saveChatReadState = () => {
+  if (!import.meta.client) {
+    return
+  }
+
+  window.localStorage.setItem(chatReadStorageKey, JSON.stringify(chatReadState.value))
+}
+
+const markCommentAsRead = (commentId: string) => {
+  if (readCommentIds.value.has(commentId)) {
+    return
+  }
+
+  const currentIds = chatReadState.value[chatReadKey.value] ?? []
+
+  chatReadState.value = {
+    ...chatReadState.value,
+    [chatReadKey.value]: [...currentIds, commentId]
+  }
+  saveChatReadState()
+}
+
+const disconnectChatObserver = () => {
+  chatObserver?.disconnect()
+  chatObserver = undefined
+}
+
+const observeVisibleChatMessages = () => {
+  disconnectChatObserver()
+
+  if (!import.meta.client || !isChatOpen.value || !canViewComments.value) {
+    return
+  }
+
+  const listElement = document.querySelector<HTMLElement>('.side-rail__chat .project-feed-block__list')
+  const messageElements = listElement?.querySelectorAll<HTMLElement>('.side-rail__chat-message[data-comment-id]')
+
+  if (!listElement || !messageElements?.length) {
+    return
+  }
+
+  chatObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) {
+        return
+      }
+
+      const element = entry.target as HTMLElement
+      const commentId = element.dataset.commentId
+
+      if (!commentId) {
+        return
+      }
+
+      markCommentAsRead(commentId)
+      chatObserver?.unobserve(element)
+    })
+  }, {
+    root: listElement,
+    threshold: 0.5
+  })
+
+  messageElements.forEach((element) => {
+    const commentId = element.dataset.commentId
+    const authorId = element.dataset.authorId
+
+    if (!commentId || authorId === currentUser.value?.id || readCommentIds.value.has(commentId)) {
+      return
+    }
+
+    chatObserver?.observe(element)
+  })
+}
+
+const formatMessageDate = (value: string) =>
+  new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date(value)).replace(' г.', 'г.')
+
+const formatMessageTime = (value: string) =>
+  new Intl.DateTimeFormat('ru-RU', {
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(value))
+
+const groupedProjectComments = computed(() => {
+  const groups: Array<{ dateKey: string; dateLabel: string; comments: ProjectComment[] }> = []
+
+  currentProjectComments.value.forEach((comment) => {
+    const dateKey = getLocalDateKey(comment.createdAt)
+    const lastGroup = groups.at(-1)
+
+    if (lastGroup?.dateKey === dateKey) {
+      lastGroup.comments.push(comment)
+      return
+    }
+
+    groups.push({
+      dateKey,
+      dateLabel: formatMessageDate(comment.createdAt),
+      comments: [comment]
+    })
+  })
+
+  return groups
+})
+
 const toggleSidebarAction = (actionId: SidebarActionId) => {
   if (actionId !== 'comments' || !canViewComments.value) {
     return
   }
 
   activeSidebarPanel.value = isChatOpen.value ? '' : 'comments'
+
+  if (activeSidebarPanel.value === 'comments') {
+    nextTick(observeVisibleChatMessages)
+    return
+  }
+
+  disconnectChatObserver()
 }
 
 const closeSidebarPanel = () => {
@@ -110,20 +285,18 @@ const canShowFeedContextMenu = computed(() => {
   return canEditComments.value || canDeleteComments.value
 })
 
-const formatDateTime = (value: string) =>
-  new Intl.DateTimeFormat('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(new Date(value))
-
 const updateTime = () => {
+  const now = new Date()
+
   currentTime.value = new Intl.DateTimeFormat('ru-RU', {
     hour: '2-digit',
     minute: '2-digit'
-  }).format(new Date())
+  }).format(now)
+
+  currentDate.value = new Intl.DateTimeFormat('ru-RU', {
+    day: '2-digit',
+    month: '2-digit'
+  }).format(now)
 }
 
 const submitComment = () => {
@@ -236,12 +409,21 @@ const closeFeedContextMenuByKeyboard = (event: KeyboardEvent) => {
 }
 
 onMounted(() => {
+  loadChatReadState()
   updateTime()
   timer = window.setInterval(updateTime, 30000)
   window.addEventListener('click', closeFeedContextMenu)
   window.addEventListener('keydown', closeFeedContextMenuByKeyboard)
   window.addEventListener('scroll', closeFeedContextMenu, true)
+  nextTick(observeVisibleChatMessages)
 })
+
+watch(
+  [isChatOpen, () => currentProjectComments.value.length, chatReadKey],
+  () => {
+    nextTick(observeVisibleChatMessages)
+  }
+)
 
 onBeforeUnmount(() => {
   if (timer) {
@@ -251,6 +433,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('click', closeFeedContextMenu)
   window.removeEventListener('keydown', closeFeedContextMenuByKeyboard)
   window.removeEventListener('scroll', closeFeedContextMenu, true)
+  disconnectChatObserver()
 })
 </script>
 
@@ -258,6 +441,7 @@ onBeforeUnmount(() => {
   <aside class="side-rail" :class="{ 'side-rail--open': isChatOpen }">
     <div class="side-rail__rail">
       <header class="side-rail__header">
+        <time class="side-rail__date">{{ currentDate }}</time>
         <time class="side-rail__time">{{ currentTime }}</time>
       </header>
 
@@ -266,15 +450,23 @@ onBeforeUnmount(() => {
           <button
             v-for="action in sidebarActions"
             :key="action.id"
-            class="side-rail__rail-action"
-            :class="{ 'side-rail__rail-action--active': action.id === 'comments' && isChatOpen }"
+            class="button button--secondary button--icon"
+            :class="{
+              'button--active': action.id === 'comments' && isChatOpen,
+              'button--attention': action.id === 'comments' && unreadCommentsCount
+            }"
             type="button"
             :disabled="action.disabled || action.id !== 'comments'"
             :aria-label="action.label"
             :title="action.label"
             @click="toggleSidebarAction(action.id)"
           >
-            <BaseIcon class="side-rail__rail-icon" :name="action.icon" />
+            <BaseIcon :name="action.icon" />
+            <span
+              v-if="action.id === 'comments' && unreadCommentsCount"
+              class="side-rail__indicator"
+              aria-label="Непрочитанные сообщения"
+            />
           </button>
         </div>
 
@@ -282,12 +474,12 @@ onBeforeUnmount(() => {
           <NuxtLink
             v-for="action in utilityActions"
             :key="action.to"
-            class="side-rail__rail-action"
+            class="button button--secondary button--icon"
             :to="action.to"
             :aria-label="action.label"
             :title="action.label"
           >
-            <BaseIcon class="side-rail__rail-icon" :name="action.icon" />
+            <BaseIcon :name="action.icon" />
           </NuxtLink>
         </div>
       </nav>
@@ -334,16 +526,24 @@ onBeforeUnmount(() => {
             </form>
           </template>
 
-          <ProjectFeedCard
-            v-for="comment in currentProjectComments"
-            :key="comment.id"
-            :author="getUserNameById(comment.authorId)"
-            :date="formatDateTime(comment.createdAt)"
-            :text="comment.text"
-            actions-mode="context"
-            readonly
-            @context="openCommentContextMenu(comment, $event)"
-          />
+          <template v-for="group in groupedProjectComments" :key="group.dateKey">
+            <div class="side-rail__date-divider">{{ group.dateLabel }}</div>
+
+            <ProjectFeedCard
+              v-for="comment in group.comments"
+              :key="comment.id"
+              class="side-rail__chat-message"
+              :data-comment-id="comment.id"
+              :data-author-id="comment.authorId"
+              :author="getUserNameById(comment.authorId)"
+              :date="formatMessageTime(comment.createdAt)"
+              :text="comment.text"
+              :direction="comment.authorId === currentUser?.id ? 'outgoing' : 'incoming'"
+              actions-mode="context"
+              readonly
+              @context="openCommentContextMenu(comment, $event)"
+            />
+          </template>
         </ProjectFeedBlock>
       </section>
     </Transition>

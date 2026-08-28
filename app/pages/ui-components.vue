@@ -183,6 +183,19 @@ const tableRows = [
               <button class="button button--secondary" type="button">Редактировать</button>
             </div>
             <div class="ui-sample">
+              <span class="ui-name">ButtonIcon</span>
+              <button class="button button--secondary button--icon" type="button" aria-label="Чат проекта" title="Чат проекта">
+                <BaseIcon name="message" />
+              </button>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">ButtonIconAttention</span>
+              <button class="button button--secondary button--icon button--attention" type="button" aria-label="Чат проекта" title="Чат проекта">
+                <BaseIcon name="message" />
+                <span class="side-rail__indicator" aria-label="Непрочитанные сообщения"></span>
+              </button>
+            </div>
+            <div class="ui-sample">
               <span class="ui-name">ButtonDangerSmall</span>
               <button class="button button--danger button--small" type="button">Удалить</button>
             </div>
@@ -415,20 +428,20 @@ const tableRows = [
                 <span class="workspace-card__title">Чеклист запуска</span>
                 <span class="workspace-card__meta">66% · 1 обязательных пунктов</span>
               </span>
+              <div class="workspace-card__actions">
+                <BaseActionMenu label="Действия чеклиста">
+                  <button class="action-menu__item" type="button">
+                    <BaseIcon class="action-menu__icon" name="edit" />
+                    <span>Изменить</span>
+                  </button>
+                  <button class="action-menu__item action-menu__item--danger" type="button">
+                    <BaseIcon class="action-menu__icon" name="trash" />
+                    <span>Удалить</span>
+                  </button>
+                </BaseActionMenu>
+              </div>
               <BaseDisclosureToggle class="workspace-card__toggle" expanded label="Свернуть чеклист" />
             </summary>
-            <div class="workspace-card__actions">
-              <BaseActionMenu label="Действия чеклиста">
-                <button class="action-menu__item" type="button">
-                  <BaseIcon class="action-menu__icon" name="edit" />
-                  <span>Изменить</span>
-                </button>
-                <button class="action-menu__item action-menu__item--danger" type="button">
-                  <BaseIcon class="action-menu__icon" name="trash" />
-                  <span>Удалить</span>
-                </button>
-              </BaseActionMenu>
-            </div>
             <ul class="checklist-card__list">
               <li class="checklist-card__item">
                 <span class="ui-name">ChecklistItemPending</span>
@@ -505,24 +518,24 @@ const tableRows = [
                   <span class="workspace-card__title">Бриф на дизайн главной страницы</span>
                   <span class="workspace-card__meta">4 вопроса · 2 ссылки · 1 заполнена</span>
                 </span>
+                <div class="workspace-card__actions">
+                  <BaseActionMenu label="Действия брифа">
+                    <button class="action-menu__item" type="button">
+                      <BaseIcon class="action-menu__icon" name="edit" />
+                      <span>Изменить</span>
+                    </button>
+                    <button class="action-menu__item" type="button">
+                      <BaseIcon class="action-menu__icon" name="plus" />
+                      <span>Создать ссылку</span>
+                    </button>
+                    <button class="action-menu__item action-menu__item--danger" type="button">
+                      <BaseIcon class="action-menu__icon" name="trash" />
+                      <span>Удалить</span>
+                    </button>
+                  </BaseActionMenu>
+                </div>
                 <BaseDisclosureToggle class="workspace-card__toggle" expanded label="Свернуть бриф" />
               </summary>
-              <div class="workspace-card__actions">
-                <BaseActionMenu label="Действия брифа">
-                  <button class="action-menu__item" type="button">
-                    <BaseIcon class="action-menu__icon" name="edit" />
-                    <span>Изменить</span>
-                  </button>
-                  <button class="action-menu__item" type="button">
-                    <BaseIcon class="action-menu__icon" name="plus" />
-                    <span>Создать ссылку</span>
-                  </button>
-                  <button class="action-menu__item action-menu__item--danger" type="button">
-                    <BaseIcon class="action-menu__icon" name="trash" />
-                    <span>Удалить</span>
-                  </button>
-                </BaseActionMenu>
-              </div>
               <div class="brief-card__links">
                 <details class="brief-card__link-item" open>
                   <summary class="brief-card__link-summary">
@@ -711,28 +724,30 @@ const tableRows = [
               <span class="ui-name">SideRailRightSidebar</span>
               <div class="side-rail__rail">
                 <header class="side-rail__header">
+                  <time class="side-rail__date">26.08</time>
                   <time class="side-rail__time">14:30</time>
                 </header>
 
                 <nav class="side-rail__actions" aria-label="Быстрые панели проекта">
                   <div class="side-rail__action-group">
-                    <button class="side-rail__rail-action side-rail__rail-action--active" type="button" aria-label="Чат проекта" title="Чат проекта">
-                      <BaseIcon class="side-rail__rail-icon" name="message" />
+                    <button class="button button--secondary button--icon button--active button--attention" type="button" aria-label="Чат проекта" title="Чат проекта">
+                      <BaseIcon name="message" />
+                      <span class="side-rail__indicator" aria-label="Непрочитанные сообщения"></span>
                     </button>
-                    <button class="side-rail__rail-action" type="button" disabled aria-label="Заметки" title="Заметки">
-                      <BaseIcon class="side-rail__rail-icon" name="note" />
+                    <button class="button button--secondary button--icon" type="button" disabled aria-label="Заметки" title="Заметки">
+                      <BaseIcon name="note" />
                     </button>
-                    <button class="side-rail__rail-action" type="button" disabled aria-label="История изменений" title="История изменений">
-                      <BaseIcon class="side-rail__rail-icon" name="history" />
+                    <button class="button button--secondary button--icon" type="button" disabled aria-label="История изменений" title="История изменений">
+                      <BaseIcon name="history" />
                     </button>
                   </div>
 
                   <div class="side-rail__action-group side-rail__action-group--utility">
-                    <a class="side-rail__rail-action" href="/settings" aria-label="Настройки" title="Настройки">
-                      <BaseIcon class="side-rail__rail-icon" name="settings" />
+                    <a class="button button--secondary button--icon" href="/settings" aria-label="Настройки" title="Настройки">
+                      <BaseIcon name="settings" />
                     </a>
-                    <a class="side-rail__rail-action" href="/ui-components" aria-label="UI-компоненты" title="UI-компоненты">
-                      <BaseIcon class="side-rail__rail-icon" name="panel" />
+                    <a class="button button--secondary button--icon" href="/ui-components" aria-label="UI-компоненты" title="UI-компоненты">
+                      <BaseIcon name="panel" />
                     </a>
                   </div>
                 </nav>
@@ -769,6 +784,23 @@ const tableRows = [
                     author="Администратор"
                     date="26.08.2026, 12:30"
                     text="Добавлено сообщение по проекту."
+                    actions-mode="context"
+                    readonly
+                  />
+                  <div class="side-rail__date-divider">26 августа 2026г.</div>
+                  <ProjectFeedCard
+                    author="Александр Островский"
+                    date="14:33"
+                    text="Посмотрел материалы, нужен доступ к макету."
+                    direction="incoming"
+                    actions-mode="context"
+                    readonly
+                  />
+                  <ProjectFeedCard
+                    author="Юрий Б."
+                    date="14:40"
+                    text="Доступ выдал, можно продолжать работу."
+                    direction="outgoing"
                     actions-mode="context"
                     readonly
                   />

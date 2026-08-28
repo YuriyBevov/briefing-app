@@ -33,6 +33,18 @@
     }
   }
 
+  &--secondary.button--active,
+  &--secondary.router-link-active {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    background-color: var(--color-accent-soft);
+  }
+
+  &--secondary.button--attention {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+
   &--danger {
     border-color: color-mix(in srgb, var(--color-danger) 42%, transparent);
     color: var(--color-danger);
@@ -48,6 +60,21 @@
     min-height: 32px;
     padding: 7px 10px;
     font-size: 12px;
+  }
+
+  &--icon {
+    position: relative;
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    line-height: 1;
+
+    > svg {
+      width: 20px;
+      height: 20px;
+    }
   }
 
   &:disabled {

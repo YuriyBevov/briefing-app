@@ -9,13 +9,15 @@ const props = withDefaults(defineProps<{
   draggable?: boolean
   hideAuthor?: boolean
   color?: string
+  direction?: 'incoming' | 'outgoing' | ''
 }>(), {
   readonly: false,
   variant: 'default',
   actionsMode: 'inline',
   draggable: false,
   hideAuthor: false,
-  color: ''
+  color: '',
+  direction: ''
 })
 
 const emit = defineEmits<{
@@ -32,6 +34,16 @@ const handleContextMenu = (event: MouseEvent) => {
   event.preventDefault()
   emit('context', event)
 }
+
+const avatarText = computed(() =>
+  props.author
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+)
 </script>
 
 <template>
@@ -41,54 +53,66 @@ const handleContextMenu = (event: MouseEvent) => {
       'project-feed-card--history': variant === 'history',
       'project-feed-card--context': actionsMode === 'context',
       'project-feed-card--colored': Boolean(color),
-      'project-feed-card--note': hideAuthor
+      'project-feed-card--note': hideAuthor,
+      'project-feed-card--incoming': direction === 'incoming',
+      'project-feed-card--outgoing': direction === 'outgoing'
     }"
     :style="color ? { '--project-feed-card-background': color } : undefined"
     @contextmenu="handleContextMenu"
   >
-    <header v-if="variant === 'history'" class="project-feed-card__header">
-      <strong class="project-feed-card__author">{{ author }}</strong>
-    </header>
+    <span
+      v-if="direction === 'incoming' && variant !== 'history' && !hideAuthor"
+      class="project-feed-card__avatar"
+      aria-hidden="true"
+    >
+      {{ avatarText }}
+    </span>
 
-    <header v-else class="project-feed-card__header">
-      <div v-if="draggable || !hideAuthor" class="project-feed-card__identity">
-        <button
-          v-if="draggable"
-          class="project-feed-card__drag"
-          type="button"
-          aria-label="Перетащить"
-        >
-          <BaseIcon class="project-feed-card__drag-icon" name="drag-handle" />
-        </button>
-        <strong v-if="!hideAuthor" class="project-feed-card__author">{{ author }}</strong>
-      </div>
-      <div class="project-feed-card__meta">
+    <div class="project-feed-card__bubble">
+      <header v-if="variant === 'history'" class="project-feed-card__header">
+        <span class="project-feed-card__author">{{ author }}</span>
+      </header>
+
+      <header v-else class="project-feed-card__header">
+        <div v-if="draggable || !hideAuthor" class="project-feed-card__identity">
+          <button
+            v-if="draggable"
+            class="project-feed-card__drag"
+            type="button"
+            aria-label="Перетащить"
+          >
+            <BaseIcon class="project-feed-card__drag-icon" name="drag-handle" />
+          </button>
+          <span v-if="!hideAuthor" class="project-feed-card__author">{{ author }}</span>
+        </div>
+        <div class="project-feed-card__meta">
+          <time class="project-feed-card__date">{{ date }}</time>
+        </div>
+      </header>
+
+      <div v-if="variant === 'history'" class="project-feed-card__event">
+        <div class="project-feed-card__text">{{ text }}</div>
         <time class="project-feed-card__date">{{ date }}</time>
       </div>
-    </header>
 
-    <div v-if="variant === 'history'" class="project-feed-card__event">
-      <div class="project-feed-card__text">{{ text }}</div>
-      <time class="project-feed-card__date">{{ date }}</time>
+      <template v-else>
+        <div class="project-feed-card__text">{{ text }}</div>
+
+        <footer v-if="actionsMode === 'inline' && ($slots.actions || !readonly)" class="project-feed-card__actions">
+          <slot name="actions">
+            <BaseIconButton
+              label="Изменить"
+              icon="edit"
+              @click="$emit('edit')"
+            />
+            <BaseIconButton
+              label="Удалить"
+              icon="trash"
+              @click="$emit('remove')"
+            />
+          </slot>
+        </footer>
+      </template>
     </div>
-
-    <template v-else>
-      <div class="project-feed-card__text">{{ text }}</div>
-
-      <footer v-if="actionsMode === 'inline' && ($slots.actions || !readonly)" class="project-feed-card__actions">
-        <slot name="actions">
-          <BaseIconButton
-            label="Изменить"
-            icon="edit"
-            @click="$emit('edit')"
-          />
-          <BaseIconButton
-            label="Удалить"
-            icon="trash"
-            @click="$emit('remove')"
-          />
-        </slot>
-      </footer>
-    </template>
   </article>
 </template>

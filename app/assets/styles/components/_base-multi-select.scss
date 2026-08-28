@@ -52,7 +52,7 @@
   justify-content: center;
   flex: 0 0 auto;
   padding: 2px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
   color: var(--color-success);
   background-color: color-mix(in srgb, var(--color-success) 14%, transparent);
   font-size: 12px;

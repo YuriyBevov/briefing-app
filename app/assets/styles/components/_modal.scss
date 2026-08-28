@@ -1,7 +1,7 @@
 .modal {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 100;
   display: grid;
   align-items: end;
   padding: var(--space-md);
@@ -9,7 +9,7 @@
 
   &__panel {
     width: min(100%, 720px);
-    max-height: calc(100vh - 32px);
+    max-height: calc(100vh - 180px);
     display: grid;
     grid-template-rows: auto minmax(0, 1fr) auto;
     margin-inline: auto;

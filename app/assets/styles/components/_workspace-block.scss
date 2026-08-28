@@ -78,7 +78,7 @@
   gap: var(--space-md);
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-md);
+  padding: var(--space-sm);
 
   &::marker {
     content: "";
@@ -139,9 +139,9 @@
 
 .workspace-card__title {
   color: var(--color-text);
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.2;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .workspace-card__meta {

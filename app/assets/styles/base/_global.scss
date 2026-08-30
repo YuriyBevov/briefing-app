@@ -5,7 +5,7 @@ html {
 }
 
 * {
-  scrollbar-color: var(--color-border-strong) var(--color-background);
+  scrollbar-color: var(--color-border-strong) transparent;
   scrollbar-width: thin;
 }
 
@@ -37,11 +37,12 @@ textarea {
 }
 
 *::-webkit-scrollbar-track {
-  background-color: var(--color-background);
+  background-color: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
-  border: 2px solid var(--color-background);
+  border: 2px solid transparent;
   border-radius: var(--radius-sm);
   background-color: var(--color-border-strong);
+  background-clip: content-box;
 }

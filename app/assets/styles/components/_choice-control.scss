@@ -56,7 +56,6 @@
 .checkbox__control:focus-visible + .checkbox__box,
 .radio__control:focus-visible + .radio__box {
   outline: 2px solid var(--color-accent);
-  outline-offset: 2px;
 }
 
 .checkbox__control:disabled + .checkbox__box,

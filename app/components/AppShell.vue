@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const pageTitle = useState('app-page-title', () => 'Раздел')
-const activeSideRailPanel = useState<'comments' | ''>('active-side-rail-panel', () => '')
-const isSideRailOpen = computed(() => activeSideRailPanel.value === 'comments')
+const activeSideRailPanel = useState<'comments' | 'notes' | ''>('active-side-rail-panel', () => '')
+const isSideRailOpen = computed(() => Boolean(activeSideRailPanel.value))
 </script>
 
 <template>

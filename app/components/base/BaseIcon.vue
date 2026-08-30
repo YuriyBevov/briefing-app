@@ -16,6 +16,7 @@ import {
   PanelTop,
   Pencil,
   Plus,
+  Search,
   SendHorizontal,
   Settings,
   StickyNote,
@@ -41,6 +42,7 @@ export type BaseIconName =
   | 'note'
   | 'panel'
   | 'plus'
+  | 'search'
   | 'send'
   | 'settings'
   | 'sun'
@@ -68,6 +70,7 @@ const icons: Record<BaseIconName, Component> = {
   note: StickyNote,
   panel: PanelTop,
   plus: Plus,
+  search: Search,
   send: SendHorizontal,
   settings: Settings,
   sun: Sun,

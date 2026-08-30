@@ -429,13 +429,13 @@ const getBriefLink = (token: string) => {
 							<button class="content-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
 								<BaseIcon class="content-card__drag-icon" name="drag-handle" />
 							</button>
-							<span class="content-card__summary">
+							<div class="content-card__summary">
 								<span class="content-card__title">{{ checklist.title }}</span>
 								<span class="content-card__meta">
 									{{ getChecklistProgress(checklist) }}% ·
 									{{ getRequiredOpenCount(checklist) }} обязательных пунктов
 								</span>
-							</span>
+							</div>
 							<div class="content-card__actions">
 								<BaseActionMenu label="Действия чеклиста">
 									<button class="action-menu__item" type="button" @click="editChecklist(checklist.id)">
@@ -533,12 +533,12 @@ const getBriefLink = (token: string) => {
 							<button class="content-card__drag" type="button" aria-label="Перетащить" title="Перетащить" @click.stop.prevent>
 								<BaseIcon class="content-card__drag-icon" name="drag-handle" />
 							</button>
-							<span class="content-card__summary">
+							<div class="content-card__summary">
 								<span class="content-card__title">{{ brief.title }}</span>
 								<span class="content-card__meta">
 									{{ getBriefMeta(brief.links, brief.questions.length) }}
 								</span>
-							</span>
+							</div>
 							<div class="content-card__actions">
 								<BaseActionMenu label="Действия брифа">
 									<button class="action-menu__item" type="button" @click="editBrief(brief.id)">
@@ -575,7 +575,7 @@ const getBriefLink = (token: string) => {
 											v-if="history.links[0]"
 											class="brief-card__link-header"
 										>
-											<span class="brief-card__link-main">
+											<div class="brief-card__link-main">
 												<a
 													class="brief-card__link"
 													:href="getBriefLink(history.links[0].token)"
@@ -590,14 +590,14 @@ const getBriefLink = (token: string) => {
 														{{ getBriefLink(history.links[0].token) }}
 													</span>
 												</a>
-											</span>
+											</div>
 											<div
 												class="label"
 												:class="getBriefLinkStatusClasses(history.links[0].status)"
 											>
 												{{ getBriefLinkStatusLabel(history.links[0].status) }}
 											</div>
-											<span class="brief-card__link-controls">
+											<div class="brief-card__link-controls">
 												<BaseActionMenu
 													v-if="history.links[0].status !== 'archived'"
 													label="Действия ссылки на бриф"
@@ -658,7 +658,7 @@ const getBriefLink = (token: string) => {
 													label="История экземпляра"
 													@click.stop.prevent="toggleClosestDetails"
 												/>
-											</span>
+											</div>
 										</div>
 									</div>
 								</summary>

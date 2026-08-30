@@ -191,11 +191,22 @@ export interface ProjectNote {
   id: string
   projectId: string
   authorId: string
+  noteColumnId: string
   text: string
   color: string
   sortOrder: number
   createdAt: string
   updatedAt: string
+}
+
+export interface ProjectNoteColumn {
+  id: string
+  projectId: string
+  authorId: string
+  title: string
+  color: string
+  sortOrder: number
+  createdAt: string
 }
 
 interface ProjectData {
@@ -213,6 +224,7 @@ interface ProjectData {
   comments: ProjectComment[]
   history: ProjectHistoryEntry[]
   notes: ProjectNote[]
+  noteColumns: ProjectNoteColumn[]
 }
 
 interface ChecklistPayload {
@@ -266,6 +278,8 @@ const defaultProjectId = 'project-brief-os'
 const adminRoleId = 'role-admin'
 const defaultAdminUserId = 'user-admin'
 const defaultDesignerUserId = 'user-designer'
+const getDefaultNoteColumnId = (projectId: string, authorId: string) =>
+  `note-column-${projectId}-${authorId}-0`
 const forceDeletedBriefTokens = new Set([
   '1d3edbaf2a864c3abf58a05761001e0f'
 ])
@@ -460,6 +474,23 @@ const createDefaultComments = (): ProjectComment[] => [
   }
 ]
 
+const defaultNoteColumnTitles = ['Срочные', 'В работе', 'На будущее']
+const defaultNoteColumnColors = ['#ffe7a3', '#bdebd2', '#bdd6ff']
+
+const createDefaultNoteColumns = (
+  projectId = defaultProjectId,
+  authorId = defaultAdminUserId
+): ProjectNoteColumn[] =>
+  defaultNoteColumnTitles.map((title, index) => ({
+    id: index === 0 ? getDefaultNoteColumnId(projectId, authorId) : `note-column-${projectId}-${authorId}-${index}`,
+    projectId,
+    authorId,
+    title,
+    color: defaultNoteColumnColors[index] ?? '',
+    sortOrder: index,
+    createdAt: new Date().toISOString()
+  }))
+
 const createInitialData = (): ProjectData => ({
   projects: [createDefaultProject()],
   currentProjectId: defaultProjectId,
@@ -474,7 +505,11 @@ const createInitialData = (): ProjectData => ({
   briefs: [],
   comments: createDefaultComments(),
   history: [],
-  notes: []
+  notes: [],
+  noteColumns: [
+    ...createDefaultNoteColumns(defaultProjectId, defaultAdminUserId),
+    ...createDefaultNoteColumns(defaultProjectId, defaultDesignerUserId)
+  ]
 })
 
 const briefStatusLabels: Record<BriefStatus, string> = {
@@ -621,6 +656,51 @@ const normalizeProjects = (projects: Project[] = []) =>
       sortOrder: index
     }))
 
+const normalizeNoteColumns = (
+  noteColumns: ProjectNoteColumn[] = [],
+  projects: Project[],
+  users: User[]
+) => {
+  const projectIds = new Set(projects.map((project) => project.id))
+  const userIds = new Set(users.map((user) => user.id))
+  const savedColumns = noteColumns
+    .filter((column) =>
+      projectIds.has(column.projectId ?? '') &&
+      userIds.has(column.authorId ?? '')
+    )
+    .map((column, index) => ({
+      ...column,
+      id: column.id || createId(),
+      title: column.title || 'Новая колонка',
+      color: column.color ?? defaultNoteColumnColors[index % defaultNoteColumnColors.length] ?? '',
+      sortOrder: column.sortOrder ?? index,
+      createdAt: column.createdAt ?? new Date().toISOString()
+    }))
+  const columns = [...savedColumns]
+
+  projects.forEach((project) => {
+    users.forEach((user) => {
+      const hasColumns = columns.some((column) =>
+        column.projectId === project.id && column.authorId === user.id
+      )
+
+      if (!hasColumns) {
+        columns.push(...createDefaultNoteColumns(project.id, user.id))
+      }
+    })
+  })
+
+  return columns
+    .toSorted((firstColumn, secondColumn) =>
+      firstColumn.sortOrder - secondColumn.sortOrder ||
+      new Date(firstColumn.createdAt).getTime() - new Date(secondColumn.createdAt).getTime()
+    )
+    .map((column, index) => ({
+      ...column,
+      sortOrder: index
+    }))
+}
+
 const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
   const projects = normalizeProjects(projectData.projects)
   const sections = normalizeSections(projectData.sections)
@@ -685,6 +765,7 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
     : projects[0].id
   const roles = normalizeRoles(projectData.roles, permissions)
   const users = normalizeUsers(projectData.users, projects)
+  const noteColumns = normalizeNoteColumns(projectData.noteColumns, projects, users)
   const currentUserId = users.some((user) => user.id === projectData.currentUserId)
     ? projectData.currentUserId as string
     : users[0].id
@@ -791,12 +872,20 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
       .toSorted((firstEntry, secondEntry) =>
         new Date(secondEntry.createdAt).getTime() - new Date(firstEntry.createdAt).getTime()
       ),
+    noteColumns,
     notes: (projectData.notes ?? [])
       .filter((note) => projectIds.has(note.projectId ?? currentProjectId))
       .map((note, index) => ({
         ...note,
         projectId: note.projectId ?? currentProjectId,
         authorId: note.authorId ?? currentUserId,
+        noteColumnId: noteColumns.some((column) =>
+          column.id === note.noteColumnId &&
+          column.projectId === (note.projectId ?? currentProjectId) &&
+          column.authorId === (note.authorId ?? currentUserId)
+        )
+          ? note.noteColumnId
+          : getDefaultNoteColumnId(note.projectId ?? currentProjectId, note.authorId ?? currentUserId),
         text: note.text ?? '',
         color: note.color ?? '',
         sortOrder: note.sortOrder ?? index,
@@ -806,7 +895,7 @@ const normalizeData = (projectData: Partial<ProjectData>): ProjectData => {
       .toSorted((firstNote, secondNote) =>
         firstNote.sortOrder - secondNote.sortOrder ||
         new Date(secondNote.createdAt).getTime() - new Date(firstNote.createdAt).getTime()
-      )
+      ),
   }
 }
 
@@ -1859,6 +1948,18 @@ export const useProjectStore = () => {
       )
   )
 
+  const currentUserNoteColumns = computed(() =>
+    data.value.noteColumns
+      .filter((column) =>
+        column.projectId === data.value.currentProjectId &&
+        column.authorId === currentUser.value?.id
+      )
+      .toSorted((firstColumn, secondColumn) =>
+        firstColumn.sortOrder - secondColumn.sortOrder ||
+        new Date(firstColumn.createdAt).getTime() - new Date(secondColumn.createdAt).getTime()
+      )
+  )
+
   const createProjectComment = (text: string) => {
     const normalizedText = text.trim()
 
@@ -1922,7 +2023,7 @@ export const useProjectStore = () => {
     return true
   }
 
-  const createProjectNote = (text: string, color = '') => {
+  const createProjectNote = (text: string, color = '', noteColumnId = '') => {
     const normalizedText = text.trim()
 
     if (!normalizedText) {
@@ -1930,8 +2031,13 @@ export const useProjectStore = () => {
     }
 
     const authorId = currentUser.value?.id ?? defaultAdminUserId
+    const columnId = currentUserNoteColumns.value.some((column) => column.id === noteColumnId)
+      ? noteColumnId
+      : currentUserNoteColumns.value[0]?.id ?? getDefaultNoteColumnId(data.value.currentProjectId, authorId)
     data.value.notes = data.value.notes.map((note) => (
-      note.projectId === data.value.currentProjectId && note.authorId === authorId
+      note.projectId === data.value.currentProjectId &&
+        note.authorId === authorId &&
+        note.noteColumnId === columnId
         ? { ...note, sortOrder: (note.sortOrder ?? 0) + 1 }
         : note
     ))
@@ -1941,6 +2047,7 @@ export const useProjectStore = () => {
         id: createId(),
         projectId: data.value.currentProjectId,
         authorId,
+        noteColumnId: columnId,
         text: normalizedText,
         color,
         sortOrder: 0,
@@ -1954,7 +2061,7 @@ export const useProjectStore = () => {
     return true
   }
 
-  const updateProjectNote = (noteId: string, text: string) => {
+  const updateProjectNote = (noteId: string, text: string, color = '') => {
     const note = data.value.notes.find((item) =>
       item.id === noteId && item.authorId === currentUser.value?.id
     )
@@ -1965,6 +2072,7 @@ export const useProjectStore = () => {
     }
 
     note.text = normalizedText
+    note.color = color
     note.updatedAt = new Date().toISOString()
     save()
 
@@ -1986,7 +2094,7 @@ export const useProjectStore = () => {
     return true
   }
 
-  const reorderProjectNotes = (noteIds: string[]) => {
+  const reorderProjectNotes = (noteIds: string[], noteColumnId?: string) => {
     const orderedIds = new Set(noteIds)
     const orderedNotes = noteIds
       .map((noteId) => data.value.notes.find((note) =>
@@ -1999,10 +2107,99 @@ export const useProjectStore = () => {
 
     data.value.notes = data.value.notes.map((note) =>
       orderedIds.has(note.id) && nextOrder.has(note.id)
-        ? { ...note, sortOrder: nextOrder.get(note.id) ?? note.sortOrder }
+        ? {
+            ...note,
+            noteColumnId: noteColumnId ?? note.noteColumnId,
+            sortOrder: nextOrder.get(note.id) ?? note.sortOrder
+          }
         : note
     )
     save()
+  }
+
+  const createProjectNoteColumn = (title: string, color = '') => {
+    const normalizedTitle = title.trim()
+
+    if (!normalizedTitle || !currentUser.value) {
+      return false
+    }
+
+    const now = new Date().toISOString()
+    const sortOrder = currentUserNoteColumns.value.length
+
+    data.value.noteColumns = [
+      ...data.value.noteColumns,
+      {
+        id: createId(),
+        projectId: data.value.currentProjectId,
+        authorId: currentUser.value.id,
+        title: normalizedTitle,
+        color,
+        sortOrder,
+        createdAt: now
+      }
+    ]
+    save()
+
+    return true
+  }
+
+  const updateProjectNoteColumn = (columnId: string, title: string, color = '') => {
+    const column = data.value.noteColumns.find((item) =>
+      item.id === columnId &&
+      item.projectId === data.value.currentProjectId &&
+      item.authorId === currentUser.value?.id
+    )
+    const normalizedTitle = title.trim()
+
+    if (!column || !normalizedTitle) {
+      return false
+    }
+
+    column.title = normalizedTitle
+    column.color = color
+    save()
+
+    return true
+  }
+
+  const deleteProjectNoteColumn = (columnId: string) => {
+    const column = data.value.noteColumns.find((item) =>
+      item.id === columnId &&
+      item.projectId === data.value.currentProjectId &&
+      item.authorId === currentUser.value?.id
+    )
+
+    if (!column) {
+      return false
+    }
+
+    const fallbackColumn = currentUserNoteColumns.value.find((item) => item.id !== columnId)
+    const replacementColumn = fallbackColumn ?? {
+      id: createId(),
+      projectId: column.projectId,
+      authorId: column.authorId,
+      title: 'Новая колонка',
+      color: '',
+      sortOrder: 0,
+      createdAt: new Date().toISOString()
+    }
+
+    data.value.noteColumns = [
+      ...data.value.noteColumns.filter((item) => item.id !== columnId),
+      ...(fallbackColumn ? [] : [replacementColumn])
+    ]
+    data.value.notes = data.value.notes.map((note) =>
+      note.noteColumnId === columnId
+        ? {
+            ...note,
+            noteColumnId: replacementColumn.id
+          }
+        : note
+    )
+    save()
+
+    return true
   }
 
   const reorderChecklists = (checklistIds: string[]) => {
@@ -2066,6 +2263,7 @@ export const useProjectStore = () => {
     currentProjectComments,
     currentProjectHistory,
     currentUserNotes,
+    currentUserNoteColumns,
     isLoaded,
     load,
     canUsePermission,
@@ -2118,6 +2316,9 @@ export const useProjectStore = () => {
     updateProjectNote,
     deleteProjectNote,
     reorderProjectNotes,
+    createProjectNoteColumn,
+    updateProjectNoteColumn,
+    deleteProjectNoteColumn,
     reorderWorkspaceBlocks,
     reorderProjectFeedBlocks,
     reorderChecklists,

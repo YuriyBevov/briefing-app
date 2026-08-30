@@ -32,17 +32,10 @@
 
     &__content {
       align-items: start;
-      padding: var(--space-lg);
     }
 
     &__content--side-rail-open {
-      padding-right: calc(var(--space-lg) + var(--side-rail-drawer-width));
-    }
-
-    &__workspace {
-      position: sticky;
-      top: calc(var(--topbar-height) + var(--space-lg));
-      align-self: start;
+      padding-right: calc(var(--space-md) + var(--side-rail-drawer-width));
     }
 
     &__content--wide {

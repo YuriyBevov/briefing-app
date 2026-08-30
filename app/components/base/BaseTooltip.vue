@@ -5,8 +5,8 @@ defineProps<{
 </script>
 
 <template>
-  <span class="tooltip">
+  <div class="tooltip-wrapper">
     <slot />
-    <span class="tooltip__content" role="tooltip">{{ text }}</span>
-  </span>
+    <div class="tooltip-wrapper__content" role="tooltip">{{ text }}</div>
+  </div>
 </template>

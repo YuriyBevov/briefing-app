@@ -46,6 +46,7 @@ const iconNames = [
   'note',
   'panel',
   'plus',
+  'search',
   'send',
   'settings',
   'sun',
@@ -73,6 +74,13 @@ const successCheckboxValue = ref(true)
 const dangerCheckboxValue = ref(true)
 const defaultRadioValue = ref('default')
 const toneRadioValue = ref('success')
+const baseColorPickerValue = ref('linear-gradient(135deg, #e4f8ed 0%, #bdebd2 100%)')
+const baseColorPickerOptions = [
+  { value: 'linear-gradient(135deg, #fff7d1 0%, #ffe7a3 100%)', preview: '#ffe7a3', label: 'Желтый' },
+  { value: 'linear-gradient(135deg, #e4f8ed 0%, #bdebd2 100%)', preview: '#bdebd2', label: 'Зеленый' },
+  { value: 'linear-gradient(135deg, #e6f0ff 0%, #bdd6ff 100%)', preview: '#bdd6ff', label: 'Синий' },
+  { value: '', label: 'По умолчанию' }
+]
 
 const tableRows = [
   { component: 'BriefLinkItemCompleted', status: 'Согласован', owner: 'Менеджер' },
@@ -325,6 +333,16 @@ const tableRows = [
               <code class="ui-code">BaseTooltip text</code>
             </div>
             <div class="ui-sample">
+              <span class="ui-name">BaseColorPicker</span>
+              <BaseColorPicker v-model="baseColorPickerValue" :options="baseColorPickerOptions" />
+              <code class="ui-code">BaseColorPicker v-model options</code>
+            </div>
+            <div class="ui-sample">
+              <span class="ui-name">BaseColorPickerVertical</span>
+              <BaseColorPicker v-model="baseColorPickerValue" :options="baseColorPickerOptions" orientation="vertical" />
+              <code class="ui-code">orientation="vertical"</code>
+            </div>
+            <div class="ui-sample">
               <span class="ui-name">ProjectSwitcherCombobox</span>
               <ProjectSwitcher />
               <code class="ui-code">Combobox с поиском</code>
@@ -439,21 +457,21 @@ const tableRows = [
         <div class="ui-accordion__body">
           <details class="content-card checklist-card">
             <summary class="content-card__header">
-              <span class="content-card__summary">
+              <div class="content-card__summary">
                 <span class="ui-name">ChecklistCardCollapsed</span>
                 <span class="content-card__title">Чеклист предподготовки</span>
                 <span class="content-card__meta">0% · 2 обязательных пунктов</span>
-              </span>
+              </div>
               <BaseDisclosureToggle class="content-card__toggle" label="Развернуть чеклист" />
             </summary>
           </details>
           <details class="content-card checklist-card" open>
             <summary class="content-card__header">
-              <span class="content-card__summary">
+              <div class="content-card__summary">
                 <span class="ui-name">ChecklistCardOpen</span>
                 <span class="content-card__title">Чеклист запуска</span>
                 <span class="content-card__meta">66% · 1 обязательных пунктов</span>
-              </span>
+              </div>
               <div class="content-card__actions">
                 <BaseActionMenu label="Действия чеклиста">
                   <button class="action-menu__item" type="button">
@@ -519,31 +537,31 @@ const tableRows = [
           <div class="content-list">
             <details class="content-card brief-card">
               <summary class="content-card__header">
-                <span class="content-card__summary">
+                <div class="content-card__summary">
                   <span class="ui-name">BriefCardCollapsed</span>
                   <span class="content-card__title">Бриф на аудит интерфейса</span>
                   <span class="content-card__meta">6 вопросов</span>
-                </span>
+                </div>
                 <BaseDisclosureToggle class="content-card__toggle" label="Развернуть бриф" />
               </summary>
             </details>
             <details class="content-card content-card--empty brief-card">
               <summary class="content-card__header">
-                <span class="content-card__summary">
+                <div class="content-card__summary">
                   <span class="ui-name">BriefCardEmpty</span>
                   <span class="content-card__title">Бриф без ссылок</span>
                   <span class="content-card__meta">4 вопроса</span>
-                </span>
+                </div>
                 <BaseDisclosureToggle class="content-card__toggle" disabled label="Развернуть бриф" />
               </summary>
             </details>
             <details class="content-card brief-card" open>
               <summary class="content-card__header">
-                <span class="content-card__summary">
+                <div class="content-card__summary">
                   <span class="ui-name">BriefCardOpen</span>
                   <span class="content-card__title">Бриф на дизайн главной страницы</span>
                   <span class="content-card__meta">4 вопроса · 2 ссылки · 1 заполнена</span>
-                </span>
+                </div>
                 <div class="content-card__actions">
                   <BaseActionMenu label="Действия брифа">
                     <button class="action-menu__item" type="button">
@@ -568,14 +586,14 @@ const tableRows = [
                     <div class="brief-card__link-node brief-card__link-node--current">
                       <span class="ui-name">BriefLinkHistoryItemRevisionOpen</span>
                       <div class="brief-card__link-header">
-                        <span class="brief-card__link-main">
+                        <div class="brief-card__link-main">
                           <a class="brief-card__link" href="/brief/example-revision-pending" target="_blank">
                             <span class="brief-card__link-title">Главная страница, редакция клиента</span>
                             <span class="brief-card__link-url">http://localhost:3000/brief/example-revision-pending</span>
                           </a>
-                        </span>
+                        </div>
                         <div class="label label--revision-pending">Ожидает редакции</div>
-                        <span class="brief-card__link-controls">
+                        <div class="brief-card__link-controls">
                           <BaseActionMenu label="Действия ссылки на бриф">
                             <button class="action-menu__item" type="button">
                               <BaseIcon class="action-menu__icon" name="copy" />
@@ -599,7 +617,7 @@ const tableRows = [
                             </button>
                           </BaseActionMenu>
                           <BaseDisclosureToggle class="brief-card__history-toggle" expanded label="История экземпляра" />
-                        </span>
+                        </div>
                       </div>
                     </div>
                   </summary>
@@ -622,14 +640,14 @@ const tableRows = [
                     <div class="brief-card__link-node brief-card__link-node--current">
                       <span class="ui-name">BriefLinkHistoryItemCollapsed</span>
                       <div class="brief-card__link-header">
-                        <span class="brief-card__link-main">
+                        <div class="brief-card__link-main">
                           <a class="brief-card__link" href="/brief/example-completed" target="_blank">
                             <span class="brief-card__link-title">Бриф на дизайн главной страницы</span>
                             <span class="brief-card__link-url">http://localhost:3000/brief/example-completed</span>
                           </a>
-                        </span>
+                        </div>
                         <div class="label label--completed">Согласован</div>
-                        <span class="brief-card__link-controls">
+                        <div class="brief-card__link-controls">
                           <BaseActionMenu label="Действия ссылки на бриф">
                             <button class="action-menu__item" type="button">
                               <BaseIcon class="action-menu__icon" name="copy" />
@@ -653,7 +671,7 @@ const tableRows = [
                             </button>
                           </BaseActionMenu>
                           <BaseDisclosureToggle class="brief-card__history-toggle" disabled label="История экземпляра" />
-                        </span>
+                        </div>
                       </div>
                     </div>
                   </summary>
@@ -701,10 +719,10 @@ const tableRows = [
               <div class="sidebar__footer">
                 <div class="user-menu">
                   <span class="user-menu__avatar">ЮБ</span>
-                  <span class="user-menu__body">
+                  <div class="user-menu__body">
                     <span class="user-menu__name">Юрий Б.</span>
                     <span class="user-menu__role">Менеджер</span>
-                  </span>
+                  </div>
                 </div>
                 <button class="theme-toggle" type="button" aria-label="ThemeToggle">
                   <BaseIcon class="theme-toggle__icon" name="moon" />
@@ -724,10 +742,10 @@ const tableRows = [
                     <button class="content-card__drag" type="button" aria-label="Перетащить" title="Перетащить">
                       <BaseIcon class="content-card__drag-icon" name="drag-handle" />
                     </button>
-                    <span class="content-card__summary">
+                    <div class="content-card__summary">
                       <span class="content-card__title">Проверить материалы</span>
                       <span class="content-card__meta">0% · 2 обязательных пункта</span>
-                    </span>
+                    </div>
                     <BaseDisclosureToggle class="content-card__toggle" label="Развернуть чеклист" />
                   </summary>
                 </details>

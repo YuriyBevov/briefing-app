@@ -1,7 +1,7 @@
 <script setup lang="ts">
 withDefaults(defineProps<{
   title: string
-  size?: 'default' | 'wide'
+  size?: 'default' | 'wide' | 'screen'
 }>(), {
   size: 'default'
 })
@@ -14,10 +14,19 @@ defineEmits<{
 <template>
   <Teleport to="body">
     <div class="modal" role="dialog" aria-modal="true">
-      <section class="modal__panel" :class="{ 'modal__panel--wide': size === 'wide' }">
+      <section
+        class="modal__panel"
+        :class="{
+          'modal__panel--wide': size === 'wide',
+          'modal__panel--screen': size === 'screen'
+        }"
+      >
         <header class="section-header modal__header">
           <h2 class="section-title">{{ title }}</h2>
-          <BaseModalCloseButton @click="$emit('close')" />
+          <div class="modal__header-actions">
+            <slot name="header-actions" />
+            <BaseModalCloseButton @click="$emit('close')" />
+          </div>
         </header>
 
         <div class="modal__body">

@@ -24,6 +24,12 @@
     width: min(100%, 1040px);
   }
 
+  &__panel--screen {
+    width: 90vw;
+    max-height: 90vh;
+    height: 90vh;
+  }
+
   &__header,
   &__footer {
     position: sticky;
@@ -34,6 +40,12 @@
   &__header {
     top: 0;
     padding: var(--space-md);
+  }
+
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
   }
 
   &__body {
